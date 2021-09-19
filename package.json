@@ -1,0 +1,14 @@
+{
+  "name": "gesture-data-capture",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/shiukaheng/gesture-data-capture.git",
+  "author": "Heng <31088159+shiukaheng@users.noreply.github.com>",
+  "license": "MIT",
+  "dependencies": {
+    "gitignore": "^0.7.0"
+  },
+  "devDependencies": {
+    "parcel": "^2.0.0-rc.0"
+  }
+}
