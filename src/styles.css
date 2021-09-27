@@ -1,0 +1,19 @@
+body {
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+}
+.viewport-div {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+}
+.viewport {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+}

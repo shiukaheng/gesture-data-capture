@@ -6,7 +6,10 @@
   "author": "Heng <31088159+shiukaheng@users.noreply.github.com>",
   "license": "MIT",
   "dependencies": {
-    "gitignore": "^0.7.0"
+    "color-convert": "^2.0.1",
+    "gitignore": "^0.7.0",
+    "handy.js": "stewdio/handy.js",
+    "three": "^0.132.2"
   },
   "devDependencies": {
     "parcel": "^2.0.0-rc.0"
