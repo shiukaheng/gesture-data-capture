@@ -7,6 +7,8 @@ import { XRControllerModelFactory } from 'three/examples/jsm/webxr/XRControllerM
 import { XRHandModelFactory } from 'three/examples/jsm/webxr/XRHandModelFactory.js';
 import { DummyXRHandModelFactory } from "./DummyXRHandModel"
 
+import { customAlphabet } from 'nanoid'
+
 window.DummyXRHandModelFactory = DummyXRHandModelFactory
 
 function setup() {
@@ -87,12 +89,15 @@ function setupControllersAndHands() {
 
     var dummyFac = new DummyXRHandModelFactory()
 
+    var dummyHands = new THREE.Group()
+    scene.add(dummyHands)
+
     var dummyLeft = dummyFac.createHandModel("left")
-    scene.add(dummyLeft)
+    dummyHands.add(dummyLeft)
     dummyLeft.visible = false
 
     var dummyRight = dummyFac.createHandModel("right")
-    scene.add(dummyRight)
+    dummyHands.add(dummyRight)
     dummyRight.visible = false
 
     window.left = Handy.hands.getLeft()
@@ -181,11 +186,12 @@ function interpSerializedJoints(pose1, pose2, value) {
     return interpObj(pose1, pose2, value)
 }
 
-function resampleTimeSeries(data) {
+// function resampleTimeSeries(data) {
 
-}
+// }
 
 function recordHandMotion(duration, callback=(data)=>{}) {
+
     console.log("Recording!")
     var timer = new THREE.Clock()
     var data = []
@@ -230,8 +236,7 @@ function playbackHandMotion(data, callback=(data)=>{}, fps_hint=60) {
     sceneModifiers.push((destroy)=>{
         // console.log(`New frame rendered: ${frame}`)
         timeNow = Date.now()
-        // If not last frame, and not current time elapsed is between video time elapsed of one frame and another, step to next frame
-        // console.log(`This is ${data[frame+1]!==undefined ? "not" : ""} the last frame, the current time is ${getTimeElapsed()>=getVideoTimeElapsed(frame) ? "" : "not "}ahead of the first frame, and the current time is ${getTimeElapsed()<=getVideoTimeElapsed(frame+1) ? "" : "not "}behind the second frame.`)
+        // If not last frame, and not current time elapsed is more than video time elapsed, step to next frame
         while (data[frame+1]!==undefined && getTimeElapsed()>=getVideoTimeElapsed(frame)) {
             frame++
             // console.log(`Incremented frame: ${frame}`)
@@ -254,6 +259,73 @@ function playbackHandMotion(data, callback=(data)=>{}, fps_hint=60) {
 function echoHands(duration=5) {
     recordHandMotion(duration, (data)=>{
         playbackHandMotion(data)
+        downloadHandMotion(data)
+    })
+}
+
+function exportHandMotion(data) {
+    // Exports as JSON
+    return "data:text/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(data))
+}
+
+function download(filename, text) {
+    // Source: https://stackoverflow.com/questions/3665115/how-to-create-a-file-in-memory-for-user-to-download-but-not-through-server
+    var element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+    element.setAttribute('download', filename);
+  
+    element.style.display = 'none';
+    document.body.appendChild(element);
+  
+    element.click();
+  
+    document.body.removeChild(element);
+}
+
+const nanoid = customAlphabet('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', 8)
+
+function downloadHandMotion(data) {
+    console.log(exportHandMotion(data))
+}
+
+function getObjectFlattenerList(sampleObject) {
+    var flatteners = {}
+    for (const [key, val] of Object.entries(sampleObject)) {
+        if (typeof val === 'object' && val !== null) {
+            var subflatteners = getObjectFlattenerList(val)
+            for (const [subkey, subflattener] of Object.entries(subflatteners)) {
+                var newKeyCandidate = `${key}-${subkey}`
+                var newKey = newKeyCandidate
+                var duplicateKeyCount = 0
+                while (Object.keys(flatteners).includes(newKey)) {
+                    duplicateKeyCount++
+                    newKey = newKeyCandidate+`(${duplicateKeyCount})`
+                }
+                flatteners[newKey] = (object) => {return subflattener(object[key])}
+            }
+        } else {
+            var newKeyCandidate = key
+            var newKey = newKeyCandidate
+            var duplicateKeyCount = 0
+            while (Object.keys(flatteners).includes(newKey)) {
+                duplicateKeyCount++
+                newKey = newKeyCandidate+`(${duplicateKeyCount})`
+            }
+            flatteners[newKey] = (object) => {return object[key]}
+        }
+    }
+    return flatteners
+}
+
+function writeCsv(rows) {
+    rows.map(row => row.join(", ")).join("")
+}
+
+function objectToCsv(array) {
+    var flattener = getObjectFlattener(array[0])
+    var header_row = Object.keys(flattener)
+    var data_rows = array.map((frame) => {
+
     })
 }
 
