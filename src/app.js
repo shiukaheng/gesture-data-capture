@@ -259,7 +259,7 @@ function playbackHandMotion(data, callback=(data)=>{}, fps_hint=60) {
 function echoHands(duration=5) {
     recordHandMotion(duration, (data)=>{
         playbackHandMotion(data)
-        downloadHandMotion(data)
+        console.log(objectToCsv(data))
     })
 }
 
@@ -288,11 +288,11 @@ function downloadHandMotion(data) {
     console.log(exportHandMotion(data))
 }
 
-function getObjectFlattenerList(sampleObject) {
+function getObjectFlattenerObject(sampleObject) {
     var flatteners = {}
     for (const [key, val] of Object.entries(sampleObject)) {
         if (typeof val === 'object' && val !== null) {
-            var subflatteners = getObjectFlattenerList(val)
+            var subflatteners = getObjectFlattenerObject(val)
             for (const [subkey, subflattener] of Object.entries(subflatteners)) {
                 var newKeyCandidate = `${key}-${subkey}`
                 var newKey = newKeyCandidate
@@ -317,16 +317,32 @@ function getObjectFlattenerList(sampleObject) {
     return flatteners
 }
 
-function writeCsv(rows) {
-    rows.map(row => row.join(", ")).join("")
+function getObjectFlattener(sampleObject) {
+
+    var flattenerObject = getObjectFlattenerObject(sampleObject)
+
+    var headers = Object.keys(flattenerObject)
+    var flattenerList = Object.values(flattenerObject)
+    
+    return {
+        "headers": headers,
+        "mapper": object => flattenerList.map(elemFlattener => elemFlattener(object))
+    }
 }
 
 function objectToCsv(array) {
+    var rows = []
     var flattener = getObjectFlattener(array[0])
-    var header_row = Object.keys(flattener)
-    var data_rows = array.map((frame) => {
-
+    var header_row = flattener["headers"]
+    rows.push(header_row)
+    array.forEach((frame) => {
+        rows.push(flattener["mapper"](frame))
     })
+    return rows.map( row => row.join(",") ).join("\n")
+}
+
+function replacePoseGesture(sourcePose, targetPose) {
+    
 }
 
 window.serializeJoints = serializeJoints
