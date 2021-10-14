@@ -9,6 +9,7 @@
     "color-convert": "^2.0.1",
     "gitignore": "^0.7.0",
     "handy.js": "stewdio/handy.js",
+    "lodash": "^4.17.21",
     "nanoid": "^3.1.29",
     "three": "^0.132.2"
   },

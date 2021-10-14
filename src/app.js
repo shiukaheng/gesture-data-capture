@@ -15,6 +15,8 @@ function setup() {
 
     var scene = new THREE.Scene()
     var camera = new THREE.PerspectiveCamera()
+    var listener = new THREE.AudioListener();
+    camera.add( listener );
 
     scene.add(camera)
 
@@ -53,6 +55,8 @@ function setup() {
     window.scene = scene
     window.camera = camera
     window.renderer = renderer
+    window.listener = listener
+    window.audioLoader = new THREE.AudioLoader();
     
 }
 

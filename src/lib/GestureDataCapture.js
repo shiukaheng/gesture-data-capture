@@ -1,4 +1,6 @@
 import { customAlphabet } from 'nanoid'
+import * as THREE from 'three'
+import { cloneDeep } from 'lodash';
 
 // Functions for hand joint serialization and display, so hand joint poses can easily be saved and shown
 
@@ -14,6 +16,15 @@ function serializeJoints(hand) {
             "matrix": arr[1].matrix.toArray()
         }]
     }))
+}
+
+function serializeWrist(hand) {
+    return (hand?.joints?.wrist === undefined) ? {} :
+    {
+        "wrist": {
+            "matrix": hand?.joints?.wrist?.matrix?.toArray()
+        }
+    }
 }
 
 /**
@@ -280,6 +291,114 @@ function objectArrayToCsv(array) {
         rows.push(flattener["mapper"](frame))
     })
     return rows.map( row => row.join(",") ).join("\n")
+}
+
+// Functions for track playback
+
+
+
+/**
+ * Function to replace the gesture from source hand pose to target hand pose
+ * @param {object} sourcePose Pose to extract gesture from
+ * @param {object} targetPose Pose to apply gesture to
+ * @returns {object} Resulting hand pose
+ */
+function replaceGesture(sourcePose, targetPose) {
+    // Extract source pose relative finger positions
+    // Extract the transformation from wrist to finger joint from source pose
+    // Set finger joint positions of resulting pose to be its represective wrist -> finger joint position using the transformations from previous step
+    // Apply relative finger positions to target pose
+    var resultPose = cloneDeep(targetPose)
+    if (targetPose?.left_hand_pose?.wrist !== undefined && sourcePose?.left_hand_pose?.wrist !== undefined) {
+        const sourceLeftWristInverse = new THREE.Matrix4.fromArray(sourcePose["left_hand_pose"]["wrist"]).invert()
+        const targetLeftWrist = new THREE.Matrix4.fromArray(targetPose["left_hand_pose"]["wrist"])
+        const sourceRightWristInverse = new THREE.Matrix4.fromArray(sourcePose["right_hand_pose"]["wrist"]).invert()
+        const targetRightWrist = new THREE.Matrix4.fromArray(targetPose["left_hand_pose"]["wrist"])
+        for (const [key, value] of Object.entries(sourcePose.left_hand_pose)) {web
+            resultPose["left_hand_pose"][key] = new THREE.Matrix4().fromArray(value.matrix).multiply(sourceLeftWristInverse).multiply(targetLeftWrist)
+        }
+        for (const [key, value] of Object.entries(sourcePose.right_hand_pose)) {
+            resultPose["right_hand_pose"][key] = new THREE.Matrix4().fromArray(value.matrix).multiply(sourceRightWristInverse).multiply(targetRightWrist)
+        }
+    }
+    return resultPose
+}
+
+function countdown(n=3, bpm=60) {
+    
+}
+
+const music = new THREE.Audio(window.listener)
+
+var leftHand = Handy.hands.getLeft()
+var rightHand = Handy.hands.getRight()
+var leftTriggered = false
+var rightTriggered = false
+leftHand.addEventListener("peace pose began", (event) => {
+    leftTriggered = true
+})
+rightHand.addEventListener("peace pose began", (event) => {
+    rightTriggered = true
+})
+
+function recordTemplate(countdown=true, music_url, callback=(data)=>{}) {
+    // Load music
+    window.audioLoader.load(music_url, (buffer => {
+        var playing = true
+        music.setBuffer(music)
+        music.setLoop(false)
+        music.setVolume(1)
+        music.play()
+        music.onEnded = ()=>{
+            playing = false
+        }
+        var left_gesture_id = 0
+        var right_gesture_id = 0
+        var data = []
+        var camera = renderer.xr.getCamera()
+        var firstUpdate = true
+        sceneModifiers.push((destroy)=>{
+            if (firstUpdate === true) {
+                leftTriggered = false
+                rightTriggered = false
+                firstUpdate = false
+            }
+            if (leftTriggered === true) {
+                left_gesture_id++
+                leftTriggered = false
+            }
+            if (rightTriggered === true) {
+                right_gesture_id++
+                rightTriggered = false
+            }
+            var pose = {
+                "left_hand_pose": serializeWrist(leftHand),
+                "right_hand_pose": serializeWrist(rightHand),
+                "head_pose": {
+                    "matrix": camera.matrix.toArray()
+                },
+                "time": Date.now(), // Perhaps we could use the audio element time instead?
+                "left_gesture_id": left_gesture_id,
+                "right_gesture_id": right_gesture_id
+            }
+            data.push(pose)
+            if (playing = false) {
+                destroy()
+                callback({
+                    "music_url": music_url,
+                    "data": data
+                })
+            }
+        })
+    }))
+    // Show countdown
+    // Record motion
+    // Recognize gestures and mark as time to change gestures
+    // Output object
+}
+
+function playbackTemplate(data) {
+
 }
 
 export {serializeJoints, applySerializedJoints, interpObj, recordHandMotion, playbackHandMotion, echoHands, download, objectArrayToCsv}
