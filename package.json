@@ -11,7 +11,8 @@
     "handy.js": "stewdio/handy.js",
     "lodash": "^4.17.21",
     "nanoid": "^3.1.29",
-    "three": "^0.132.2"
+    "three": "^0.132.2",
+    "troika-three-text": "^0.43.0"
   },
   "devDependencies": {
     "parcel": "^2.0.0-rc.0"
