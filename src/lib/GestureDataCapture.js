@@ -1,6 +1,259 @@
 import { customAlphabet } from 'nanoid'
-import * as THREE from 'three'
-import { cloneDeep } from 'lodash';
+import * as THREE from "three"
+import { cloneDeep, initial } from 'lodash'
+
+import * as THREE from "three"
+import 'color-convert'
+import { Handy } from 'handy.js'
+
+import { XRControllerModelFactory } from 'three/examples/jsm/webxr/XRControllerModelFactory.js';
+import { XRHandModelFactory } from 'three/examples/jsm/webxr/XRHandModelFactory.js';
+import { DummyXRHandModelFactory } from "./DummyXRHandModel"
+
+import {Text} from 'troika-three-text'
+
+// Boilerplate
+
+window.DummyXRHandModelFactory = DummyXRHandModelFactory
+
+function setup() {
+    window.Handy = Handy
+
+    var scene = new THREE.Scene()
+    var cameraGroup = new THREE.Group()
+    var camera = new THREE.PerspectiveCamera()
+    var listener = new THREE.AudioListener();
+
+    cameraGroup.add(camera)
+    scene.add(cameraGroup)
+    camera.add( listener );
+
+    var renderer = new THREE.WebGLRenderer({antialias: true})
+    renderer.xr.enabled = true
+
+    var sceneModifiers = []
+
+    document.getElementsByClassName("viewport-div")[0].appendChild(renderer.domElement)
+
+    window.addEventListener( 'resize', onWindowResize, false );
+
+    function onWindowResize(){
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize( window.innerWidth, window.innerHeight );
+    }
+
+    onWindowResize()
+
+    window.sceneModifiers = sceneModifiers
+
+    renderer.setAnimationLoop(function() {
+        renderer.render(scene, camera)
+        Handy.update()
+        window.sceneModifiers.forEach((x)=>{x(()=>{
+            window.sceneModifiers = window.sceneModifiers.filter((modifier)=>{
+                return modifier !== x
+            })
+            console.log("Modifier terminated.")
+        })})
+    })
+
+    window.scene = scene
+    window.camera = camera
+    window.cameraGroup = cameraGroup
+    window.renderer = renderer
+    window.listener = listener
+    window.audioLoader = new THREE.AudioLoader();
+    window.musicPlayer = new THREE.Audio(window.listener)
+    
+}
+
+function setupControllersAndHands() {
+    var controller1 = renderer.xr.getController( 0 );
+    scene.add( controller1 );
+
+    var controller2 = renderer.xr.getController( 1 );
+    scene.add( controller2 );
+
+    const controllerModelFactory = new XRControllerModelFactory();
+    const handModelFactory = new XRHandModelFactory();
+
+    // Hand 1
+    var controllerGrip1 = renderer.xr.getControllerGrip( 0 );
+    controllerGrip1.add( controllerModelFactory.createControllerModel( controllerGrip1 ) );
+    scene.add( controllerGrip1 );
+
+    var hand1 = renderer.xr.getHand( 0 );
+    scene.add( hand1 );
+    hand1.add( handModelFactory.createHandModel( hand1, 'mesh' ) );
+    Handy.makeHandy(hand1)
+    
+    // Hand 2
+    var controllerGrip2 = renderer.xr.getControllerGrip( 1 );
+    controllerGrip2.add( controllerModelFactory.createControllerModel( controllerGrip2 ) );
+    scene.add( controllerGrip2 );
+
+    var hand2 = renderer.xr.getHand( 1 );
+    scene.add( hand2 );
+    hand2.add( handModelFactory.createHandModel( hand2, 'mesh' ) );
+    Handy.makeHandy(hand2)
+
+    var dummyFac = new DummyXRHandModelFactory()
+
+    var dummyHands = new THREE.Group()
+    scene.add(dummyHands)
+
+    var dummyLeft = dummyFac.createHandModel("left")
+    dummyHands.add(dummyLeft)
+    dummyLeft.visible = false
+
+    var dummyRight = dummyFac.createHandModel("right")
+    dummyHands.add(dummyRight)
+    dummyRight.visible = false
+    window.inSession = false
+    window.handTrackingAvailable = false
+
+    var leftHandAvailable = false
+    var rightHandAvailable = false
+
+    const handtrackavailable = new Event("handtrackavailable")
+    const handtrackunavailable = new Event("handtrackunavailable")
+
+    renderer.xr.addEventListener("sessionstart", (event) => {
+        console.log("Entered XR")
+        renderer.xr.getSession().addEventListener("inputsourceschange", event => {
+            // console.log("Input sources changed")
+            event.added.forEach(inputSource => {
+                if (inputSource.profiles.includes("generic-hand")) {
+                    if (inputSource.handedness === "left") {
+                        leftHandAvailable = true
+                    }
+                    if (inputSource.handedness === "right") {
+                        rightHandAvailable = true
+                    }
+                }
+            })
+            event.removed.forEach(inputSource => {
+                if (inputSource.profiles.includes("generic-hand")) {
+                    if (inputSource.handedness === "left") {
+                        leftHandAvailable = false
+                    }
+                    if (inputSource.handedness === "right") {
+                        rightHandAvailable = false
+                    }
+                }
+            })
+            var newHandrackingAvailable = leftHandAvailable && rightHandAvailable
+            if (window.handTrackingAvailable !== newHandrackingAvailable) {
+                window.handTrackingAvailable = newHandrackingAvailable
+                document.dispatchEvent(new CustomEvent("onhandtrackchange", {"detail": window.handTrackingAvailable}))
+                if (window.handTrackingAvailable === true) {
+                    document.dispatchEvent(handtrackavailable)
+                } else {
+                    document.dispatchEvent(handtrackunavailable)
+                }
+            }
+        })
+    })
+
+    renderer.xr.addEventListener("sessionend", (event) => {
+        console.log("Exited XR")
+    })
+
+    window.left = Handy.hands.getLeft()
+    window.right = Handy.hands.getRight()
+    window.dummyLeft = dummyLeft
+    window.dummyRight = dummyRight
+    window.dummyLock = false
+}
+
+function setupScene() {
+    // Lights
+    var light = new THREE.AmbientLight()
+    scene.add(light)
+
+    // Scene
+    var floorGeom = new THREE.PlaneGeometry(10, 10, 10, 10)
+    var floorMaterial = new THREE.MeshBasicMaterial({wireframe: true})
+    var floorMesh = new THREE.Mesh(floorGeom, floorMaterial)
+    scene.add(floorMesh)
+    floorMesh.rotation.x = Math.PI / 2
+
+    window.hudText = new Text()
+    window.camera.add(window.hudText)
+    window.hudText.text = "PLEASE SWITCH TO HAND TRACKING"
+    window.hudText.fontSize = 0.05
+    window.hudText.position.set(-0.5, 0, -1)
+    window.hudText.textAlign = "center"
+    window.hudText.sync()
+}
+
+const welcomeTextElem = document.getElementById("welcome-text")
+const welcomeScreenElem = document.getElementById("welcome-screen")
+
+var currentSession = null;
+
+async function onSessionStarted( session ) {
+    session.addEventListener( 'end', onSessionEnded );
+    await renderer.xr.setSession( session );
+    currentSession = session;
+
+}
+
+function onSessionEnded( /*event*/ ) {
+    currentSession.removeEventListener( 'end', onSessionEnded );
+    currentSession = null;
+}
+
+let
+
+function startFlow() {
+    console.log("1. Started flow")
+    var flowValid = true
+    // Show welcome screen to enter VR experience
+    welcomeTextElem.textContent = "CLICK ANYWHERE TO START CAPTURE"
+    welcomeScreenElem.style.backgroundColor = "white"
+    welcomeScreenElem.addEventListener("click", (clickevent) => {
+        if (flowValid === true) {
+            console.log("2. Clicked")
+            const sessionInit = { optionalFeatures: [ 'local-floor', 'bounded-floor', 'hand-tracking', 'layers' ] };
+            navigator.xr.requestSession( 'immersive-vr', sessionInit ).then( onSessionStarted );
+            window.renderer.xr.addEventListener("sessionstart", (vrevent) => {
+                if (flowValid === true) {
+                // Prompt user for hand tracking
+                window.renderer.xr.addEventListener("sessionend", (vrevent2) => {
+                    if (flowValid === true) {
+                        // In the case that XR session ended, restart
+                        startFlow()
+                    }
+                    flowValid = false
+                }, {once: true})
+                document.addEventListener("handtrackavailable", (handtrackevent) => {
+                    if (flowValid === true) {
+                        // Start experience once hand tracking is available
+                        document.addEventListener("handtrackunavailable", (handtrackevent2) => {
+                            if (flowValid === true) {
+                                // In the case that hand tracking was lost, restart
+                                startFlow()
+                            }
+                            flowValid = false
+                        }, {once: true})
+                    }
+                }, {once: true})}
+            }, {once: true})
+        }
+    }, {once: true})
+}
+
+function initialize() {
+    console.log("Initialized")
+    setup()
+    setupControllersAndHands()
+    setupScene()
+    startFlow()
+}
+
+document.addEventListener("DOMContentLoaded", initialize, {once: true})
 
 // Functions for hand joint serialization and display, so hand joint poses can easily be saved and shown
 
@@ -328,18 +581,17 @@ function countdown(n=3, bpm=60) {
     
 }
 
-const music = new THREE.Audio(window.listener)
-
 var leftHand = Handy.hands.getLeft()
 var rightHand = Handy.hands.getRight()
 var leftTriggered = false
 var rightTriggered = false
-leftHand.addEventListener("peace pose began", (event) => {
-    leftTriggered = true
-})
-rightHand.addEventListener("peace pose began", (event) => {
-    rightTriggered = true
-})
+
+// leftHand.addEventListener("peace pose began", (event) => {
+//     leftTriggered = true
+// })
+// rightHand.addEventListener("peace pose began", (event) => {
+//     rightTriggered = true
+// })
 
 function recordTemplate(countdown=true, music_url, callback=(data)=>{}) {
     // Load music
@@ -401,4 +653,4 @@ function playbackTemplate(data) {
 
 }
 
-export {serializeJoints, applySerializedJoints, interpObj, recordHandMotion, playbackHandMotion, echoHands, download, objectArrayToCsv}
+export {initialize, serializeJoints, applySerializedJoints, interpObj, recordHandMotion, playbackHandMotion, echoHands, download, objectArrayToCsv}
