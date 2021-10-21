@@ -1,3 +1,6 @@
+import * as THREE from "three"
+import {cloneDeep} from "lodash"
+
 /**
  * Returns a object representing hand joint positions given a hand object
  * @param {*} hand - Hand object
