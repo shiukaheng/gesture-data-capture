@@ -17,6 +17,11 @@ function _createObjectDescriptor(object, index_start) {
         }
         index++
     }
+    if (Array.isArray(object)) {
+        var arr = []
+        descriptor = Object.entries(descriptor).forEach(([k, v]) => {arr[k] = v})
+        descriptor = arr
+    }
     return [descriptor, index-1]
 }
 
@@ -40,7 +45,7 @@ function flattenObject(object, descriptor) {
 }
 
 function _unflattenObject(array, descriptorCopy) {
-    for (const [key, val] of Object.entries(object)) {
+    for (const [key, val] of Object.entries(descriptorCopy)) {
         if (isObject(val)) {
             _unflattenObject(array, val)
         } else {

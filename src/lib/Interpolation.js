@@ -58,4 +58,6 @@ function interpObj(obj1, obj2, value) {
     return newObj
 }
 
+// Could be improved, taking inspiration from ObjectUtils recursion, treating all objects equally, and converting arrays back into arrays when needed
+
 export {interpNumbers, interpNumericArray, interpObj}

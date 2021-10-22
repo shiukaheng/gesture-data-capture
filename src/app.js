@@ -10,7 +10,20 @@ import * as TWEEN from "@tweenjs/tween.js"
 import {Text, preloadFont} from 'troika-three-text'
 import { once } from "lodash"
 
+import * as DataCapture from "./lib/DataCapture"
+import * as IO from "./lib/IO"
+import * as Interpolation from "./lib/Interpolation"
+import * as PoseUtils from "./lib/PoseUtils"
+import * as ObjectUtils from "./lib/ObjectUtils"
+
 // Boilerplate
+
+window.DataCapture = DataCapture
+window.IO = IO
+window.Interpolation = Interpolation
+window.PoseUtils = PoseUtils
+window.ObjectUtils = ObjectUtils
+window.testObj = {a:"Hello", b:[1,2,3], c:{c1: [1,2,3], c2: {c21: "on9"}}}
 
 class App {
     constructor() {
@@ -20,8 +33,7 @@ class App {
         this.camera_group = new THREE.Group()
         this.listener = new THREE.AudioListener()
         this.camera = new THREE.PerspectiveCamera()
-        this.camera_group.add(this.camera)
-        this.scene.add(this.camera_group)
+        this.scene.add(this.camera)
         this.camera.add(this.listener)
         this.renderer = new THREE.WebGLRenderer({antialias: true})
         this.renderer.xr.enabled = true
@@ -150,7 +162,10 @@ class App {
         // Setup three.js scene elements
 
         this.ambient_light = new THREE.AmbientLight()
+        this.ambient_light.intensity = 0.2
         this.scene.add(this.ambient_light)
+        this.directional_light = new THREE.DirectionalLight()
+        this.scene.add(this.directional_light)
         var floor_geom = new THREE.PlaneGeometry(10, 10, 10, 10)
         var floor_mat = new THREE.MeshBasicMaterial({wireframe: true})
         this.floor = new THREE.Mesh(floor_geom, floor_mat)
@@ -159,8 +174,9 @@ class App {
 
         this.hud_text = new Text()
         this.camera.add(this.hud_text)
-        this.hud_text.fontSize = 0.05
-        this.hud_text.position.set(0, 0, -1)
+        this.hud_text.fontSize = 0.08
+        this.hud_text.font = "./archivo-black-v10-latin-regular.woff"
+        this.hud_text.position.set(0, 0, -2)
         this.hud_text.textAlign = "center"
         this.hud_text.anchorX = "center"
         this.hud_text.anchorY = "middle"
@@ -169,55 +185,20 @@ class App {
         this.welcome_text_element = document.getElementById("welcome-text")
         this.welcome_screen_element = document.getElementById("welcome-screen")
         this.current_session = null;
+
+        this.onSessionStarted = this.onSessionStarted.bind(this)
+        this.onSessionEnded = this.onSessionEnded.bind(this)
     }
 
     async onSessionStarted( session ) {
-        session.addEventListener( 'end', onSessionEnded );
+        session.addEventListener( 'end', this.onSessionEnded );
         await this.renderer.xr.setSession( session );
         this.current_session = session;
     }
     
     onSessionEnded( /*event*/ ) {
-        this.current_session.removeEventListener( 'end', onSessionEnded );
+        this.current_session.removeEventListener( 'end', this.onSessionEnded );
         this.current_session = null;
-    }
-
-    oldstart() {
-        console.log("1. Started flow")
-        var flowValid = true
-        // Show welcome screen to enter VR experience
-        this.welcome_text_element.textContent = ""
-        this.welcome_screen_element.style.backgroundColor = "white"
-        this.welcome_screen_element.addEventListener("click", (clickevent) => {
-            if (flowValid === true) {
-                console.log("2. Clicked")
-                const sessionInit = { optionalFeatures: [ 'local-floor', 'bounded-floor', 'hand-tracking', 'layers' ] };
-                navigator.xr.requestSession( 'immersive-vr', sessionInit ).then( onSessionStarted );
-                this.renderer.xr.addEventListener("sessionstart", (vrevent) => {
-                    if (flowValid === true) {
-                    // Prompt user for hand tracking
-                    this.renderer.xr.addEventListener("sessionend", (vrevent2) => {
-                        if (flowValid === true) {
-                            // In the case that XR session ended, restart
-                            startFlow()
-                        }
-                        flowValid = false
-                    }, {once: true})
-                    document.addEventListener("handtrackavailable", (handtrackevent) => {
-                        if (flowValid === true) {
-                            // Start experience once hand tracking is available
-                            document.addEventListener("handtrackunavailable", (handtrackevent2) => {
-                                if (flowValid === true) {
-                                    // In the case that hand tracking was lost, restart
-                                    startFlow()
-                                }
-                                flowValid = false
-                            }, {once: true})
-                        }
-                    }, {once: true})}
-                }, {once: true})
-            }
-        }, {once: true})
     }
 
     async start() {
@@ -240,6 +221,25 @@ class App {
         return new Promise((resolve, reject) => {
             this.welcome_text_element.textContent = "LOADING..."
             this.welcome_screen_element.style.backgroundColor = "lightslategrey"
+            var load_list = [
+                new Promise((resolve, reject) => {
+                    try {
+                        preloadFont(
+                            {
+                                font: "./archivo-black-v10-latin-regular.woff"
+                            },
+                            () => {
+                                resolve()
+                            }
+                        )
+                        } catch (e) {
+
+                        }
+                })
+            ]
+            Promise.all(load_list).then(() => {
+                resolve()
+            })
             // Loading stuff
             // TODO: Resolve if all loaded
             // TODO: Reject if some loading failed
@@ -253,21 +253,24 @@ class App {
             this.welcome_screen_element.addEventListener("click", () => {
                 // Request for XR session
                 const sessionInit = { optionalFeatures: [ 'local-floor', 'bounded-floor', 'hand-tracking', 'layers' ] };
-                navigator.xr.requestSession( 'immersive-vr', sessionInit ).then( onSessionStarted );
+                navigator.xr.requestSession( 'immersive-vr', sessionInit ).then( this.onSessionStarted );
                 // Resolve if the session does start
-                this.renderer.xr.addEventListener("sessionstart", resolve, {once: true})
+                this.renderer.xr.addEventListener("sessionstart", () => {resolve()}, {once: true})
                 // TODO: Reject if user declines XR request
             }, {once: true})
         })
-
     }
 
     request_hand_tracking_screen() {
         return new Promise((resolve, reject) => {
+            // Webpage elements
             this.welcome_text_element.textContent = "XR IN SESSION: WAITING FOR HAND TRACKING"
             this.welcome_screen_element.style.backgroundColor = "mintcream"
+
+            // 3D elements
             this.hud_text.text = "WAITING FOR HAND TRACKING"
             this.hud_text.sync()
+
             // Resolve if hand tracking started or already is available
             if (this.hand_tracking_available) {
                 resolve()
@@ -281,8 +284,15 @@ class App {
 
     tutorial() {
         return new Promise((resolve, reject) => {
+            // Webpage elements
             this.welcome_text_element.textContent = "XR IN SESSION: TUTORIAL"
             this.welcome_screen_element.style.backgroundColor = "mintcream"
+
+            // 3D elements
+            this.hud_text.text = "TUTORIAL IN SESSION"
+            this.hud_text.sync()
+            TWEEN.Tween(this.floor.material.color).to({r: 255, g:0, b:0}, 500).start()
+
             // TODO: Resolve if done OR skipped
             // Reject if hand tracking lost OR session lost
             document.addEventListener("handtrackunavailable", reject, {once: true})
@@ -321,4 +331,5 @@ class App {
 
 document.addEventListener("DOMContentLoaded", ()=>{
     window.app = new App()
+    window.app.start()
 }, {once: true})
