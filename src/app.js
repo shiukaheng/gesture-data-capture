@@ -15,6 +15,7 @@ import * as IO from "./lib/IO"
 import * as Interpolation from "./lib/Interpolation"
 import * as PoseUtils from "./lib/PoseUtils"
 import * as ObjectUtils from "./lib/ObjectUtils"
+import * as InteractiveElements from "./lib/InteractiveElements"
 
 // Boilerplate
 
@@ -208,7 +209,7 @@ class App {
             await this.request_hand_tracking_screen()
             // await this.tutorial()
             var data = await this.capture_screen() // TODO: Start data capture on button press / gesture
-            // Send data to server
+            // TODO: Send data to server
             await this.normal_exit_screen()
         } catch (error) {
             await this.error_exit_screen(error)
@@ -300,16 +301,50 @@ class App {
         })
     }
 
-    capture_screen() {
-        return new Promise((resolve, reject) => {
-            this.welcome_text_element.textContent = "XR IN SESSION: CAPTURING"
-            this.welcome_screen_element.style.backgroundColor = "mintcream"
-            // Resolve if capture finished
-            // Reject if hand tracking lost OR session lost
-            document.addEventListener("handtrackunavailable", reject, {once: true})
-            this.renderer.xr.addEventListener("sessionend", reject, {once: true})
-        })
+    async capture_screen() {
+        this.welcome_text_element.textContent = "XR IN SESSION: CAPTURING"
+        this.welcome_screen_element.style.backgroundColor = "mintcream"
+        var [record_button, record_button_promise] = new InteractiveElements.createButton(this.scene_modifiers, [this.left_hand, this.right_hand])
+        this.scene.add(record_button)
+        record_button.position.z = -2
+        record_button.position.x = 1
+        var cleanup = (error) => {
+            record_button.cancel()
+            throw(error)
+        }
+        // Reject if hand tracking lost OR session lost
+        document.addEventListener("handtrackunavailable", cleanup, {once: true})
+        this.renderer.xr.addEventListener("sessionend", cleanup, {once: true})
+        try {
+            await record_button_promise
+            data = await DataCapture.recordHandMotion(30, this.left_hand, this.right_hand, this.camera)
+            return data
+        } catch(error) {
+            record_button.cancel()
+            throw(error)
+        }
     }
+
+    // capture_screen() {
+    //     return new Promise((resolve, reject) => {
+    //         this.welcome_text_element.textContent = "XR IN SESSION: CAPTURING"
+    //         this.welcome_screen_element.style.backgroundColor = "mintcream"
+    //         var [record_button, record_button_promise] = new InteractiveElements.createButton(this.scene_modifiers, [this.left_hand, this.right_hand])
+    //         var cleanup = () => {
+    //             record_button.cancel()
+    //             reject()
+    //         }
+    //         record_button_promise.then(()=>{
+    //             DataCapture.recordHandMotion(30, this.left_hand, this.right_hand, this.camera).then((data) => {
+    //                 // send data
+    //             }, cleanup)
+    //         }, cleanup)
+    //         // Resolve if capture finished
+    //         // Reject if hand tracking lost OR session lost
+    //         document.addEventListener("handtrackunavailable", cleanup, {once: true})
+    //         this.renderer.xr.addEventListener("sessionend", cleanup, {once: true})
+    //     })
+    // }
 
     error_exit_screen(message) {
         return new Promise((resolve, reject) => {
@@ -326,7 +361,6 @@ class App {
             // Resolve if user clicks screen
         })
     }
-
 }
 
 document.addEventListener("DOMContentLoaded", ()=>{
