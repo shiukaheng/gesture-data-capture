@@ -1,5 +1,5 @@
 import * as THREE from "three"
-import {cloneDeep} from "lodash"
+import {cloneDeep, mapValues} from "lodash"
 
 /**
  * Returns a object representing hand joint positions given a hand object
@@ -66,4 +66,24 @@ function applySerializedJoints(dummyHand, serializedJoints, jointMask=[]) {
     return resultPose
 }
 
-export {serializeJoints, serializeWrist, applySerializedJoints, replaceGesture}
+function matrixObjectToPositionQuaternion(object) {
+    var matrix = new THREE.Matrix4().fromArray(object.matrix)
+    return {
+        "position": new THREE.Vector3().setFromMatrixPosition(matrix),
+        "quaternion": new THREE.Quaternion.setFromMatrixPosition(matrix)
+    }
+}
+
+function poseMatrixToPositionQuaternion(pose) {
+    for (const key in pose) {
+        if (["left_hand_pose", "right_hand_pose"].includes(key)) {
+            pose[key] = mapValues(pose[key], matrixObjectToPositionQuaternion)
+        }
+        if (key === "head_pose") {
+            pose[key] = matrixObjectToPositionQuaternion(pose[key])
+        }
+    }
+    return pose
+}
+
+export {serializeJoints, serializeWrist, applySerializedJoints, replaceGesture, poseMatrixToPositionQuaternion}
