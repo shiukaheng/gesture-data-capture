@@ -209,6 +209,10 @@ class App {
             await this.request_hand_tracking_screen()
             // await this.tutorial()
             var data = await this.capture_screen() // TODO: Start data capture on button press / gesture
+            await fetch("/", {
+                method: "POST",
+                body: JSON.stringify(data)
+            }) // TODO: Upload screen https://stackoverflow.com/questions/35711724/upload-progress-indicators-for-fetch
             // TODO: Send data to server
             await this.normal_exit_screen()
         } catch (error) {

@@ -1,17 +1,23 @@
-[tool.poetry]
-name = "gesture-data-capture"
-version = "0.1.0"
+[project]
+name = ""
+version = ""
 description = ""
-authors = ["Your Name <you@example.com>"]
-license = "MIT"
+authors = [
+    {name = "Heng", email = ""},
+]
+dependencies = [
+    "flask~=2.0",
+]
+requires-python = ">=3.9"
+dynamic = ["classifiers"]
+license = {text = "MIT"}
 
-[tool.poetry.dependencies]
-python = "^2.7"
-Flask = "^2.0.2"
-Werkzeug = "^2.0.2"
-
-[tool.poetry.dev-dependencies]
+[project.urls]
+homepage = ""
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["pdm-pep517"]
+build-backend = "pdm.pep517.api"
+
+[tool]
+[tool.pdm]
