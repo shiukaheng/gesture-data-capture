@@ -16,6 +16,7 @@ import * as Interpolation from "./lib/Interpolation"
 import * as PoseUtils from "./lib/PoseUtils"
 import * as ObjectUtils from "./lib/ObjectUtils"
 import * as InteractiveElements from "./lib/InteractiveElements"
+import { test } from "./test"
 
 // Boilerplate
 
@@ -25,6 +26,11 @@ window.Interpolation = Interpolation
 window.PoseUtils = PoseUtils
 window.ObjectUtils = ObjectUtils
 window.testObj = {a:"Hello", b:[1,2,3], c:{c1: [1,2,3], c2: {c21: "on9"}}}
+
+function inspect(object) {
+    console.log(object)
+    return object
+}
 
 class App {
     constructor() {
@@ -60,7 +66,7 @@ class App {
                 this.scene_modifiers = this.scene_modifiers.filter((modifier)=>{
                     return modifier !== x
                 })
-                console.log("Modifier terminated.")
+                // console.log("Modifier terminated.")
             })})
         })
 
@@ -96,14 +102,14 @@ class App {
         this.scene.add(this.dummyHands)
     
         // Create left dummy hand
-        var dummy_left = this.dummy_factory.createHandModel("left")
-        this.dummyHands.add(dummy_left)
-        dummy_left.visible = false
+        this.dummy_left_hand = this.dummy_factory.createHandModel("left")
+        this.dummyHands.add(this.dummy_left_hand)
+        this.dummy_left_hand.visible = false
     
         // Create right dummy hand
-        var dummy_right = this.dummy_factory.createHandModel("right")
-        this.dummyHands.add(dummy_right)
-        dummy_right.visible = false
+        this.dummy_right_hand = this.dummy_factory.createHandModel("right")
+        this.dummyHands.add(this.dummy_right_hand)
+        this.dummy_right_hand.visible = false
 
         // Create app states
         this.in_session = false
@@ -143,6 +149,11 @@ class App {
                     this.hand_tracking_available = new_hand_tracking_available
                     document.dispatchEvent(new CustomEvent("onhandtrackchange", {"detail": this.hand_tracking_available}))
                     if (this.hand_tracking_available=== true) {
+                        var hand0 = this.renderer.xr.getHand(0)
+                        var hand1 = this.renderer.xr.getHand(1)
+                        var hands = [hand0, hand1]
+                        this.left_hand = hands.find((hand) => (hand.handedness === "left"))
+                        this.right_hand = hands.find((hand) => (hand.handedness === "right"))
                         document.dispatchEvent(handtrackavailable)
                     } else {
                         document.dispatchEvent(handtrackunavailable)
@@ -155,10 +166,8 @@ class App {
             console.log("Exited XR")
         })
     
-        this.left_hand = this.Handy.hands.getLeft()
-        this.right_hand = this.Handy.hands.getRight()
-        this.dummy_left_hand = dummy_left
-        this.dummy_right_hand = dummy_right
+        this.left_hand = null
+        this.right_hand = null
 
         // Setup three.js scene elements
 
@@ -218,7 +227,7 @@ class App {
         } catch (error) {
             await this.error_exit_screen(error)
         } finally {
-            this.start()
+            await this.start()
         }
     }
 
@@ -278,6 +287,7 @@ class App {
 
             // Resolve if hand tracking started or already is available
             if (this.hand_tracking_available) {
+                console.log(renderer.xr.getHand( 0 ), renderer.xr.getHand( 1 ))
                 resolve()
             } else {
                 document.addEventListener("handtrackavailable", resolve, {once: true})
@@ -308,7 +318,8 @@ class App {
     async capture_screen() {
         this.welcome_text_element.textContent = "XR IN SESSION: CAPTURING"
         this.welcome_screen_element.style.backgroundColor = "mintcream"
-        var [record_button, record_button_promise] = new InteractiveElements.createButton(this.scene_modifiers, [this.left_hand, this.right_hand])
+        console.log(this.Handy.hands.getLeft(), this.Handy.hands.getRight())
+        var [record_button, record_button_promise] = InteractiveElements.createButton(this.scene_modifiers, inspect([this.Handy.hands.getLeft(), this.Handy.hands.getRight()]))
         this.scene.add(record_button)
         record_button.position.z = -2
         record_button.position.x = 1
@@ -370,4 +381,5 @@ class App {
 document.addEventListener("DOMContentLoaded", ()=>{
     window.app = new App()
     window.app.start()
+    // test(window.app)
 }, {once: true})

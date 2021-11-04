@@ -1,14 +1,18 @@
+import * as THREE from "three"
+import { serializeJoints, applySerializedJoints } from "./PoseUtils"
+import { interpObj } from "./Interpolation"
+
 /**
  * Function for initiating hand motion recording
  * @param {number} duration - Recording duration in seconds 
  * @returns {Promise}
  */
-function recordHandMotion(duration, left_hand, right_hand, camera) {
+function recordHandMotion(scene_modifiers, duration, left_hand, right_hand, camera) {
     return new Promise((resolve, reject) => {
         console.log("Recording!")
         var timer = new THREE.Clock()
         var data = []
-        window.sceneModifiers.push((destroy)=>{
+        scene_modifiers.push((destroy)=>{
             var pose = {
                 "left_hand_pose": serializeJoints(left_hand),
                 "right_hand_pose": serializeJoints(right_hand),
@@ -31,7 +35,7 @@ function recordHandMotion(duration, left_hand, right_hand, camera) {
  * @param {array} data - Recorded data for playback 
  * @returns {Promise}
  */
-function playbackHandMotion(data, dummy_left_hand, dummy_right_hand) {
+function playbackHandMotion(scene_modifiers, data, dummy_left_hand, dummy_right_hand) {
     return new Promise((resolve, reject) => {
         console.log("Playback in progress!")
 
@@ -48,7 +52,7 @@ function playbackHandMotion(data, dummy_left_hand, dummy_right_hand) {
             return data[frameIndex]["time"] - data[0]["time"]
         }
         var frame = 0
-        window.sceneModifiers.push((destroy)=>{
+        scene_modifiers.push((destroy)=>{
             // console.log(`New frame rendered: ${frame}`)
             timeNow = Date.now()
             // If not last frame, and not current time elapsed is more than video time elapsed, step to next frame
@@ -81,7 +85,7 @@ async function echoHands(duration=5) {
     await playbackHandMotion(data, window.dummy_left_hand, window.dummy_right_hand)
 }
 
-function recordTemplate(left_hand, right_hand, camera, music_url, audio_loader, audio_object) {
+function recordTemplate(scene_modifiers, left_hand, right_hand, camera, music_url, audio_loader, audio_object) {
     var leftTriggered = false
     var rightTriggered = false
     return new Promise((resolve, reject) => {
@@ -99,7 +103,7 @@ function recordTemplate(left_hand, right_hand, camera, music_url, audio_loader, 
             var right_gesture_id = 0
             var data = []
             var firstUpdate = true
-            window.sceneModifiers.push((destroy)=>{
+            scene_modifiers.push((destroy)=>{
                 if (firstUpdate === true) {
                     leftTriggered = false
                     rightTriggered = false

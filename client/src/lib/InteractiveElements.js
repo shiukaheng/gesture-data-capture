@@ -22,9 +22,12 @@ function samplePointInFrustum(horizontal_fov, vertical_fov, max_distance) {
     return
 }
 
+var target_vec = new THREE.Vector3()
+var monitored_vec = new THREE.Vector3()
+
 function nearest_dist(target_object, monitored_objects) {
-    return Math.min(Array.map(monitored_objects, (monitored_object) => {
-        target_object.getWorldPosition().distanceTo(monitored_object.getWorldPosition())
+    return Math.min(monitored_objects.map((monitored_object) => {
+        target_object.getWorldPosition(target_vec).distanceTo(monitored_object.getWorldPosition(monitored_vec))
     }))
 }
 
@@ -55,9 +58,14 @@ function createButton(scene_modifiers, monitored_objects) {
     button.cancel = () => {
         pressed = true
     }
+    var dist
     return [button, new Promise((resolve, reject) => {
         scene_modifiers.push((destroy) => {
-            var dist = nearest_dist(button, monitored_objects)
+            if (button.parent !== undefined) {
+                dist = nearest_dist(button, monitored_objects)
+            } else {
+                dist = Infinity
+            }
             if (dist < accept_threshold) {
                 pressed = true
                 time_pressed = Date.now()
