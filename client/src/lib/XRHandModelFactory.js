@@ -75,7 +75,7 @@ class XRHandModelFactory {
 
 			}
 
-            on_connected(handModel)
+            on_connected(controller)
 
 		} );
 
@@ -85,7 +85,7 @@ class XRHandModelFactory {
 			// handModel.remove( scene );
 			// scene = null;
 
-            on_disconnected(handModel)
+            on_disconnected(controller)
 
 		} );
 

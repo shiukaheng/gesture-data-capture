@@ -77,6 +77,45 @@ class App {
         this.scene.add(controller2);
         const controllerModelFactory = new XRControllerModelFactory();
         const handModelFactory = new XRHandModelFactory();
+
+        this.left_hand = null
+        this.right_hand = null
+        var hand_availablity = false
+        const handtrackunavailable = new Event("handtrackunavailable")
+
+        var check_hand_availablity = () => {
+            var new_hand_availability = (this.left_hand !== null && this.right_hand !== null)
+            if (hand_availablity !== new_hand_availability) {
+                if (new_hand_availability) {
+                    document.dispatchEvent(new CustomEvent("handtrackavailable", {"detail": {"left_hand": this.left_hand, "right_hand": this.right_hand}}))
+                } else {
+                    document.dispatchEvent(handtrackunavailable)
+                }
+                hand_availablity = new_hand_availability
+            }
+        }
+
+        var hand_connected_callback = (controller) => {
+            if (controller.handedness === "right") {
+                this.right_hand = controller
+            } else if (controller.handedness === "left") {
+                this.left_hand = controller
+            } else {
+                throw "unrecognized handedness"
+            }
+            check_hand_availablity()
+        }
+
+        var hand_disconnected_callback = (controller) => {
+            if (controller.handedness === "right") {
+                this.right_hand = null
+            } else if (controller.handedness === "left") {
+                this.left_hand = null
+            } else {
+                throw "unrecognized handedness"
+            }
+            check_hand_availablity()
+        }
     
         // Hand 1
         var controllerGrip1 = this.renderer.xr.getControllerGrip( 0 );
@@ -84,7 +123,7 @@ class App {
         this.scene.add( controllerGrip1 );
         var hand1 = this.renderer.xr.getHand( 0 );
         this.scene.add( hand1 );
-        hand1.add( handModelFactory.createHandModel( hand1, 'mesh' ) );
+        hand1.add( handModelFactory.createHandModel( hand1, 'mesh', hand_connected_callback, hand_disconnected_callback ) );
         this.Handy.makeHandy(hand1)
         
         // Hand 2
@@ -93,7 +132,7 @@ class App {
         this.scene.add( controllerGrip2 );
         var hand2 = this.renderer.xr.getHand( 1 );
         this.scene.add( hand2 );
-        hand2.add( handModelFactory.createHandModel( hand2, 'mesh' ) );
+        hand2.add( handModelFactory.createHandModel( hand2, 'mesh', hand_connected_callback ) );
         this.Handy.makeHandy(hand2)
     
         // Create dummy hands pre-requisites
@@ -114,53 +153,48 @@ class App {
         // Create app states
         this.in_session = false
         this.hand_tracking_available = false
-        var left_hand_available = false
-        var right_hand_available = false
+        
+        // var left_hand_available = false
+        // var right_hand_available = false
     
-        const handtrackavailable = new Event("handtrackavailable")
-        const handtrackunavailable = new Event("handtrackunavailable")
+        // const handtrackavailable = new Event("handtrackavailable")
+        // const handtrackunavailable = new Event("handtrackunavailable")
     
-        this.renderer.xr.addEventListener("sessionstart", (event) => {
-            console.log("Entered XR")
-            this.renderer.xr.getSession().addEventListener("inputsourceschange", event => {
-                // console.log("Input sources changed")
-                event.added.forEach(inputSource => {
-                    if (inputSource.profiles.includes("generic-hand")) {
-                        if (inputSource.handedness === "left") {
-                            left_hand_available = true
-                        }
-                        if (inputSource.handedness === "right") {
-                            right_hand_available = true
-                        }
-                    }
-                })
-                event.removed.forEach(inputSource => {
-                    if (inputSource.profiles.includes("generic-hand")) {
-                        if (inputSource.handedness === "left") {
-                            left_hand_available = false
-                        }
-                        if (inputSource.handedness === "right") {
-                            right_hand_available = false
-                        }
-                    }
-                })
-                var new_hand_tracking_available = left_hand_available && right_hand_available
-                if (this.hand_tracking_available !== new_hand_tracking_available) {
-                    this.hand_tracking_available = new_hand_tracking_available
-                    document.dispatchEvent(new CustomEvent("onhandtrackchange", {"detail": this.hand_tracking_available}))
-                    if (this.hand_tracking_available=== true) {
-                        var hand0 = this.renderer.xr.getHand(0)
-                        var hand1 = this.renderer.xr.getHand(1)
-                        var hands = [hand0, hand1]
-                        this.left_hand = hands.find((hand) => (hand.handedness === "left"))
-                        this.right_hand = hands.find((hand) => (hand.handedness === "right"))
-                        document.dispatchEvent(handtrackavailable)
-                    } else {
-                        document.dispatchEvent(handtrackunavailable)
-                    }
-                }
-            })
-        })
+        // this.renderer.xr.addEventListener("sessionstart", (event) => {
+        //     console.log("Entered XR")
+        //     this.renderer.xr.getSession().addEventListener("inputsourceschange", event => { // @todo: does this mean that a new listener is created whenever user enters XR? potential bug. there should only be one listener UNLESS the session object is different each time.
+        //         event.added.forEach(inputSource => {
+        //             if (inputSource.profiles.includes("generic-hand")) {
+        //                 if (inputSource.handedness === "left") {
+        //                     left_hand_available = true
+        //                 }
+        //                 if (inputSource.handedness === "right") {
+        //                     right_hand_available = true
+        //                 }
+        //             }
+        //         })
+        //         event.removed.forEach(inputSource => {
+        //             if (inputSource.profiles.includes("generic-hand")) {
+        //                 if (inputSource.handedness === "left") {
+        //                     left_hand_available = false
+        //                 }
+        //                 if (inputSource.handedness === "right") {
+        //                     right_hand_available = false
+        //                 }
+        //             }
+        //         })
+        //         var new_hand_tracking_available = left_hand_available && right_hand_available
+        //         if (this.hand_tracking_available !== new_hand_tracking_available) {
+        //             this.hand_tracking_available = new_hand_tracking_available
+        //             document.dispatchEvent(new CustomEvent("onhandtrackchange", {"detail": this.hand_tracking_available}))
+        //             if (this.hand_tracking_available=== true) {
+        //                 document.dispatchEvent(handtrackavailable)
+        //             } else {
+        //                 document.dispatchEvent(handtrackunavailable)
+        //             }
+        //         }
+        //     })
+        // })
     
         this.renderer.xr.addEventListener("sessionend", (event) => {
             console.log("Exited XR")
@@ -290,7 +324,7 @@ class App {
                 console.log(renderer.xr.getHand( 0 ), renderer.xr.getHand( 1 ))
                 resolve()
             } else {
-                document.addEventListener("handtrackavailable", resolve, {once: true})
+                document.addEventListener("handtrackavailable", (event) => {resolve(event["detail"])}, {once: true})
             }
             // Reject if XR session lost
             this.renderer.xr.addEventListener("sessionend", reject, {once: true})
@@ -319,7 +353,7 @@ class App {
         this.welcome_text_element.textContent = "XR IN SESSION: CAPTURING"
         this.welcome_screen_element.style.backgroundColor = "mintcream"
         console.log(this.Handy.hands.getLeft(), this.Handy.hands.getRight())
-        var [record_button, record_button_promise] = InteractiveElements.createButton(this.scene_modifiers, inspect([this.Handy.hands.getLeft(), this.Handy.hands.getRight()]))
+        var [record_button, record_button_promise] = InteractiveElements.createButton(this.scene_modifiers, [this.left_hand, this.right_hand])
         this.scene.add(record_button)
         record_button.position.z = -2
         record_button.position.x = 1
