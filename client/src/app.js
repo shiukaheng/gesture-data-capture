@@ -3,7 +3,7 @@ import 'color-convert'
 import { Handy } from 'handy.js'
 
 import { XRControllerModelFactory } from 'three/examples/jsm/webxr/XRControllerModelFactory.js'
-import { XRHandModelFactory } from 'three/examples/jsm/webxr/XRHandModelFactory.js'
+import { XRHandModelFactory } from "./lib/XRHandModelFactory"
 import { DummyXRHandModelFactory } from "./lib/DummyXRHandModel"
 
 import * as TWEEN from "@tweenjs/tween.js"
@@ -96,6 +96,8 @@ class App {
         }
 
         var hand_connected_callback = (controller) => {
+            console.log("hand connected")
+            controller.checkHandedness()
             if (controller.handedness === "right") {
                 this.right_hand = controller
             } else if (controller.handedness === "left") {
@@ -107,6 +109,7 @@ class App {
         }
 
         var hand_disconnected_callback = (controller) => {
+            console.log("hand disconnected")
             if (controller.handedness === "right") {
                 this.right_hand = null
             } else if (controller.handedness === "left") {
@@ -324,7 +327,7 @@ class App {
                 console.log(renderer.xr.getHand( 0 ), renderer.xr.getHand( 1 ))
                 resolve()
             } else {
-                document.addEventListener("handtrackavailable", (event) => {resolve(event["detail"])}, {once: true})
+                document.addEventListener("handtrackavailable", (event) => {resolve()}, {once: true})
             }
             // Reject if XR session lost
             this.renderer.xr.addEventListener("sessionend", reject, {once: true})
