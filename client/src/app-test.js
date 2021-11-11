@@ -213,10 +213,6 @@ class App {
         console.log("Hand tracking detected.")
         console.log({"left": this.left_hand, "right": this.right_hand})
         await this.capture_screen()
-        console.log
-        // console.log("Data recorded.")
-        // await this.upload_screen()
-        // console.log("Data uploaded.")
         console.log("Done.")
     }
 
@@ -279,8 +275,9 @@ class App {
         var [record_button, record_button_promise] = InteractiveElements.createButton(this.scene_modifiers, [this.left_hand, this.right_hand])
         this.scene.add(record_button)
         console.log(record_button)
-        record_button.position.z = -2
-        record_button.position.x = 1
+        // record_button.position.z = -2
+        record_button.position.x = 0.5
+        record_button.position.y = 1.5
         var cleanup = (error) => {
             record_button.cancel()
             throw(error)
@@ -290,7 +287,8 @@ class App {
         this.renderer.xr.addEventListener("sessionend", cleanup, {once: true})
         try {
             await record_button_promise
-            data = await DataCapture.recordHandMotion(30, this.left_hand, this.right_hand, this.camera)
+            // data = await DataCapture.recordHandMotion(30, this.left_hand, this.right_hand, this.camera)
+            var data = true
             return data
         } catch(error) {
             record_button.cancel()

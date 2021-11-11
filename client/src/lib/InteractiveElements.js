@@ -1,4 +1,5 @@
 import * as THREE from "three"
+import { MinEquation } from "three"
 
 function linear_scaler(x, max, min) {
     return (x-min)/(max-min)
@@ -26,29 +27,30 @@ var target_vec = new THREE.Vector3()
 var monitored_vec = new THREE.Vector3()
 
 function nearest_dist(target_object, monitored_objects) {
-    var dist_array = monitored_objects.map((monitored_object) => {target_object.getWorldPosition(target_vec).distanceTo(monitored_object.getWorldPosition(monitored_vec))    })
-    console.log(dist_array)
-    return Math.min(dist_array)
+    // console.log(monitored_objects)
+    var dist_array = monitored_objects.map((monitored_object) => target_object.getWorldPosition(target_vec).distanceTo(monitored_object.getWorldPosition(monitored_vec)))
+    // console.log(dist_array)
+    return Math.min(...dist_array)
 }
 
 /**
  * Create VR hand controlled button
  */
-function createButton(scene_modifiers, monitored_objects) {
-    var internal_size = 0.1
+function createButton(scene_modifiers, hands) {
+    var internal_size = 0.02
     var internal_size_effector = 1
-    var external_size = 0.5
+    var external_size = 0.05
     var external_size_effector = 1
     var destroy_scaler = 1
-    const destroy_animation_time = 0.2
-    const accept_threshold = 0.5
-    const start_threshold = 1
+    const destroy_animation_time = 0.05
+    const accept_threshold = 0.05
+    const start_threshold = 0.1
     const external_sphere_interaction_scaler = 1
     var pressed = false
     var time_pressed = null
     const button = new THREE.Object3D()
     const external_sphere_geom = new THREE.SphereGeometry(external_size, 20, 20)
-    const external_sphere_mat = new THREE.MeshBasicMaterial({opacity: 0.5})
+    const external_sphere_mat = new THREE.MeshBasicMaterial({opacity: 0.5, transparent: true})
     const external_sphere = new THREE.Mesh(external_sphere_geom, external_sphere_mat)
     const internal_sphere_geom = new THREE.SphereGeometry(internal_size, 10, 10)
     const internal_sphere_mat = new THREE.MeshBasicMaterial()
@@ -61,13 +63,13 @@ function createButton(scene_modifiers, monitored_objects) {
     var dist
     return [button, new Promise((resolve, reject) => {
         scene_modifiers.push((destroy) => {
-            if (button.parent !== undefined) {
-                dist = nearest_dist(button, monitored_objects)
+            var flattened_joints = hands.map((hand)=>Object.values(hand.joints)).flat()
+            if (button.parent !== undefined && flattened_joints.length > 0) {
+                dist = nearest_dist(button, flattened_joints)
             } else {
                 dist = Infinity
             }
-            // console.log(dist, monitored_objects)
-            if (dist < accept_threshold) {
+            if (dist < accept_threshold && pressed === false) {
                 pressed = true
                 time_pressed = Date.now()
                 resolve()
@@ -82,8 +84,9 @@ function createButton(scene_modifiers, monitored_objects) {
                 destroy()
                 reject()
             }
-            external_sphere.scale.set(external_size_effector*destroy_scaler)
-            internal_sphere.scale.set(internal_size_effector*destroy_scaler)
+            external_sphere.scale.setScalar(1+external_size_effector*destroy_scaler)
+            internal_sphere.scale.setScalar(internal_size_effector*destroy_scaler)
+            // console.log(external_sphere.scale, internal_sphere.scale)
         })
     })]
 }
