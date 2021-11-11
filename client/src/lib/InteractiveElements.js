@@ -26,9 +26,9 @@ var target_vec = new THREE.Vector3()
 var monitored_vec = new THREE.Vector3()
 
 function nearest_dist(target_object, monitored_objects) {
-    return Math.min(monitored_objects.map((monitored_object) => {
-        target_object.getWorldPosition(target_vec).distanceTo(monitored_object.getWorldPosition(monitored_vec))
-    }))
+    var dist_array = monitored_objects.map((monitored_object) => {target_object.getWorldPosition(target_vec).distanceTo(monitored_object.getWorldPosition(monitored_vec))    })
+    console.log(dist_array)
+    return Math.min(dist_array)
 }
 
 /**
@@ -66,6 +66,7 @@ function createButton(scene_modifiers, monitored_objects) {
             } else {
                 dist = Infinity
             }
+            // console.log(dist, monitored_objects)
             if (dist < accept_threshold) {
                 pressed = true
                 time_pressed = Date.now()

@@ -76,18 +76,18 @@ class App {
 
         this.left_hand = null
         this.right_hand = null
-        this.hand_tracking_available = false
+        var hand_availablity = false
         const handtrackunavailable = new Event("handtrackunavailable")
 
         var check_hand_availablity = () => {
             var new_hand_availability = (this.left_hand !== null && this.right_hand !== null)
-            if (this.hand_tracking_available !== new_hand_availability) {
+            if (hand_availablity !== new_hand_availability) {
                 if (new_hand_availability) {
                     document.dispatchEvent(new CustomEvent("handtrackavailable", {"detail": {"left_hand": this.left_hand, "right_hand": this.right_hand}}))
                 } else {
                     document.dispatchEvent(handtrackunavailable)
                 }
-                this.hand_tracking_available = new_hand_availability
+                hand_availablity = new_hand_availability
             }
         }
 
@@ -204,29 +204,24 @@ class App {
     }
 
     async start() {
+        console.log("Loop started.")
         await this.loading_screen()
+        console.log("Loaded.")
         await this.welcome_screen()
-        try {
-            await this.request_hand_tracking_screen()
-            // await this.tutorial()
-            var data = await this.capture_screen() // TODO: Start data capture on button press / gesture
-            await fetch("/", {
-                method: "POST",
-                body: JSON.stringify(data)
-            }) // TODO: Upload screen https://stackoverflow.com/questions/35711724/upload-progress-indicators-for-fetch
-            // TODO: Send data to server
-            await this.normal_exit_screen()
-        } catch (error) {
-            await this.error_exit_screen(error)
-        } finally {
-            await this.start()
-        }
+        console.log("Entered vr.")
+        await this.request_hand_tracking_screen()
+        console.log("Hand tracking detected.")
+        console.log({"left": this.left_hand, "right": this.right_hand})
+        await this.capture_screen()
+        console.log
+        // console.log("Data recorded.")
+        // await this.upload_screen()
+        // console.log("Data uploaded.")
+        console.log("Done.")
     }
 
     loading_screen() {
         return new Promise((resolve, reject) => {
-            this.welcome_text_element.textContent = "LOADING..."
-            this.welcome_screen_element.style.backgroundColor = "lightslategrey"
             var load_list = [
                 new Promise((resolve, reject) => {
                     try {
@@ -246,18 +241,15 @@ class App {
             Promise.all(load_list).then(() => {
                 resolve()
             })
-            // Loading stuff
-            // TODO: Resolve if all loaded
-            // TODO: Reject if some loading failed
         })
     }
 
     welcome_screen() {
         return new Promise((resolve, reject) => {
-            this.welcome_text_element.textContent = "CLICK ANYWHERE TO START"
-            this.welcome_screen_element.style.backgroundColor = "mintcream"
+            console.log("Waiting for a click.")
             this.welcome_screen_element.addEventListener("click", () => {
                 // Request for XR session
+                console.log("Requesting for XR session.")
                 const sessionInit = { optionalFeatures: [ 'local-floor', 'bounded-floor', 'hand-tracking', 'layers' ] };
                 navigator.xr.requestSession( 'immersive-vr', sessionInit ).then( this.onSessionStarted );
                 // Resolve if the session does start
@@ -269,17 +261,9 @@ class App {
 
     request_hand_tracking_screen() {
         return new Promise((resolve, reject) => {
-            // Webpage elements
-            this.welcome_text_element.textContent = "XR IN SESSION: WAITING FOR HAND TRACKING"
-            this.welcome_screen_element.style.backgroundColor = "mintcream"
-
-            // 3D elements
-            this.hud_text.text = "WAITING FOR HAND TRACKING"
-            this.hud_text.sync()
-
             // Resolve if hand tracking started or already is available
             if (this.hand_tracking_available) {
-                console.log(this.left_hand, this.right_hand)
+                console.log(renderer.xr.getHand( 0 ), renderer.xr.getHand( 1 ))
                 resolve()
             } else {
                 document.addEventListener("handtrackavailable", (event) => {resolve()}, {once: true})
@@ -289,30 +273,12 @@ class App {
         })
     }
 
-    tutorial() {
-        return new Promise((resolve, reject) => {
-            // Webpage elements
-            this.welcome_text_element.textContent = "XR IN SESSION: TUTORIAL"
-            this.welcome_screen_element.style.backgroundColor = "mintcream"
-
-            // 3D elements
-            this.hud_text.text = "TUTORIAL IN SESSION"
-            this.hud_text.sync()
-            TWEEN.Tween(this.floor.material.color).to({r: 255, g:0, b:0}, 500).start()
-
-            // TODO: Resolve if done OR skipped
-            // Reject if hand tracking lost OR session lost
-            document.addEventListener("handtrackunavailable", reject, {once: true})
-            this.renderer.xr.addEventListener("sessionend", reject, {once: true})
-        })
-    }
-
     async capture_screen() {
         this.welcome_text_element.textContent = "XR IN SESSION: CAPTURING"
         this.welcome_screen_element.style.backgroundColor = "mintcream"
-        console.log(this.Handy.hands.getLeft(), this.Handy.hands.getRight())
         var [record_button, record_button_promise] = InteractiveElements.createButton(this.scene_modifiers, [this.left_hand, this.right_hand])
         this.scene.add(record_button)
+        console.log(record_button)
         record_button.position.z = -2
         record_button.position.x = 1
         var cleanup = (error) => {
@@ -352,5 +318,4 @@ class App {
 document.addEventListener("DOMContentLoaded", ()=>{
     window.app = new App()
     window.app.start()
-    // test(window.app)
 }, {once: true})
