@@ -212,9 +212,11 @@ class App {
         this.current_session = null;
     }
 
-    setDOMText(text, background_color="white") {
+    setDOMText(text, background_color=null) {
         this.welcome_text_element.textContent = text
-        this.welcome_screen_element.style.backgroundColor = background_color
+        if (background_color !== null) {
+            this.welcome_screen_element.style.backgroundColor = background_color
+        }
     }
 
     setHUDText(text) {
@@ -227,7 +229,26 @@ class App {
         this.setDOMText("LOADING...", "lightslategrey")
         await this.load_assets()
         var data = await this.capture_loop()
-        console.log(data)
+        this.current_session.end()
+        var upload_success = false
+        while (!upload_success) {
+            this.setDOMText("UPLOADING DATA... 0%", "mintcream")
+            try {
+                await axios.request({
+                    method: "post",
+                    url: url,
+                    data: data,
+                    onUploadProgress: (p) => {
+                        this.setDOMText(`UPLOADING DATA... ${Math.round(p.loaded/p.total*100).toString()}%`)
+                    }
+                })
+                upload_success = true
+            } catch (error) {
+                this.setDOMText("UPLOAD ERROR, CLICK ANYWHERE TO RETRY.", this.error_color)
+                await this.await_click(this.welcome_screen_element)
+            }
+        }
+        this.setDOMText("DONE! THANKS FOR YOUR CONTRIBUTION.", "chartreuse")
     }
 
     async capture_loop() {
@@ -335,8 +356,10 @@ class App {
     capture_screen() {
         return new Promise((resolve, reject) => {
             var [record_button, record_button_promise] = InteractiveElements.createButton(this.scene_modifiers, [this.left_hand, this.right_hand])
-            record_button.position.y = 1.3
-            this.scene.add(record_button)
+            record_button.position.z = -0.5
+            record_button.position.y = -0.1
+            record_button.position.x = 0.05
+            this.camera.add(record_button)
             var cleanup = (error) => {
                 record_button.cancel()
                 reject(error)
@@ -364,27 +387,6 @@ class App {
                 })
             }).catch(()=>{})
         })
-    }
-
-    async post_data(data, url) {
-        // Webpage elements
-        this.welcome_text_element.textContent = "XR IN SESSION: UPLOADING DATA"
-        this.welcome_screen_element.style.backgroundColor = "mintcream"
-
-        // 3D elements
-        this.hud_text.text = "UPLOADING DATA... 0%"
-        this.hud_text.sync()
-
-        await axios.request({
-            method: "post",
-            url: url,
-            data: data,
-            onUploadProgress: (p) => {
-                this.hud_text.text = `UPLOADING DATA... ${Math.round(p.loaded/p.total*100).toString()}%`
-                this.hud_text.sync()
-            }
-        })
-        return
     }
 
     error_exit_screen(message) {
