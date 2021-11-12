@@ -81,40 +81,25 @@ class App {
         this.right_hand = null
         const handtrackunavailable = new Event("handtrackunavailable")
 
-        // var check_hand_availablity = () => {
-        //     var new_hand_availability = (this.left_hand !== null && this.right_hand !== null)
-        //     if (hand_availablity !== new_hand_availability) {
-        //         if (new_hand_availability) {
-        //             document.dispatchEvent(new CustomEvent("handtrackavailable", {"detail": {"left_hand": this.left_hand, "right_hand": this.right_hand}}))
-        //         } else {
-        //             document.dispatchEvent(handtrackunavailable)
-        //         }
-        //         hand_availablity = new_hand_availability
-        //     }
-        // } 
-
-        var hand_connected_callback = (controller, handedness) => {
-            console.log("hand connected")
-            if (handedness === "right") {
-                this.right_hand = controller
-            } else if (handedness === "left") {
-                this.left_hand = controller
-            } else {
-                throw "unrecognized handedness"
+        var hand_connected_callback = (event) => {
+            if (event.data.profiles.includes("generic-hand")) {
+                if (event.data.handedness === "right") {
+                    this.right_hand = event.target
+                } else if (event.data.handedness === "left") {
+                    this.left_hand = event.target
+                } else {
+                    throw "unrecognized handedness"
+                }
             }
-            // check_hand_availablity()
         }
 
-        var hand_disconnected_callback = (handedness) => {
-            console.log("hand disconnected")
-            if (handedness === "right") {
-                this.right_hand = null
-            } else if (handedness === "left") {
+        var hand_disconnected_callback = (event) => {
+            if (event.target === this.left_hand) {
                 this.left_hand = null
-            } else {
-                throw "unrecognized handedness"
             }
-            // check_hand_availablity()
+            if (event.target === this.right_hand) {
+                this.right_hand = null
+            }
         }
 
         var new_hand_availability = false
@@ -125,12 +110,19 @@ class App {
             if (new_hand_availability !== this.hand_tracking_available) {
                 if (new_hand_availability) {
                     document.dispatchEvent(new CustomEvent("handtrackavailable", {"detail": {"left_hand": this.left_hand, "right_hand": this.right_hand}}))
+                    console.log("Hand tracking available!")
                 } else {
                     document.dispatchEvent(handtrackunavailable)
+                    console.log("Hand tracking lost!")
                 }
                 this.hand_tracking_available = new_hand_availability
             }
         })
+
+        const preprocess_hand = (hand) => {
+            hand.addEventListener("connected", hand_connected_callback)
+            hand.addEventListener("disconnected", hand_disconnected_callback)
+        }
     
         // Hand 1
         var controllerGrip1 = this.renderer.xr.getControllerGrip( 0 );
@@ -138,8 +130,7 @@ class App {
         this.scene.add( controllerGrip1 );
         var hand1 = this.renderer.xr.getHand( 0 );
         this.scene.add( hand1 );
-        hand1.addEventListener("connected", (event) => {if (event.data.profiles.includes("generic-hand")) {console.log(event);hand_connected_callback(hand1, event.data.handedness)}})
-        hand1.addEventListener("disconnected", (event) => {if (event.data.profiles.includes("generic-hand")) {console.log(event); hand_disconnected_callback(event.data.handedness)}})
+        preprocess_hand(hand1)
         hand1.add( handModelFactory.createHandModel( hand1, 'mesh' ) );
         
         // Hand 2
@@ -148,8 +139,7 @@ class App {
         this.scene.add( controllerGrip2 );
         var hand2 = this.renderer.xr.getHand( 1 );
         this.scene.add( hand2 );
-        hand2.addEventListener("connected", (event) => {if (event.data.profiles.includes("generic-hand")) {console.log(event);hand_connected_callback(hand2, event.data.handedness)}})
-        hand2.addEventListener("disconnected", (event) => {if (event.data.profiles.includes("generic-hand")) {console.log(event); hand_disconnected_callback(event.data.handedness)}})
+        preprocess_hand(hand2)
         hand2.add( handModelFactory.createHandModel( hand2, 'mesh' ) );
     
         // Create dummy hands pre-requisites
@@ -342,36 +332,38 @@ class App {
         })
     }
 
-    async capture_screen() {
-        var [record_button, record_button_promise] = InteractiveElements.createButton(this.scene_modifiers, [this.left_hand, this.right_hand])
-        record_button.position.y = 1.3
-        this.scene.add(record_button)
-        var cleanup = (error) => {
-            record_button.cancel()
-            throw(error)
-        }
+    capture_screen() {
+        return new Promise((resolve, reject) => {
+            var [record_button, record_button_promise] = InteractiveElements.createButton(this.scene_modifiers, [this.left_hand, this.right_hand])
+            record_button.position.y = 1.3
+            this.scene.add(record_button)
+            var cleanup = (error) => {
+                record_button.cancel()
+                reject(error)
+            }
 
-        // Reject if XR session lost or hand tracking lost
-        var lost_xr = ()=>{cleanup("lost xr")}
-        this.renderer.xr.addEventListener("sessionend", lost_xr, {once: true})
-        var lost_hand_tracking = ()=>{cleanup("lost hand tracking")}
-        document.addEventListener("handtrackingunavailable", lost_hand_tracking, {once: true})
+            // Reject if XR session lost or hand tracking lost
+            var lost_xr = ()=>{cleanup("lost xr")}
+            this.renderer.xr.addEventListener("sessionend", lost_xr, {once: true})
+            var lost_hand_tracking = ()=>{cleanup("lost hand tracking")}
+            document.addEventListener("handtrackunavailable", lost_hand_tracking, {once: true})
 
-        // 3D elements
-        this.hud_text.text = "PRESS SPHERE TO START CAPTURE"
-        this.hud_text.sync()
+            // 3D elements
+            this.hud_text.text = "PRESS SPHERE TO START CAPTURE"
+            this.hud_text.sync()
 
-        // Await button being pressed
-        await record_button_promise
-
-        this.hud_text.text = "CAPTURING..."
-        this.hud_text.sync()
-
-        // Record data
-        var data = await DataCapture.recordHandMotion(this.scene_modifiers, 5, this.left_hand, this.right_hand, this.camera)
-        this.renderer.xr.removeEventListener("sessionend", lost_xr)
-        document.removeEventListener("handtrackingunavailable", lost_hand_tracking)
-        return data
+            // Await button being pressed
+            record_button_promise.then(() => {
+                this.hud_text.text = "CAPTURING..."
+                this.hud_text.sync()
+                // Record data
+                DataCapture.recordHandMotion(this.scene_modifiers, 5, this.left_hand, this.right_hand, this.camera).then((data) => {
+                    this.renderer.xr.removeEventListener("sessionend", lost_xr)
+                    document.removeEventListener("handtrackunavailable", lost_hand_tracking)
+                    resolve(data)
+                })
+            }).catch(()=>{})
+        })
     }
 
     async post_data(data, url) {
