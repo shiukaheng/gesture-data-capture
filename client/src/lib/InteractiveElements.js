@@ -44,7 +44,7 @@ function createButton(scene_modifiers, hands) {
     var destroy_scaler = 1
     const destroy_animation_time = 0.05
     const accept_threshold = 0.05
-    const start_threshold = 0.1
+    const start_threshold = 0.15
     const external_sphere_interaction_scaler = 1
     var pressed = false
     var time_pressed = null
@@ -57,8 +57,9 @@ function createButton(scene_modifiers, hands) {
     const internal_sphere = new THREE.Mesh(internal_sphere_geom, internal_sphere_mat)
     button.add(internal_sphere)
     button.add(external_sphere)
+    var remove
     button.cancel = () => {
-        pressed = true
+        remove = true
     }
     var dist
     return [button, new Promise((resolve, reject) => {
@@ -71,18 +72,21 @@ function createButton(scene_modifiers, hands) {
             }
             if (dist < accept_threshold && pressed === false) {
                 pressed = true
+                remove = true
                 time_pressed = Date.now()
-                resolve()
             }
-            if (!pressed) {
+            if (!remove) {
                 external_size_effector = proximity_animation(dist, start_threshold, accept_threshold)*external_sphere_interaction_scaler
             } else {
                 destroy_scaler = proximity_animation(Date.now(), time_pressed+destroy_animation_time*1000, time_pressed)
             }
             if (destroy_scaler <= 0) {
                 button.removeFromParent()
-                destroy()
-                reject()
+                if (pressed === true) {
+                    resolve()
+                } else {
+                    reject()
+                }
             }
             external_sphere.scale.setScalar(1+external_size_effector*destroy_scaler)
             internal_sphere.scale.setScalar(internal_size_effector*destroy_scaler)

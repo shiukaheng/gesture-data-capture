@@ -16,6 +16,9 @@ import * as PoseUtils from "./lib/PoseUtils"
 import * as ObjectUtils from "./lib/ObjectUtils"
 import * as InteractiveElements from "./lib/InteractiveElements"
 
+import "axios"
+import axios from "axios"
+
 // Boilerplate
 
 window.DataCapture = DataCapture
@@ -76,20 +79,19 @@ class App {
 
         this.left_hand = null
         this.right_hand = null
-        var hand_availablity = false
         const handtrackunavailable = new Event("handtrackunavailable")
 
-        var check_hand_availablity = () => {
-            var new_hand_availability = (this.left_hand !== null && this.right_hand !== null)
-            if (hand_availablity !== new_hand_availability) {
-                if (new_hand_availability) {
-                    document.dispatchEvent(new CustomEvent("handtrackavailable", {"detail": {"left_hand": this.left_hand, "right_hand": this.right_hand}}))
-                } else {
-                    document.dispatchEvent(handtrackunavailable)
-                }
-                hand_availablity = new_hand_availability
-            }
-        }
+        // var check_hand_availablity = () => {
+        //     var new_hand_availability = (this.left_hand !== null && this.right_hand !== null)
+        //     if (hand_availablity !== new_hand_availability) {
+        //         if (new_hand_availability) {
+        //             document.dispatchEvent(new CustomEvent("handtrackavailable", {"detail": {"left_hand": this.left_hand, "right_hand": this.right_hand}}))
+        //         } else {
+        //             document.dispatchEvent(handtrackunavailable)
+        //         }
+        //         hand_availablity = new_hand_availability
+        //     }
+        // } 
 
         var hand_connected_callback = (controller, handedness) => {
             console.log("hand connected")
@@ -100,7 +102,7 @@ class App {
             } else {
                 throw "unrecognized handedness"
             }
-            check_hand_availablity()
+            // check_hand_availablity()
         }
 
         var hand_disconnected_callback = (handedness) => {
@@ -112,8 +114,23 @@ class App {
             } else {
                 throw "unrecognized handedness"
             }
-            check_hand_availablity()
+            // check_hand_availablity()
         }
+
+        var new_hand_availability = false
+
+        this.scene_modifiers.push((destroy) => {
+            new_hand_availability = (this.left_hand?.joints && Object.values(this.left_hand.joints).length > 0 && this?.right_hand?.joints && Object.values(this.right_hand.joints).length > 0)
+            // console.log(this?.left_hand?.joints, this?.right_hand?.joints, new_hand_availability)
+            if (new_hand_availability !== this.hand_tracking_available) {
+                if (new_hand_availability) {
+                    document.dispatchEvent(new CustomEvent("handtrackavailable", {"detail": {"left_hand": this.left_hand, "right_hand": this.right_hand}}))
+                } else {
+                    document.dispatchEvent(handtrackunavailable)
+                }
+                this.hand_tracking_available = new_hand_availability
+            }
+        })
     
         // Hand 1
         var controllerGrip1 = this.renderer.xr.getControllerGrip( 0 );
@@ -212,12 +229,17 @@ class App {
         await this.request_hand_tracking_screen()
         console.log("Hand tracking detected.")
         console.log({"left": this.left_hand, "right": this.right_hand})
-        await this.capture_screen()
+        var data = await this.capture_screen()
+        console.log("Capture complete.")
+        await this.post_data(data, "/")
+        // console.log("Data uploaded.")
         console.log("Done.")
     }
 
     loading_screen() {
         return new Promise((resolve, reject) => {
+            this.welcome_text_element.textContent = "LOADING..."
+            this.welcome_screen_element.style.backgroundColor = "lightslategrey"
             var load_list = [
                 new Promise((resolve, reject) => {
                     try {
@@ -242,10 +264,10 @@ class App {
 
     welcome_screen() {
         return new Promise((resolve, reject) => {
-            console.log("Waiting for a click.")
+            this.welcome_text_element.textContent = "CLICK ANYWHERE TO START"
+            this.welcome_screen_element.style.backgroundColor = "mintcream"
             this.welcome_screen_element.addEventListener("click", () => {
                 // Request for XR session
-                console.log("Requesting for XR session.")
                 const sessionInit = { optionalFeatures: [ 'local-floor', 'bounded-floor', 'hand-tracking', 'layers' ] };
                 navigator.xr.requestSession( 'immersive-vr', sessionInit ).then( this.onSessionStarted );
                 // Resolve if the session does start
@@ -257,9 +279,16 @@ class App {
 
     request_hand_tracking_screen() {
         return new Promise((resolve, reject) => {
+            // Webpage elements
+            this.welcome_text_element.textContent = "XR IN SESSION: WAITING FOR HAND TRACKING"
+            this.welcome_screen_element.style.backgroundColor = "mintcream"
+
+            // 3D elements
+            this.hud_text.text = "WAITING FOR HAND TRACKING"
+            this.hud_text.sync()
+
             // Resolve if hand tracking started or already is available
             if (this.hand_tracking_available) {
-                console.log(renderer.xr.getHand( 0 ), renderer.xr.getHand( 1 ))
                 resolve()
             } else {
                 document.addEventListener("handtrackavailable", (event) => {resolve()}, {once: true})
@@ -270,14 +299,17 @@ class App {
     }
 
     async capture_screen() {
+        // Webpage elements
         this.welcome_text_element.textContent = "XR IN SESSION: CAPTURING"
         this.welcome_screen_element.style.backgroundColor = "mintcream"
+
+        // 3D elements
+        this.hud_text.text = "PRESS SPHERE TO START CAPTURE"
+        this.hud_text.sync()
+
         var [record_button, record_button_promise] = InteractiveElements.createButton(this.scene_modifiers, [this.left_hand, this.right_hand])
+        record_button.position.y = 1.3
         this.scene.add(record_button)
-        console.log(record_button)
-        // record_button.position.z = -2
-        record_button.position.x = 0.5
-        record_button.position.y = 1.5
         var cleanup = (error) => {
             record_button.cancel()
             throw(error)
@@ -287,13 +319,37 @@ class App {
         this.renderer.xr.addEventListener("sessionend", cleanup, {once: true})
         try {
             await record_button_promise
-            // data = await DataCapture.recordHandMotion(30, this.left_hand, this.right_hand, this.camera)
-            var data = true
+
+            this.hud_text.text = "CAPTURING..."
+            this.hud_text.sync()
+
+            var data = await DataCapture.recordHandMotion(this.scene_modifiers, 5, this.left_hand, this.right_hand, this.camera)
             return data
         } catch(error) {
             record_button.cancel()
             throw(error)
         }
+    }
+
+    async post_data(data, url) {
+        // Webpage elements
+        this.welcome_text_element.textContent = "XR IN SESSION: UPLOADING DATA"
+        this.welcome_screen_element.style.backgroundColor = "mintcream"
+
+        // 3D elements
+        this.hud_text.text = "UPLOADING DATA... 0%"
+        this.hud_text.sync()
+
+        await axios.request({
+            method: "post",
+            url: url,
+            data: data,
+            onUploadProgress: (p) => {
+                this.hud_text.text = `UPLOADING DATA... ${Math.round(p.loaded/p.total*100).toString()}%`
+                this.hud_text.sync()
+            }
+        })
+        return
     }
 
     error_exit_screen(message) {
