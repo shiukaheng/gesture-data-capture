@@ -221,25 +221,38 @@ class App {
     }
 
     async start() {
-        console.log("Loop started.")
-        await this.loading_screen()
-        console.log("Loaded.")
-        await this.welcome_screen()
-        console.log("Entered vr.")
-        await this.request_hand_tracking_screen()
-        console.log("Hand tracking detected.")
-        console.log({"left": this.left_hand, "right": this.right_hand})
+        // Load assets first
+        this.welcome_text_element.textContent = "LOADING..."
+        this.welcome_screen_element.style.backgroundColor = "lightslategrey"
+        await this.load_assets()
+
+        // Ask users to enter VR [ ASSUMES USER WILL ACCEPT REQUEST ]
+        // @todo: handle if user declines VR
+        this.welcome_text_element.textContent = "CLICK ANYWHERE TO START"
+        this.welcome_screen_element.style.backgroundColor = "mintcream"
+        await this.request_vr(this.welcome_screen_element)
+
+
+        // Acquire hand tracking [ - ASSUMES USER WILL STAY IN VR ]
+        this.welcome_text_element.textContent = "XR IN SESSION: WAITING FOR HAND TRACKING"
+        this.welcome_screen_element.style.backgroundColor = "mintcream"
+
+        this.hud_text.text = "WAITING FOR HAND TRACKING"
+        this.hud_text.sync()
+        await this.await_hand_tracking()
+
+        // Capture data [ - - ASSUMES HAND TRACKING WILL STAY ON ]
         var data = await this.capture_screen()
-        console.log("Capture complete.")
+
+        // Upload data [ ASSUMES DATA TRANSFER WILL SUCEED ]
         await this.post_data(data, "/")
-        // console.log("Data uploaded.")
+
+        // Finished
         console.log("Done.")
     }
 
-    loading_screen() {
+    load_assets() {
         return new Promise((resolve, reject) => {
-            this.welcome_text_element.textContent = "LOADING..."
-            this.welcome_screen_element.style.backgroundColor = "lightslategrey"
             var load_list = [
                 new Promise((resolve, reject) => {
                     try {
@@ -262,11 +275,9 @@ class App {
         })
     }
 
-    welcome_screen() {
+    request_vr(dom_element) {
         return new Promise((resolve, reject) => {
-            this.welcome_text_element.textContent = "CLICK ANYWHERE TO START"
-            this.welcome_screen_element.style.backgroundColor = "mintcream"
-            this.welcome_screen_element.addEventListener("click", () => {
+            dom_element.addEventListener("click", () => {
                 // Request for XR session
                 const sessionInit = { optionalFeatures: [ 'local-floor', 'bounded-floor', 'hand-tracking', 'layers' ] };
                 navigator.xr.requestSession( 'immersive-vr', sessionInit ).then( this.onSessionStarted );
@@ -277,16 +288,8 @@ class App {
         })
     }
 
-    request_hand_tracking_screen() {
+    await_hand_tracking() {
         return new Promise((resolve, reject) => {
-            // Webpage elements
-            this.welcome_text_element.textContent = "XR IN SESSION: WAITING FOR HAND TRACKING"
-            this.welcome_screen_element.style.backgroundColor = "mintcream"
-
-            // 3D elements
-            this.hud_text.text = "WAITING FOR HAND TRACKING"
-            this.hud_text.sync()
-
             // Resolve if hand tracking started or already is available
             if (this.hand_tracking_available) {
                 resolve()
