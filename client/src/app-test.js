@@ -207,6 +207,8 @@ class App {
 
         this.onSessionStarted = this.onSessionStarted.bind(this)
         this.onSessionEnded = this.onSessionEnded.bind(this)
+
+        this.error_color = "salmon"
     }
 
     async onSessionStarted( session ) {
@@ -220,35 +222,63 @@ class App {
         this.current_session = null;
     }
 
+    setDOMText(text, background_color="white") {
+        this.welcome_text_element.textContent = text
+        this.welcome_screen_element.style.backgroundColor = background_color
+    }
+
+    setHUDText(text) {
+        this.hud_text.text = text
+        this.hud_text.sync()
+    }
+
     async start() {
         // Load assets first
-        this.welcome_text_element.textContent = "LOADING..."
-        this.welcome_screen_element.style.backgroundColor = "lightslategrey"
+        this.setDOMText("LOADING...", "lightslategrey")
         await this.load_assets()
+        var data = await this.capture_loop()
+        console.log(data)
+    }
 
+    async capture_loop() {
         // Ask users to enter VR [ ASSUMES USER WILL ACCEPT REQUEST ]
-        // @todo: handle if user declines VR
-        this.welcome_text_element.textContent = "CLICK ANYWHERE TO START"
-        this.welcome_screen_element.style.backgroundColor = "mintcream"
-        await this.request_vr(this.welcome_screen_element)
+        this.setDOMText("CLICK ANYWHERE TO START", "mintcream")
+        await this.await_click(this.welcome_screen_element)
+        var user_allowed_xr = false
+        while (!user_allowed_xr) {
+            try {
+                await this.request_vr()
+                user_allowed_xr = true
+            } catch(error) {
+                if (error === "user declined") {
+                    this.setDOMText("PLEASE ALLOW XR ACCESS", this.error_color)      
+                } else {
+                    throw error
+                }
+            }
+        }
 
-
-        // Acquire hand tracking [ - ASSUMES USER WILL STAY IN VR ]
-        this.welcome_text_element.textContent = "XR IN SESSION: WAITING FOR HAND TRACKING"
-        this.welcome_screen_element.style.backgroundColor = "mintcream"
-
-        this.hud_text.text = "WAITING FOR HAND TRACKING"
-        this.hud_text.sync()
-        await this.await_hand_tracking()
-
-        // Capture data [ - - ASSUMES HAND TRACKING WILL STAY ON ]
-        var data = await this.capture_screen()
-
-        // Upload data [ ASSUMES DATA TRANSFER WILL SUCEED ]
-        await this.post_data(data, "/")
-
-        // Finished
-        console.log("Done.")
+        var data_captured = false
+        var data
+        this.setHUDText("WAITING FOR HAND TRACKING")
+        while (!data_captured) {
+            try {
+                await this.await_hand_tracking()
+                data = await this.capture_screen()
+                data_captured = true
+            } catch(error) {
+                if (error === "lost xr") {
+                    this.setDOMText("XR SESSION LOST, CLICK TO RETRY", this.error_color)
+                    this.await_click(this.welcome_screen_element)
+                    data = this.capture_loop()
+                } else if (error === "lost hand tracking") {
+                    this.setHUDText("HAND TRACKING LOST, ENABLE HAND TRACKING AGAIN TO RETRY")
+                } else {
+                    throw error
+                }
+            }
+        }
+        return data
     }
 
     load_assets() {
@@ -275,41 +305,44 @@ class App {
         })
     }
 
-    request_vr(dom_element) {
+    request_vr() {
+        return new Promise((resolve, reject) => {
+            // Request for XR session
+            const sessionInit = { optionalFeatures: [ 'local-floor', 'bounded-floor', 'hand-tracking', 'layers' ] };
+            navigator.xr.requestSession( 'immersive-vr', sessionInit ).then(this.onSessionStarted).catch(()=>{reject("user declined")});
+            // Resolve if the session does start
+            this.renderer.xr.addEventListener("sessionstart", () => {resolve()}, {once: true})
+            // TODO: Reject if user declines XR request
+        })
+    }
+
+    await_click(dom_element) {
         return new Promise((resolve, reject) => {
             dom_element.addEventListener("click", () => {
-                // Request for XR session
-                const sessionInit = { optionalFeatures: [ 'local-floor', 'bounded-floor', 'hand-tracking', 'layers' ] };
-                navigator.xr.requestSession( 'immersive-vr', sessionInit ).then( this.onSessionStarted );
-                // Resolve if the session does start
-                this.renderer.xr.addEventListener("sessionstart", () => {resolve()}, {once: true})
-                // TODO: Reject if user declines XR request
+                resolve()
             }, {once: true})
         })
     }
 
     await_hand_tracking() {
         return new Promise((resolve, reject) => {
+            // Reject if XR session lost
+            var lost_xr = ()=>{reject("lost xr")}
+            this.renderer.xr.addEventListener("sessionend", lost_xr, {once: true})
+
             // Resolve if hand tracking started or already is available
             if (this.hand_tracking_available) {
                 resolve()
             } else {
                 document.addEventListener("handtrackavailable", (event) => {resolve()}, {once: true})
             }
-            // Reject if XR session lost
-            this.renderer.xr.addEventListener("sessionend", reject, {once: true})
+
+            // Cancel event listener if all goes well
+            this.renderer.xr.removeEventListener("sessionend", lost_xr)
         })
     }
 
     async capture_screen() {
-        // Webpage elements
-        this.welcome_text_element.textContent = "XR IN SESSION: CAPTURING"
-        this.welcome_screen_element.style.backgroundColor = "mintcream"
-
-        // 3D elements
-        this.hud_text.text = "PRESS SPHERE TO START CAPTURE"
-        this.hud_text.sync()
-
         var [record_button, record_button_promise] = InteractiveElements.createButton(this.scene_modifiers, [this.left_hand, this.right_hand])
         record_button.position.y = 1.3
         this.scene.add(record_button)
@@ -317,21 +350,28 @@ class App {
             record_button.cancel()
             throw(error)
         }
-        // Reject if hand tracking lost OR session lost
-        document.addEventListener("handtrackunavailable", cleanup, {once: true})
-        this.renderer.xr.addEventListener("sessionend", cleanup, {once: true})
-        try {
-            await record_button_promise
 
-            this.hud_text.text = "CAPTURING..."
-            this.hud_text.sync()
+        // Reject if XR session lost or hand tracking lost
+        var lost_xr = ()=>{cleanup("lost xr")}
+        this.renderer.xr.addEventListener("sessionend", lost_xr, {once: true})
+        var lost_hand_tracking = ()=>{cleanup("lost hand tracking")}
+        document.addEventListener("handtrackingunavailable", lost_hand_tracking, {once: true})
 
-            var data = await DataCapture.recordHandMotion(this.scene_modifiers, 5, this.left_hand, this.right_hand, this.camera)
-            return data
-        } catch(error) {
-            record_button.cancel()
-            throw(error)
-        }
+        // 3D elements
+        this.hud_text.text = "PRESS SPHERE TO START CAPTURE"
+        this.hud_text.sync()
+
+        // Await button being pressed
+        await record_button_promise
+
+        this.hud_text.text = "CAPTURING..."
+        this.hud_text.sync()
+
+        // Record data
+        var data = await DataCapture.recordHandMotion(this.scene_modifiers, 5, this.left_hand, this.right_hand, this.camera)
+        this.renderer.xr.removeEventListener("sessionend", lost_xr)
+        document.removeEventListener("handtrackingunavailable", lost_hand_tracking)
+        return data
     }
 
     async post_data(data, url) {
