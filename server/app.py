@@ -1,5 +1,5 @@
 import os
-from flask import Flask, flash, request, Response, request, send_from_directory
+from flask import Flask, flash, request, Response, request, send_from_directory, send_file
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 import time
@@ -27,9 +27,14 @@ def upload():
         outfile.write(serialized_json)
     return Response(status=200)
 
+@app.route("/")
+def home():
+    return send_file("../client/dist/index.html")
+
 @app.route('/<path:path>')
 def fetch_file(path):
+    print(path)
     return send_from_directory('../client/dist', path)
 
 if __name__ == "__main__":
-    app.run(debug=True, ssl_context="adhoc", threaded=True)
+    app.run(debug=True, ssl_context="adhoc", threaded=True, host="192.168.1.103")

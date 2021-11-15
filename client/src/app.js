@@ -229,9 +229,8 @@ class App {
         // Load assets first
         this.setDOMText("LOADING...", "lightslategrey")
         await this.load_assets()
-        // var data = await this.capture_loop()
-        // this.current_session.end()
-        var data = {}
+        var data = await this.capture_loop()
+        this.current_session.end()
         var upload_success = false
         // const config = {'Content-Type': 'application/json'};
         while (!upload_success) {
@@ -386,7 +385,7 @@ class App {
                 this.hud_text.text = "CAPTURING..."
                 this.hud_text.sync()
                 // Record data
-                DataCapture.recordHandMotion(this.scene_modifiers, 5, this.left_hand, this.right_hand, this.camera).then((data) => {
+                DataCapture.recordHandMotion(this.scene_modifiers, 30, this.left_hand, this.right_hand, this.camera).then((data) => {
                     this.renderer.xr.removeEventListener("sessionend", lost_xr)
                     document.removeEventListener("handtrackunavailable", lost_hand_tracking)
                     resolve(data)
