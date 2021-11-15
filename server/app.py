@@ -10,7 +10,7 @@ app.config["MAX_CONTENT_LENGTH"] = 64 * 1024 * 1024
 
 @app.route("/", methods=["GET"])
 def home():
-    render_template("./templates/index.html")
+    return render_template("index.html")
 
 @app.route("/upload_file", methods=["POST"])
 def upload_file():
