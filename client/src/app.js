@@ -34,7 +34,7 @@ function inspect(object) {
 }
 
 class App {
-    constructor() {
+    constructor(upload_endpoint) {
         // Setup three.js elements
         this.scene = new THREE.Scene()
         this.camera_group = new THREE.Group()
@@ -47,6 +47,7 @@ class App {
         this.scene_modifiers = []
         this.audioLoader = new THREE.AudioLoader();
         this.music_player = new THREE.Audio(this.listener)
+        this.upload_endpoint = upload_endpoint
 
         // Setup viewport canvas and renderer
         document.getElementsByClassName("viewport-div")[0].appendChild(this.renderer.domElement)
@@ -184,7 +185,7 @@ class App {
         this.hud_text = new Text()
         this.camera.add(this.hud_text)
         this.hud_text.fontSize = 0.08
-        this.hud_text.font = "./static/archivo-black-v10-latin-regular.woff"
+        this.hud_text.font = "archivo-black-v10-latin-regular.woff"
         this.hud_text.position.set(0, 0, -2)
         this.hud_text.textAlign = "center"
         this.hud_text.anchorX = "center"
@@ -228,23 +229,28 @@ class App {
         // Load assets first
         this.setDOMText("LOADING...", "lightslategrey")
         await this.load_assets()
-        var data = await this.capture_loop()
-        this.current_session.end()
+        // var data = await this.capture_loop()
+        // this.current_session.end()
+        var data = [1,2,3]
         var upload_success = false
+        // const config = {'Content-Type': 'application/json'};
         while (!upload_success) {
             this.setDOMText("UPLOADING DATA... 0%", "mintcream")
             try {
                 await axios.request({
                     method: "post",
-                    url: url,
+                    url: this.upload_endpoint,
                     data: data,
+                    // headers: config,
                     onUploadProgress: (p) => {
                         this.setDOMText(`UPLOADING DATA... ${Math.round(p.loaded/p.total*100).toString()}%`)
-                    }
+                    },
+                    httpsAgent: this.agent
                 })
                 upload_success = true
             } catch (error) {
                 this.setDOMText("UPLOAD ERROR, CLICK ANYWHERE TO RETRY.", this.error_color)
+                console.warn(error)
                 await this.await_click(this.welcome_screen_element)
             }
         }
@@ -299,7 +305,7 @@ class App {
                     try {
                         preloadFont(
                             {
-                                font: "./static/archivo-black-v10-latin-regular.woff"
+                                font: "archivo-black-v10-latin-regular.woff"
                             },
                             () => {
                                 resolve()
@@ -407,6 +413,6 @@ class App {
 }
 
 document.addEventListener("DOMContentLoaded", ()=>{
-    window.app = new App()
+    window.app = new App("https://127.0.0.1:1337/upload")
     window.app.start()
 }, {once: true})

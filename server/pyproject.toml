@@ -3,11 +3,16 @@ name = ""
 version = ""
 description = ""
 authors = [
-    {name = "Heng", email = ""},
+    {name = "Heng", email = "31088159+shiukaheng@users.noreply.github.com"},
 ]
 dependencies = [
     "flask~=2.0",
+    "werkzeug~=2.0",
+    "flask-cors~=3.0",
+    "cryptography~=35.0",
+    "pyopenssl~=21.0",
 ]
+dev-dependencies = []
 requires-python = ">=3.9"
 dynamic = ["classifiers"]
 license = {text = "MIT"}
@@ -15,9 +20,9 @@ license = {text = "MIT"}
 [project.urls]
 homepage = ""
 
+[tool]
+[tool.pdm]
+
 [build-system]
 requires = ["pdm-pep517"]
 build-backend = "pdm.pep517.api"
-
-[tool]
-[tool.pdm]
