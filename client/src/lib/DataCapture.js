@@ -1,6 +1,7 @@
 import * as THREE from "three"
 import { serializeJoints, applySerializedJoints } from "./PoseUtils"
 import { interpObj } from "./Interpolation"
+import * as ObjectUtils from "./lib/ObjectUtils"
 
 /**
  * Function for initiating hand motion recording
@@ -11,6 +12,7 @@ function recordHandMotion(scene_modifiers, duration, left_hand, right_hand, came
     return new Promise((resolve, reject) => {
         console.log("Recording!")
         var timer = new THREE.Clock()
+        var protocol = null
         var data = []
         scene_modifiers.push((destroy)=>{
             var pose = {
@@ -21,10 +23,16 @@ function recordHandMotion(scene_modifiers, duration, left_hand, right_hand, came
                 },
                 "time": Date.now()
             }
-            data.push(pose)
+            if (protocol === null) {
+                protocol = ObjectUtils.createObjectDescriptor(pose)
+            }
+            data.push(ObjectUtils.flattenObject(pose, protocol))
             if (timer.getElapsedTime() >= duration) {
                 destroy()
-                resolve(data)
+                resolve({
+                    protocol: protocol,
+                    flattened_data: data
+                })
             }
         })
     })
