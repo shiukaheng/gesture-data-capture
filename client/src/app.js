@@ -231,7 +231,7 @@ class App {
         await this.load_assets()
         // var data = await this.capture_loop()
         // this.current_session.end()
-        var data = [1,2,3]
+        var data = {}
         var upload_success = false
         // const config = {'Content-Type': 'application/json'};
         while (!upload_success) {
@@ -413,6 +413,6 @@ class App {
 }
 
 document.addEventListener("DOMContentLoaded", ()=>{
-    window.app = new App("https://127.0.0.1:1337/upload")
+    window.app = new App("/upload")
     window.app.start()
 }, {once: true})

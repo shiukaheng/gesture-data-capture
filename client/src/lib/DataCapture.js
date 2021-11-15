@@ -1,7 +1,7 @@
 import * as THREE from "three"
 import { serializeJoints, applySerializedJoints } from "./PoseUtils"
 import { interpObj } from "./Interpolation"
-import * as ObjectUtils from "./lib/ObjectUtils"
+import * as ObjectUtils from "./ObjectUtils"
 
 /**
  * Function for initiating hand motion recording
