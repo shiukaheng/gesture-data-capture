@@ -22,6 +22,8 @@ function recordHandMotion(scene_modifiers, duration, left_hand, right_hand, came
                 "head_pose": {
                     "matrix": camera.matrix.toArray()
                 },
+                "left_template_pose_distances": left_hand.searchResults.map((result) => result.distance),
+                "right_template_pose_distances": right_hand.searchResults.map((result) => result.distance),
                 "time": Date.now()
             }
             if (protocol === null) {
@@ -31,7 +33,9 @@ function recordHandMotion(scene_modifiers, duration, left_hand, right_hand, came
             if (timer.getElapsedTime() >= duration) {
                 destroy()
                 resolve({
-                    protocol: protocol,
+                    protocol: protocol, 
+                    left_template_names: left_hand.searchResults.map((result) => result.pose.names),
+                    right_template_names: right_hand.searchResults.map((result) => result.pose.names),
                     flattened_data: data
                 })
             }

@@ -13,7 +13,7 @@ import * as PoseUtils from "./lib/PoseUtils"
 import * as ObjectUtils from "./lib/ObjectUtils"
 import * as InteractiveElements from "./lib/InteractiveElements"
 
-import {Handy} from "handy.js"
+import {Handy} from "./handy-mod/Handy"
 
 import "axios"
 import axios from "axios"
@@ -27,12 +27,14 @@ window.PoseUtils = PoseUtils
 window.ObjectUtils = ObjectUtils
 
 class App {
-    constructor(upload_endpoint) {
+    constructor(upload_endpoint, record_length=30) {
         this.upload_endpoint = upload_endpoint
+        this.record_length = record_length
         this.setup_three()
         this.setup_controls()
         this.setup_dummy_hands()
         this.setup_content()
+        this.start()
     }
 
     setup_three() {
@@ -48,6 +50,7 @@ class App {
         this.audioLoader = new THREE.AudioLoader();
         this.music_player = new THREE.Audio(this.listener)
         this.Handy = Handy
+        window.dont_round_coordinates = true
 
         // Setup viewport canvas and renderer
         document.getElementsByClassName("viewport-div")[0].appendChild(this.renderer.domElement)
@@ -378,7 +381,7 @@ class App {
                 this.hud_text.text = "CAPTURING..."
                 this.hud_text.sync()
                 // Record data
-                DataCapture.recordHandMotion(this.scene_modifiers, 30, this.left_hand, this.right_hand, this.camera).then((data) => {
+                DataCapture.recordHandMotion(this.scene_modifiers, this.record_length, this.left_hand, this.right_hand, this.camera).then((data) => {
                     this.renderer.xr.removeEventListener("sessionend", lost_xr)
                     document.removeEventListener("handtrackunavailable", lost_hand_tracking)
                     resolve(data)
@@ -386,25 +389,8 @@ class App {
             }).catch(()=>{})
         })
     }
-
-    error_exit_screen(message) {
-        return new Promise((resolve, reject) => {
-            this.welcome_text_element.textContent = message
-            this.welcome_screen_element.style.backgroundColor = "salmon"
-            // Resolve if user clicks screen
-        }) 
-    }
-
-    normal_exit_screen() {
-        return new Promise((resolve, reject) => {
-            this.welcome_text_element.textContent = "CLICK ANYWHERE TO RESTART"
-            this.welcome_screen_element.style.backgroundColor = "lightblue"
-            // Resolve if user clicks screen
-        })
-    }
 }
 
 document.addEventListener("DOMContentLoaded", ()=>{
     window.app = new App("/upload")
-    window.app.start()
 }, {once: true})
