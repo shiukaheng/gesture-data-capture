@@ -140,10 +140,10 @@
       this[globalName] = mainExports;
     }
   }
-})({"5MabY":[function(require,module,exports) {
+})({"1zBGs":[function(require,module,exports) {
 var HMR_HOST = null;
 var HMR_PORT = null;
-var HMR_SECURE = false;
+var HMR_SECURE = true;
 var HMR_ENV_HASH = "69f74e7f31319ffd";
 module.bundle.HMR_BUNDLE_ID = "d839e75310fa75bc";
 "use strict";
@@ -460,9 +460,7 @@ var _three = require("three");
 var _colorConvert = require("color-convert");
 var _xrcontrollerModelFactoryJs = require("three/examples/jsm/webxr/XRControllerModelFactory.js");
 var _xrhandModelFactoryJs = require("three/examples/jsm/webxr/XRHandModelFactory.js");
-// import { XRHandModelFactory } from "./lib/XRHandModelFactory"
 var _dummyXRHandModel = require("./lib/DummyXRHandModel");
-var _tweenJs = require("@tweenjs/tween.js");
 var _troikaThreeText = require("troika-three-text");
 var _dataCapture = require("./lib/DataCapture");
 var _io = require("./lib/IO");
@@ -481,9 +479,15 @@ window.PoseUtils = _poseUtils;
 window.ObjectUtils = _objectUtils;
 class App {
     constructor(upload_endpoint){
+        this.upload_endpoint = upload_endpoint;
+        this.setup_three();
+        this.setup_controls();
+        this.setup_dummy_hands();
+        this.setup_content();
+    }
+    setup_three() {
         // Setup three.js elements
         this.scene = new _three.Scene();
-        this.camera_group = new _three.Group();
         this.listener = new _three.AudioListener();
         this.camera = new _three.PerspectiveCamera();
         this.scene.add(this.camera);
@@ -495,7 +499,6 @@ class App {
         this.scene_modifiers = [];
         this.audioLoader = new _three.AudioLoader();
         this.music_player = new _three.Audio(this.listener);
-        this.upload_endpoint = upload_endpoint;
         this.Handy = _handyJs.Handy;
         // Setup viewport canvas and renderer
         document.getElementsByClassName("viewport-div")[0].appendChild(this.renderer.domElement);
@@ -508,24 +511,19 @@ class App {
         on_window_resize();
         // Define animation loop
         this.renderer.setAnimationLoop(()=>{
-            this.renderer.render(this.scene, this.camera);
+            _handyJs.Handy.update();
             this.scene_modifiers.forEach((x)=>{
                 x(()=>{
                     this.scene_modifiers = this.scene_modifiers.filter((modifier)=>{
                         return modifier !== x;
                     });
-                // console.log("Modifier terminated.")
                 });
             });
-            _handyJs.Handy.update((hand)=>{
-            // console.log(hand.searchResults)
-            });
+            this.renderer.render(this.scene, this.camera);
         });
+    }
+    setup_controls() {
         // Setup controllers and hand tracking
-        var controller1 = this.renderer.xr.getController(0);
-        this.scene.add(controller1);
-        var controller2 = this.renderer.xr.getController(1);
-        this.scene.add(controller2);
         const controllerModelFactory = new _xrcontrollerModelFactoryJs.XRControllerModelFactory();
         const handModelFactory = new _xrhandModelFactoryJs.XRHandModelFactory();
         this.left_hand = null;
@@ -543,6 +541,24 @@ class App {
             if (event.target === this.right_hand) this.right_hand = null;
         };
         var new_hand_availability = false;
+        var setup_controller_and_hand_models = (index)=>{
+            var controller = this.renderer.xr.getController(index);
+            this.scene.add(controller);
+            var controller_grip = this.renderer.xr.getControllerGrip(index);
+            controller_grip.add(controllerModelFactory.createControllerModel(controller_grip));
+            this.scene.add(controller_grip);
+            var hand = this.renderer.xr.getHand(index);
+            this.scene.add(hand);
+            hand.addEventListener("connected", hand_connected_callback);
+            hand.addEventListener("disconnected", hand_disconnected_callback);
+            hand.add(handModelFactory.createHandModel(hand, 'mesh'));
+            _handyJs.Handy.makeHandy(hand);
+            return hand;
+        };
+        [
+            0,
+            1
+        ].map(setup_controller_and_hand_models);
         this.scene_modifiers.push((destroy)=>{
             new_hand_availability = this.left_hand?.joints && Object.values(this.left_hand.joints).length > 0 && this?.right_hand?.joints && Object.values(this.right_hand.joints).length > 0;
             // console.log(this?.left_hand?.joints, this?.right_hand?.joints, new_hand_availability)
@@ -562,28 +578,8 @@ class App {
                 this.hand_tracking_available = new_hand_availability;
             }
         });
-        const preprocess_hand = (hand)=>{
-            hand.addEventListener("connected", hand_connected_callback);
-            hand.addEventListener("disconnected", hand_disconnected_callback);
-        };
-        // Hand 1
-        var controllerGrip1 = this.renderer.xr.getControllerGrip(0);
-        controllerGrip1.add(controllerModelFactory.createControllerModel(controllerGrip1));
-        this.scene.add(controllerGrip1);
-        var hand1 = this.renderer.xr.getHand(0);
-        this.scene.add(hand1);
-        preprocess_hand(hand1);
-        hand1.add(handModelFactory.createHandModel(hand1, 'mesh'));
-        _handyJs.Handy.makeHandy(hand1);
-        // Hand 2
-        var controllerGrip2 = this.renderer.xr.getControllerGrip(1);
-        controllerGrip2.add(controllerModelFactory.createControllerModel(controllerGrip2));
-        this.scene.add(controllerGrip2);
-        var hand2 = this.renderer.xr.getHand(1);
-        this.scene.add(hand2);
-        preprocess_hand(hand2);
-        hand2.add(handModelFactory.createHandModel(hand2, 'mesh'));
-        _handyJs.Handy.makeHandy(hand2);
+    }
+    setup_dummy_hands() {
         // Create dummy hands pre-requisites
         this.dummy_factory = new _dummyXRHandModel.DummyXRHandModelFactory();
         this.dummyHands = new _three.Group();
@@ -596,9 +592,8 @@ class App {
         this.dummy_right_hand = this.dummy_factory.createHandModel("right");
         this.dummyHands.add(this.dummy_right_hand);
         this.dummy_right_hand.visible = false;
-        // Create app states
-        this.in_session = false;
-        this.hand_tracking_available = false;
+    }
+    setup_content() {
         this.renderer.xr.addEventListener("sessionend", (event)=>{
             console.log("Exited XR");
         });
@@ -844,7 +839,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
     once: true
 });
 
-},{"three":"1AKvZ","three/examples/jsm/webxr/XRHandModelFactory.js":"dKTS4","color-convert":"g3Be4","three/examples/jsm/webxr/XRControllerModelFactory.js":"lQjc0","./lib/DummyXRHandModel":"dCmjv","@tweenjs/tween.js":"e87sn","troika-three-text":"jZx5N","./lib/DataCapture":"3qqgc","./lib/IO":"hiq5a","./lib/Interpolation":"3PyXB","./lib/PoseUtils":"6XW1O","./lib/ObjectUtils":"4q0XH","./lib/InteractiveElements":"ENSer","handy.js":"jFuxO","axios":"iYoWk","@parcel/transformer-js/src/esmodule-helpers.js":"JacNc"}],"1AKvZ":[function(require,module,exports) {
+},{"three":"1AKvZ","three/examples/jsm/webxr/XRHandModelFactory.js":"dKTS4","color-convert":"g3Be4","three/examples/jsm/webxr/XRControllerModelFactory.js":"lQjc0","./lib/DummyXRHandModel":"dCmjv","troika-three-text":"jZx5N","./lib/DataCapture":"3qqgc","./lib/IO":"hiq5a","./lib/Interpolation":"3PyXB","./lib/PoseUtils":"6XW1O","./lib/ObjectUtils":"4q0XH","./lib/InteractiveElements":"ENSer","handy.js":"jFuxO","axios":"iYoWk","@parcel/transformer-js/src/esmodule-helpers.js":"JacNc"}],"1AKvZ":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "ACESFilmicToneMapping", ()=>ACESFilmicToneMapping
@@ -35315,833 +35310,7 @@ class DummyXRHandModelFactory {
     }
 }
 
-},{"three":"1AKvZ","three/examples/jsm/webxr/XRHandPrimitiveModel.js":"aMXgY","three/examples/jsm/webxr/XRHandMeshModel.js":"kWKvy","three/examples/jsm/loaders/GLTFLoader.js":"jzUEM","@parcel/transformer-js/src/esmodule-helpers.js":"JacNc"}],"e87sn":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "Easing", ()=>Easing
-);
-parcelHelpers.export(exports, "Group", ()=>Group
-);
-parcelHelpers.export(exports, "Interpolation", ()=>Interpolation
-);
-parcelHelpers.export(exports, "Sequence", ()=>Sequence
-);
-parcelHelpers.export(exports, "Tween", ()=>Tween
-);
-parcelHelpers.export(exports, "VERSION", ()=>VERSION
-);
-parcelHelpers.export(exports, "add", ()=>add
-);
-parcelHelpers.export(exports, "getAll", ()=>getAll
-);
-parcelHelpers.export(exports, "nextId", ()=>nextId
-);
-parcelHelpers.export(exports, "now", ()=>now$1
-);
-parcelHelpers.export(exports, "remove", ()=>remove
-);
-parcelHelpers.export(exports, "removeAll", ()=>removeAll
-);
-parcelHelpers.export(exports, "update", ()=>update
-);
-var process = require("process");
-/**
- * The Ease class provides a collection of easing functions for use with tween.js.
- */ var Easing = {
-    Linear: {
-        None: function(amount) {
-            return amount;
-        }
-    },
-    Quadratic: {
-        In: function(amount) {
-            return amount * amount;
-        },
-        Out: function(amount) {
-            return amount * (2 - amount);
-        },
-        InOut: function(amount) {
-            if ((amount *= 2) < 1) return 0.5 * amount * amount;
-            return -0.5 * ((--amount) * (amount - 2) - 1);
-        }
-    },
-    Cubic: {
-        In: function(amount) {
-            return amount * amount * amount;
-        },
-        Out: function(amount) {
-            return (--amount) * amount * amount + 1;
-        },
-        InOut: function(amount) {
-            if ((amount *= 2) < 1) return 0.5 * amount * amount * amount;
-            return 0.5 * ((amount -= 2) * amount * amount + 2);
-        }
-    },
-    Quartic: {
-        In: function(amount) {
-            return amount * amount * amount * amount;
-        },
-        Out: function(amount) {
-            return 1 - (--amount) * amount * amount * amount;
-        },
-        InOut: function(amount) {
-            if ((amount *= 2) < 1) return 0.5 * amount * amount * amount * amount;
-            return -0.5 * ((amount -= 2) * amount * amount * amount - 2);
-        }
-    },
-    Quintic: {
-        In: function(amount) {
-            return amount * amount * amount * amount * amount;
-        },
-        Out: function(amount) {
-            return (--amount) * amount * amount * amount * amount + 1;
-        },
-        InOut: function(amount) {
-            if ((amount *= 2) < 1) return 0.5 * amount * amount * amount * amount * amount;
-            return 0.5 * ((amount -= 2) * amount * amount * amount * amount + 2);
-        }
-    },
-    Sinusoidal: {
-        In: function(amount) {
-            return 1 - Math.cos(amount * Math.PI / 2);
-        },
-        Out: function(amount) {
-            return Math.sin(amount * Math.PI / 2);
-        },
-        InOut: function(amount) {
-            return 0.5 * (1 - Math.cos(Math.PI * amount));
-        }
-    },
-    Exponential: {
-        In: function(amount) {
-            return amount === 0 ? 0 : Math.pow(1024, amount - 1);
-        },
-        Out: function(amount) {
-            return amount === 1 ? 1 : 1 - Math.pow(2, -10 * amount);
-        },
-        InOut: function(amount) {
-            if (amount === 0) return 0;
-            if (amount === 1) return 1;
-            if ((amount *= 2) < 1) return 0.5 * Math.pow(1024, amount - 1);
-            return 0.5 * (-Math.pow(2, -10 * (amount - 1)) + 2);
-        }
-    },
-    Circular: {
-        In: function(amount) {
-            return 1 - Math.sqrt(1 - amount * amount);
-        },
-        Out: function(amount) {
-            return Math.sqrt(1 - (--amount) * amount);
-        },
-        InOut: function(amount) {
-            if ((amount *= 2) < 1) return -0.5 * (Math.sqrt(1 - amount * amount) - 1);
-            return 0.5 * (Math.sqrt(1 - (amount -= 2) * amount) + 1);
-        }
-    },
-    Elastic: {
-        In: function(amount) {
-            if (amount === 0) return 0;
-            if (amount === 1) return 1;
-            return -Math.pow(2, 10 * (amount - 1)) * Math.sin((amount - 1.1) * 5 * Math.PI);
-        },
-        Out: function(amount) {
-            if (amount === 0) return 0;
-            if (amount === 1) return 1;
-            return Math.pow(2, -10 * amount) * Math.sin((amount - 0.1) * 5 * Math.PI) + 1;
-        },
-        InOut: function(amount) {
-            if (amount === 0) return 0;
-            if (amount === 1) return 1;
-            amount *= 2;
-            if (amount < 1) return -0.5 * Math.pow(2, 10 * (amount - 1)) * Math.sin((amount - 1.1) * 5 * Math.PI);
-            return 0.5 * Math.pow(2, -10 * (amount - 1)) * Math.sin((amount - 1.1) * 5 * Math.PI) + 1;
-        }
-    },
-    Back: {
-        In: function(amount) {
-            var s = 1.70158;
-            return amount * amount * ((s + 1) * amount - s);
-        },
-        Out: function(amount) {
-            var s = 1.70158;
-            return (--amount) * amount * ((s + 1) * amount + s) + 1;
-        },
-        InOut: function(amount) {
-            var s = 2.5949095;
-            if ((amount *= 2) < 1) return 0.5 * (amount * amount * ((s + 1) * amount - s));
-            return 0.5 * ((amount -= 2) * amount * ((s + 1) * amount + s) + 2);
-        }
-    },
-    Bounce: {
-        In: function(amount) {
-            return 1 - Easing.Bounce.Out(1 - amount);
-        },
-        Out: function(amount) {
-            if (amount < 1 / 2.75) return 7.5625 * amount * amount;
-            else if (amount < 2 / 2.75) return 7.5625 * (amount -= 1.5 / 2.75) * amount + 0.75;
-            else if (amount < 2.5 / 2.75) return 7.5625 * (amount -= 2.25 / 2.75) * amount + 0.9375;
-            else return 7.5625 * (amount -= 2.625 / 2.75) * amount + 0.984375;
-        },
-        InOut: function(amount) {
-            if (amount < 0.5) return Easing.Bounce.In(amount * 2) * 0.5;
-            return Easing.Bounce.Out(amount * 2 - 1) * 0.5 + 0.5;
-        }
-    }
-};
-var now;
-// Include a performance.now polyfill.
-// In node.js, use process.hrtime.
-// eslint-disable-next-line
-// @ts-ignore
-if (typeof self === 'undefined' && typeof process !== 'undefined' && process.hrtime) now = function() {
-    // eslint-disable-next-line
-    // @ts-ignore
-    var time = process.hrtime();
-    // Convert [seconds, nanoseconds] to milliseconds.
-    return time[0] * 1000 + time[1] / 1000000;
-};
-else if (typeof self !== 'undefined' && self.performance !== undefined && self.performance.now !== undefined) // This must be bound, because directly assigning this function
-// leads to an invocation exception in Chrome.
-now = self.performance.now.bind(self.performance);
-else if (Date.now !== undefined) now = Date.now;
-else now = function() {
-    return new Date().getTime();
-};
-var now$1 = now;
-/**
- * Controlling groups of tweens
- *
- * Using the TWEEN singleton to manage your tweens can cause issues in large apps with many components.
- * In these cases, you may want to create your own smaller groups of tween
- */ var Group = function() {
-    function Group1() {
-        this._tweens = {
-        };
-        this._tweensAddedDuringUpdate = {
-        };
-    }
-    Group1.prototype.getAll = function() {
-        var _this = this;
-        return Object.keys(this._tweens).map(function(tweenId) {
-            return _this._tweens[tweenId];
-        });
-    };
-    Group1.prototype.removeAll = function() {
-        this._tweens = {
-        };
-    };
-    Group1.prototype.add = function(tween) {
-        this._tweens[tween.getId()] = tween;
-        this._tweensAddedDuringUpdate[tween.getId()] = tween;
-    };
-    Group1.prototype.remove = function(tween) {
-        delete this._tweens[tween.getId()];
-        delete this._tweensAddedDuringUpdate[tween.getId()];
-    };
-    Group1.prototype.update = function(time, preserve) {
-        if (time === void 0) time = now$1();
-        if (preserve === void 0) preserve = false;
-        var tweenIds = Object.keys(this._tweens);
-        if (tweenIds.length === 0) return false;
-        // Tweens are updated in "batches". If you add a new tween during an
-        // update, then the new tween will be updated in the next batch.
-        // If you remove a tween during an update, it may or may not be updated.
-        // However, if the removed tween was added during the current batch,
-        // then it will not be updated.
-        while(tweenIds.length > 0){
-            this._tweensAddedDuringUpdate = {
-            };
-            for(var i = 0; i < tweenIds.length; i++){
-                var tween = this._tweens[tweenIds[i]];
-                var autoStart = !preserve;
-                if (tween && tween.update(time, autoStart) === false && !preserve) delete this._tweens[tweenIds[i]];
-            }
-            tweenIds = Object.keys(this._tweensAddedDuringUpdate);
-        }
-        return true;
-    };
-    return Group1;
-}();
-/**
- *
- */ var Interpolation = {
-    Linear: function(v, k) {
-        var m = v.length - 1;
-        var f = m * k;
-        var i = Math.floor(f);
-        var fn = Interpolation.Utils.Linear;
-        if (k < 0) return fn(v[0], v[1], f);
-        if (k > 1) return fn(v[m], v[m - 1], m - f);
-        return fn(v[i], v[i + 1 > m ? m : i + 1], f - i);
-    },
-    Bezier: function(v, k) {
-        var b = 0;
-        var n = v.length - 1;
-        var pw = Math.pow;
-        var bn = Interpolation.Utils.Bernstein;
-        for(var i = 0; i <= n; i++)b += pw(1 - k, n - i) * pw(k, i) * v[i] * bn(n, i);
-        return b;
-    },
-    CatmullRom: function(v, k) {
-        var m = v.length - 1;
-        var f = m * k;
-        var i = Math.floor(f);
-        var fn = Interpolation.Utils.CatmullRom;
-        if (v[0] === v[m]) {
-            if (k < 0) i = Math.floor(f = m * (1 + k));
-            return fn(v[(i - 1 + m) % m], v[i], v[(i + 1) % m], v[(i + 2) % m], f - i);
-        } else {
-            if (k < 0) return v[0] - (fn(v[0], v[0], v[1], v[1], -f) - v[0]);
-            if (k > 1) return v[m] - (fn(v[m], v[m], v[m - 1], v[m - 1], f - m) - v[m]);
-            return fn(v[i ? i - 1 : 0], v[i], v[m < i + 1 ? m : i + 1], v[m < i + 2 ? m : i + 2], f - i);
-        }
-    },
-    Utils: {
-        Linear: function(p0, p1, t) {
-            return (p1 - p0) * t + p0;
-        },
-        Bernstein: function(n, i) {
-            var fc = Interpolation.Utils.Factorial;
-            return fc(n) / fc(i) / fc(n - i);
-        },
-        Factorial: function() {
-            var a = [
-                1
-            ];
-            return function(n) {
-                var s = 1;
-                if (a[n]) return a[n];
-                for(var i = n; i > 1; i--)s *= i;
-                a[n] = s;
-                return s;
-            };
-        }(),
-        CatmullRom: function(p0, p1, p2, p3, t) {
-            var v0 = (p2 - p0) * 0.5;
-            var v1 = (p3 - p1) * 0.5;
-            var t2 = t * t;
-            var t3 = t * t2;
-            return (2 * p1 - 2 * p2 + v0 + v1) * t3 + (-3 * p1 + 3 * p2 - 2 * v0 - v1) * t2 + v0 * t + p1;
-        }
-    }
-};
-/**
- * Utils
- */ var Sequence = function() {
-    function Sequence1() {
-    }
-    Sequence1.nextId = function() {
-        return Sequence1._nextId++;
-    };
-    Sequence1._nextId = 0;
-    return Sequence1;
-}();
-var mainGroup = new Group();
-/**
- * Tween.js - Licensed under the MIT license
- * https://github.com/tweenjs/tween.js
- * ----------------------------------------------
- *
- * See https://github.com/tweenjs/tween.js/graphs/contributors for the full list of contributors.
- * Thank you all, you're awesome!
- */ var Tween = function() {
-    function Tween1(_object, _group) {
-        if (_group === void 0) _group = mainGroup;
-        this._object = _object;
-        this._group = _group;
-        this._isPaused = false;
-        this._pauseStart = 0;
-        this._valuesStart = {
-        };
-        this._valuesEnd = {
-        };
-        this._valuesStartRepeat = {
-        };
-        this._duration = 1000;
-        this._initialRepeat = 0;
-        this._repeat = 0;
-        this._yoyo = false;
-        this._isPlaying = false;
-        this._reversed = false;
-        this._delayTime = 0;
-        this._startTime = 0;
-        this._easingFunction = Easing.Linear.None;
-        this._interpolationFunction = Interpolation.Linear;
-        this._chainedTweens = [];
-        this._onStartCallbackFired = false;
-        this._id = Sequence.nextId();
-        this._isChainStopped = false;
-        this._goToEnd = false;
-    }
-    Tween1.prototype.getId = function() {
-        return this._id;
-    };
-    Tween1.prototype.isPlaying = function() {
-        return this._isPlaying;
-    };
-    Tween1.prototype.isPaused = function() {
-        return this._isPaused;
-    };
-    Tween1.prototype.to = function(properties, duration) {
-        // TODO? restore this, then update the 07_dynamic_to example to set fox
-        // tween's to on each update. That way the behavior is opt-in (there's
-        // currently no opt-out).
-        // for (const prop in properties) this._valuesEnd[prop] = properties[prop]
-        this._valuesEnd = Object.create(properties);
-        if (duration !== undefined) this._duration = duration;
-        return this;
-    };
-    Tween1.prototype.duration = function(d) {
-        this._duration = d;
-        return this;
-    };
-    Tween1.prototype.start = function(time) {
-        if (this._isPlaying) return this;
-        // eslint-disable-next-line
-        this._group && this._group.add(this);
-        this._repeat = this._initialRepeat;
-        if (this._reversed) {
-            // If we were reversed (f.e. using the yoyo feature) then we need to
-            // flip the tween direction back to forward.
-            this._reversed = false;
-            for(var property in this._valuesStartRepeat){
-                this._swapEndStartRepeatValues(property);
-                this._valuesStart[property] = this._valuesStartRepeat[property];
-            }
-        }
-        this._isPlaying = true;
-        this._isPaused = false;
-        this._onStartCallbackFired = false;
-        this._isChainStopped = false;
-        this._startTime = time !== undefined ? typeof time === 'string' ? now$1() + parseFloat(time) : time : now$1();
-        this._startTime += this._delayTime;
-        this._setupProperties(this._object, this._valuesStart, this._valuesEnd, this._valuesStartRepeat);
-        return this;
-    };
-    Tween1.prototype._setupProperties = function(_object, _valuesStart, _valuesEnd, _valuesStartRepeat) {
-        for(var property in _valuesEnd){
-            var startValue = _object[property];
-            var startValueIsArray = Array.isArray(startValue);
-            var propType = startValueIsArray ? 'array' : typeof startValue;
-            var isInterpolationList = !startValueIsArray && Array.isArray(_valuesEnd[property]);
-            // If `to()` specifies a property that doesn't exist in the source object,
-            // we should not set that property in the object
-            if (propType === 'undefined' || propType === 'function') continue;
-            // Check if an Array was provided as property value
-            if (isInterpolationList) {
-                var endValues = _valuesEnd[property];
-                if (endValues.length === 0) continue;
-                // handle an array of relative values
-                endValues = endValues.map(this._handleRelativeValue.bind(this, startValue));
-                // Create a local copy of the Array with the start value at the front
-                _valuesEnd[property] = [
-                    startValue
-                ].concat(endValues);
-            }
-            // handle the deepness of the values
-            if ((propType === 'object' || startValueIsArray) && startValue && !isInterpolationList) {
-                _valuesStart[property] = startValueIsArray ? [] : {
-                };
-                // eslint-disable-next-line
-                for(var prop in startValue)// eslint-disable-next-line
-                // @ts-ignore FIXME?
-                _valuesStart[property][prop] = startValue[prop];
-                _valuesStartRepeat[property] = startValueIsArray ? [] : {
-                }; // TODO? repeat nested values? And yoyo? And array values?
-                // eslint-disable-next-line
-                // @ts-ignore FIXME?
-                this._setupProperties(startValue, _valuesStart[property], _valuesEnd[property], _valuesStartRepeat[property]);
-            } else {
-                // Save the starting value, but only once.
-                if (typeof _valuesStart[property] === 'undefined') _valuesStart[property] = startValue;
-                if (!startValueIsArray) // eslint-disable-next-line
-                // @ts-ignore FIXME?
-                _valuesStart[property] *= 1; // Ensures we're using numbers, not strings
-                if (isInterpolationList) // eslint-disable-next-line
-                // @ts-ignore FIXME?
-                _valuesStartRepeat[property] = _valuesEnd[property].slice().reverse();
-                else _valuesStartRepeat[property] = _valuesStart[property] || 0;
-            }
-        }
-    };
-    Tween1.prototype.stop = function() {
-        if (!this._isChainStopped) {
-            this._isChainStopped = true;
-            this.stopChainedTweens();
-        }
-        if (!this._isPlaying) return this;
-        // eslint-disable-next-line
-        this._group && this._group.remove(this);
-        this._isPlaying = false;
-        this._isPaused = false;
-        if (this._onStopCallback) this._onStopCallback(this._object);
-        return this;
-    };
-    Tween1.prototype.end = function() {
-        this._goToEnd = true;
-        this.update(Infinity);
-        return this;
-    };
-    Tween1.prototype.pause = function(time) {
-        if (time === void 0) time = now$1();
-        if (this._isPaused || !this._isPlaying) return this;
-        this._isPaused = true;
-        this._pauseStart = time;
-        // eslint-disable-next-line
-        this._group && this._group.remove(this);
-        return this;
-    };
-    Tween1.prototype.resume = function(time) {
-        if (time === void 0) time = now$1();
-        if (!this._isPaused || !this._isPlaying) return this;
-        this._isPaused = false;
-        this._startTime += time - this._pauseStart;
-        this._pauseStart = 0;
-        // eslint-disable-next-line
-        this._group && this._group.add(this);
-        return this;
-    };
-    Tween1.prototype.stopChainedTweens = function() {
-        for(var i = 0, numChainedTweens = this._chainedTweens.length; i < numChainedTweens; i++)this._chainedTweens[i].stop();
-        return this;
-    };
-    Tween1.prototype.group = function(group) {
-        this._group = group;
-        return this;
-    };
-    Tween1.prototype.delay = function(amount) {
-        this._delayTime = amount;
-        return this;
-    };
-    Tween1.prototype.repeat = function(times) {
-        this._initialRepeat = times;
-        this._repeat = times;
-        return this;
-    };
-    Tween1.prototype.repeatDelay = function(amount) {
-        this._repeatDelayTime = amount;
-        return this;
-    };
-    Tween1.prototype.yoyo = function(yoyo) {
-        this._yoyo = yoyo;
-        return this;
-    };
-    Tween1.prototype.easing = function(easingFunction) {
-        this._easingFunction = easingFunction;
-        return this;
-    };
-    Tween1.prototype.interpolation = function(interpolationFunction) {
-        this._interpolationFunction = interpolationFunction;
-        return this;
-    };
-    Tween1.prototype.chain = function() {
-        var tweens = [];
-        for(var _i = 0; _i < arguments.length; _i++)tweens[_i] = arguments[_i];
-        this._chainedTweens = tweens;
-        return this;
-    };
-    Tween1.prototype.onStart = function(callback) {
-        this._onStartCallback = callback;
-        return this;
-    };
-    Tween1.prototype.onUpdate = function(callback) {
-        this._onUpdateCallback = callback;
-        return this;
-    };
-    Tween1.prototype.onRepeat = function(callback) {
-        this._onRepeatCallback = callback;
-        return this;
-    };
-    Tween1.prototype.onComplete = function(callback) {
-        this._onCompleteCallback = callback;
-        return this;
-    };
-    Tween1.prototype.onStop = function(callback) {
-        this._onStopCallback = callback;
-        return this;
-    };
-    /**
-     * @returns true if the tween is still playing after the update, false
-     * otherwise (calling update on a paused tween still returns true because
-     * it is still playing, just paused).
-     */ Tween1.prototype.update = function(time, autoStart) {
-        if (time === void 0) time = now$1();
-        if (autoStart === void 0) autoStart = true;
-        if (this._isPaused) return true;
-        var property;
-        var elapsed;
-        var endTime = this._startTime + this._duration;
-        if (!this._goToEnd && !this._isPlaying) {
-            if (time > endTime) return false;
-            if (autoStart) this.start(time);
-        }
-        this._goToEnd = false;
-        if (time < this._startTime) return true;
-        if (this._onStartCallbackFired === false) {
-            if (this._onStartCallback) this._onStartCallback(this._object);
-            this._onStartCallbackFired = true;
-        }
-        elapsed = (time - this._startTime) / this._duration;
-        elapsed = this._duration === 0 || elapsed > 1 ? 1 : elapsed;
-        var value = this._easingFunction(elapsed);
-        // properties transformations
-        this._updateProperties(this._object, this._valuesStart, this._valuesEnd, value);
-        if (this._onUpdateCallback) this._onUpdateCallback(this._object, elapsed);
-        if (elapsed === 1) {
-            if (this._repeat > 0) {
-                if (isFinite(this._repeat)) this._repeat--;
-                // Reassign starting values, restart by making startTime = now
-                for(property in this._valuesStartRepeat){
-                    if (!this._yoyo && typeof this._valuesEnd[property] === 'string') this._valuesStartRepeat[property] = // eslint-disable-next-line
-                    // @ts-ignore FIXME?
-                    this._valuesStartRepeat[property] + parseFloat(this._valuesEnd[property]);
-                    if (this._yoyo) this._swapEndStartRepeatValues(property);
-                    this._valuesStart[property] = this._valuesStartRepeat[property];
-                }
-                if (this._yoyo) this._reversed = !this._reversed;
-                if (this._repeatDelayTime !== undefined) this._startTime = time + this._repeatDelayTime;
-                else this._startTime = time + this._delayTime;
-                if (this._onRepeatCallback) this._onRepeatCallback(this._object);
-                return true;
-            } else {
-                if (this._onCompleteCallback) this._onCompleteCallback(this._object);
-                for(var i = 0, numChainedTweens = this._chainedTweens.length; i < numChainedTweens; i++)// Make the chained tweens start exactly at the time they should,
-                // even if the `update()` method was called way past the duration of the tween
-                this._chainedTweens[i].start(this._startTime + this._duration);
-                this._isPlaying = false;
-                return false;
-            }
-        }
-        return true;
-    };
-    Tween1.prototype._updateProperties = function(_object, _valuesStart, _valuesEnd, value) {
-        for(var property in _valuesEnd){
-            // Don't update properties that do not exist in the source object
-            if (_valuesStart[property] === undefined) continue;
-            var start = _valuesStart[property] || 0;
-            var end = _valuesEnd[property];
-            var startIsArray = Array.isArray(_object[property]);
-            var endIsArray = Array.isArray(end);
-            var isInterpolationList = !startIsArray && endIsArray;
-            if (isInterpolationList) _object[property] = this._interpolationFunction(end, value);
-            else if (typeof end === 'object' && end) // eslint-disable-next-line
-            // @ts-ignore FIXME?
-            this._updateProperties(_object[property], start, end, value);
-            else {
-                // Parses relative end values with start as base (e.g.: +10, -3)
-                end = this._handleRelativeValue(start, end);
-                // Protect against non numeric properties.
-                if (typeof end === 'number') // eslint-disable-next-line
-                // @ts-ignore FIXME?
-                _object[property] = start + (end - start) * value;
-            }
-        }
-    };
-    Tween1.prototype._handleRelativeValue = function(start, end) {
-        if (typeof end !== 'string') return end;
-        if (end.charAt(0) === '+' || end.charAt(0) === '-') return start + parseFloat(end);
-        else return parseFloat(end);
-    };
-    Tween1.prototype._swapEndStartRepeatValues = function(property) {
-        var tmp = this._valuesStartRepeat[property];
-        var endValue = this._valuesEnd[property];
-        if (typeof endValue === 'string') this._valuesStartRepeat[property] = this._valuesStartRepeat[property] + parseFloat(endValue);
-        else this._valuesStartRepeat[property] = this._valuesEnd[property];
-        this._valuesEnd[property] = tmp;
-    };
-    return Tween1;
-}();
-var VERSION = '18.6.4';
-/**
- * Tween.js - Licensed under the MIT license
- * https://github.com/tweenjs/tween.js
- * ----------------------------------------------
- *
- * See https://github.com/tweenjs/tween.js/graphs/contributors for the full list of contributors.
- * Thank you all, you're awesome!
- */ var nextId = Sequence.nextId;
-/**
- * Controlling groups of tweens
- *
- * Using the TWEEN singleton to manage your tweens can cause issues in large apps with many components.
- * In these cases, you may want to create your own smaller groups of tweens.
- */ var TWEEN = mainGroup;
-// This is the best way to export things in a way that's compatible with both ES
-// Modules and CommonJS, without build hacks, and so as not to break the
-// existing API.
-// https://github.com/rollup/rollup/issues/1961#issuecomment-423037881
-var getAll = TWEEN.getAll.bind(TWEEN);
-var removeAll = TWEEN.removeAll.bind(TWEEN);
-var add = TWEEN.add.bind(TWEEN);
-var remove = TWEEN.remove.bind(TWEEN);
-var update = TWEEN.update.bind(TWEEN);
-var exports1 = {
-    Easing: Easing,
-    Group: Group,
-    Interpolation: Interpolation,
-    now: now$1,
-    Sequence: Sequence,
-    nextId: nextId,
-    Tween: Tween,
-    VERSION: VERSION,
-    getAll: getAll,
-    removeAll: removeAll,
-    add: add,
-    remove: remove,
-    update: update
-};
-exports.default = exports1;
-
-},{"process":"6Upk8","@parcel/transformer-js/src/esmodule-helpers.js":"JacNc"}],"6Upk8":[function(require,module,exports) {
-// shim for using process in browser
-var process = module.exports = {
-};
-// cached from whatever global is present so that test runners that stub it
-// don't break things.  But we need to wrap it in a try catch in case it is
-// wrapped in strict mode code which doesn't define any globals.  It's inside a
-// function because try/catches deoptimize in certain engines.
-var cachedSetTimeout;
-var cachedClearTimeout;
-function defaultSetTimout() {
-    throw new Error('setTimeout has not been defined');
-}
-function defaultClearTimeout() {
-    throw new Error('clearTimeout has not been defined');
-}
-(function() {
-    try {
-        if (typeof setTimeout === 'function') cachedSetTimeout = setTimeout;
-        else cachedSetTimeout = defaultSetTimout;
-    } catch (e) {
-        cachedSetTimeout = defaultSetTimout;
-    }
-    try {
-        if (typeof clearTimeout === 'function') cachedClearTimeout = clearTimeout;
-        else cachedClearTimeout = defaultClearTimeout;
-    } catch (e) {
-        cachedClearTimeout = defaultClearTimeout;
-    }
-})();
-function runTimeout(fun) {
-    if (cachedSetTimeout === setTimeout) //normal enviroments in sane situations
-    return setTimeout(fun, 0);
-    // if setTimeout wasn't available but was latter defined
-    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
-        cachedSetTimeout = setTimeout;
-        return setTimeout(fun, 0);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedSetTimeout(fun, 0);
-    } catch (e) {
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
-            return cachedSetTimeout.call(null, fun, 0);
-        } catch (e1) {
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
-            return cachedSetTimeout.call(this, fun, 0);
-        }
-    }
-}
-function runClearTimeout(marker) {
-    if (cachedClearTimeout === clearTimeout) //normal enviroments in sane situations
-    return clearTimeout(marker);
-    // if clearTimeout wasn't available but was latter defined
-    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
-        cachedClearTimeout = clearTimeout;
-        return clearTimeout(marker);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedClearTimeout(marker);
-    } catch (e) {
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
-            return cachedClearTimeout.call(null, marker);
-        } catch (e1) {
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
-            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
-            return cachedClearTimeout.call(this, marker);
-        }
-    }
-}
-var queue = [];
-var draining = false;
-var currentQueue;
-var queueIndex = -1;
-function cleanUpNextTick() {
-    if (!draining || !currentQueue) return;
-    draining = false;
-    if (currentQueue.length) queue = currentQueue.concat(queue);
-    else queueIndex = -1;
-    if (queue.length) drainQueue();
-}
-function drainQueue() {
-    if (draining) return;
-    var timeout = runTimeout(cleanUpNextTick);
-    draining = true;
-    var len = queue.length;
-    while(len){
-        currentQueue = queue;
-        queue = [];
-        while((++queueIndex) < len)if (currentQueue) currentQueue[queueIndex].run();
-        queueIndex = -1;
-        len = queue.length;
-    }
-    currentQueue = null;
-    draining = false;
-    runClearTimeout(timeout);
-}
-process.nextTick = function(fun) {
-    var args = new Array(arguments.length - 1);
-    if (arguments.length > 1) for(var i = 1; i < arguments.length; i++)args[i - 1] = arguments[i];
-    queue.push(new Item(fun, args));
-    if (queue.length === 1 && !draining) runTimeout(drainQueue);
-};
-// v8 likes predictible objects
-function Item(fun, array) {
-    this.fun = fun;
-    this.array = array;
-}
-Item.prototype.run = function() {
-    this.fun.apply(null, this.array);
-};
-process.title = 'browser';
-process.browser = true;
-process.env = {
-};
-process.argv = [];
-process.version = ''; // empty string to avoid regexp issues
-process.versions = {
-};
-function noop() {
-}
-process.on = noop;
-process.addListener = noop;
-process.once = noop;
-process.off = noop;
-process.removeListener = noop;
-process.removeAllListeners = noop;
-process.emit = noop;
-process.prependListener = noop;
-process.prependOnceListener = noop;
-process.listeners = function(name) {
-    return [];
-};
-process.binding = function(name) {
-    throw new Error('process.binding is not supported');
-};
-process.cwd = function() {
-    return '/';
-};
-process.chdir = function(dir) {
-    throw new Error('process.chdir is not supported');
-};
-process.umask = function() {
-    return 0;
-};
-
-},{}],"jZx5N":[function(require,module,exports) {
+},{"three":"1AKvZ","three/examples/jsm/webxr/XRHandPrimitiveModel.js":"aMXgY","three/examples/jsm/webxr/XRHandMeshModel.js":"kWKvy","three/examples/jsm/loaders/GLTFLoader.js":"jzUEM","@parcel/transformer-js/src/esmodule-helpers.js":"JacNc"}],"jZx5N":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "GlyphsGeometry", ()=>GlyphsGeometry
@@ -77496,7 +76665,156 @@ utils.forEach([
 });
 module.exports = defaults;
 
-},{"process":"6Upk8","./utils":"hOPY0","./helpers/normalizeHeaderName":"6GUF5","./core/enhanceError":"3f4N4","./adapters/xhr":"4uZQD","./adapters/http":"4uZQD"}],"6GUF5":[function(require,module,exports) {
+},{"process":"6Upk8","./utils":"hOPY0","./helpers/normalizeHeaderName":"6GUF5","./core/enhanceError":"3f4N4","./adapters/xhr":"4uZQD","./adapters/http":"4uZQD"}],"6Upk8":[function(require,module,exports) {
+// shim for using process in browser
+var process = module.exports = {
+};
+// cached from whatever global is present so that test runners that stub it
+// don't break things.  But we need to wrap it in a try catch in case it is
+// wrapped in strict mode code which doesn't define any globals.  It's inside a
+// function because try/catches deoptimize in certain engines.
+var cachedSetTimeout;
+var cachedClearTimeout;
+function defaultSetTimout() {
+    throw new Error('setTimeout has not been defined');
+}
+function defaultClearTimeout() {
+    throw new Error('clearTimeout has not been defined');
+}
+(function() {
+    try {
+        if (typeof setTimeout === 'function') cachedSetTimeout = setTimeout;
+        else cachedSetTimeout = defaultSetTimout;
+    } catch (e) {
+        cachedSetTimeout = defaultSetTimout;
+    }
+    try {
+        if (typeof clearTimeout === 'function') cachedClearTimeout = clearTimeout;
+        else cachedClearTimeout = defaultClearTimeout;
+    } catch (e) {
+        cachedClearTimeout = defaultClearTimeout;
+    }
+})();
+function runTimeout(fun) {
+    if (cachedSetTimeout === setTimeout) //normal enviroments in sane situations
+    return setTimeout(fun, 0);
+    // if setTimeout wasn't available but was latter defined
+    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+        cachedSetTimeout = setTimeout;
+        return setTimeout(fun, 0);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedSetTimeout(fun, 0);
+    } catch (e) {
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
+            return cachedSetTimeout.call(null, fun, 0);
+        } catch (e1) {
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
+            return cachedSetTimeout.call(this, fun, 0);
+        }
+    }
+}
+function runClearTimeout(marker) {
+    if (cachedClearTimeout === clearTimeout) //normal enviroments in sane situations
+    return clearTimeout(marker);
+    // if clearTimeout wasn't available but was latter defined
+    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+        cachedClearTimeout = clearTimeout;
+        return clearTimeout(marker);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedClearTimeout(marker);
+    } catch (e) {
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
+            return cachedClearTimeout.call(null, marker);
+        } catch (e1) {
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
+            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
+            return cachedClearTimeout.call(this, marker);
+        }
+    }
+}
+var queue = [];
+var draining = false;
+var currentQueue;
+var queueIndex = -1;
+function cleanUpNextTick() {
+    if (!draining || !currentQueue) return;
+    draining = false;
+    if (currentQueue.length) queue = currentQueue.concat(queue);
+    else queueIndex = -1;
+    if (queue.length) drainQueue();
+}
+function drainQueue() {
+    if (draining) return;
+    var timeout = runTimeout(cleanUpNextTick);
+    draining = true;
+    var len = queue.length;
+    while(len){
+        currentQueue = queue;
+        queue = [];
+        while((++queueIndex) < len)if (currentQueue) currentQueue[queueIndex].run();
+        queueIndex = -1;
+        len = queue.length;
+    }
+    currentQueue = null;
+    draining = false;
+    runClearTimeout(timeout);
+}
+process.nextTick = function(fun) {
+    var args = new Array(arguments.length - 1);
+    if (arguments.length > 1) for(var i = 1; i < arguments.length; i++)args[i - 1] = arguments[i];
+    queue.push(new Item(fun, args));
+    if (queue.length === 1 && !draining) runTimeout(drainQueue);
+};
+// v8 likes predictible objects
+function Item(fun, array) {
+    this.fun = fun;
+    this.array = array;
+}
+Item.prototype.run = function() {
+    this.fun.apply(null, this.array);
+};
+process.title = 'browser';
+process.browser = true;
+process.env = {
+};
+process.argv = [];
+process.version = ''; // empty string to avoid regexp issues
+process.versions = {
+};
+function noop() {
+}
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+process.prependListener = noop;
+process.prependOnceListener = noop;
+process.listeners = function(name) {
+    return [];
+};
+process.binding = function(name) {
+    throw new Error('process.binding is not supported');
+};
+process.cwd = function() {
+    return '/';
+};
+process.chdir = function(dir) {
+    throw new Error('process.chdir is not supported');
+};
+process.umask = function() {
+    return 0;
+};
+
+},{}],"6GUF5":[function(require,module,exports) {
 'use strict';
 var utils = require('../utils');
 module.exports = function normalizeHeaderName(headers, normalizedName) {
@@ -78195,6 +77513,6 @@ module.exports = CancelToken;
     return typeof payload === 'object' && payload.isAxiosError === true;
 };
 
-},{}]},["5MabY","g1M29"], "g1M29", "parcelRequirea5b0")
+},{}]},["1zBGs","g1M29"], "g1M29", "parcelRequirea5b0")
 
 //# sourceMappingURL=index.10fa75bc.js.map

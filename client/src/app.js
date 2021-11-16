@@ -3,10 +3,7 @@ import 'color-convert'
 
 import { XRControllerModelFactory } from 'three/examples/jsm/webxr/XRControllerModelFactory.js'
 import { XRHandModelFactory } from 'three/examples/jsm/webxr/XRHandModelFactory.js'
-// import { XRHandModelFactory } from "./lib/XRHandModelFactory"
 import { DummyXRHandModelFactory } from "./lib/DummyXRHandModel"
-
-import * as TWEEN from "@tweenjs/tween.js"
 import {Text, preloadFont} from 'troika-three-text'
 
 import * as DataCapture from "./lib/DataCapture"
@@ -31,9 +28,16 @@ window.ObjectUtils = ObjectUtils
 
 class App {
     constructor(upload_endpoint) {
+        this.upload_endpoint = upload_endpoint
+        this.setup_three()
+        this.setup_controls()
+        this.setup_dummy_hands()
+        this.setup_content()
+    }
+
+    setup_three() {
         // Setup three.js elements
         this.scene = new THREE.Scene()
-        this.camera_group = new THREE.Group()
         this.listener = new THREE.AudioListener()
         this.camera = new THREE.PerspectiveCamera()
         this.scene.add(this.camera)
@@ -43,7 +47,6 @@ class App {
         this.scene_modifiers = []
         this.audioLoader = new THREE.AudioLoader();
         this.music_player = new THREE.Audio(this.listener)
-        this.upload_endpoint = upload_endpoint
         this.Handy = Handy
 
         // Setup viewport canvas and renderer
@@ -58,23 +61,19 @@ class App {
 
         // Define animation loop
         this.renderer.setAnimationLoop(() => {
-            this.renderer.render(this.scene, this.camera)
+            Handy.update()
             this.scene_modifiers.forEach((x)=>{x(()=>{
                 this.scene_modifiers = this.scene_modifiers.filter((modifier)=>{
                     return modifier !== x
                 })
-                // console.log("Modifier terminated.")
             })})
-            Handy.update((hand) => {
-                // console.log(hand.searchResults)
-            })
+            this.renderer.render(this.scene, this.camera)
         })
+    }
 
+    setup_controls() {
         // Setup controllers and hand tracking
-        var controller1 = this.renderer.xr.getController( 0 );
-        this.scene.add(controller1);
-        var controller2 = this.renderer.xr.getController( 1 );
-        this.scene.add(controller2);
+
         const controllerModelFactory = new XRControllerModelFactory();
         const handModelFactory = new XRHandModelFactory();
 
@@ -105,6 +104,26 @@ class App {
 
         var new_hand_availability = false
 
+        var setup_controller_and_hand_models = (index) => {
+            var controller = this.renderer.xr.getController(index)
+            this.scene.add(controller)
+
+            var controller_grip = this.renderer.xr.getControllerGrip(index);
+            controller_grip.add(controllerModelFactory.createControllerModel(controller_grip));
+            this.scene.add(controller_grip);
+
+            var hand = this.renderer.xr.getHand(index)
+            this.scene.add(hand)
+            hand.addEventListener("connected", hand_connected_callback)
+            hand.addEventListener("disconnected", hand_disconnected_callback)
+            hand.add(handModelFactory.createHandModel(hand,'mesh'))
+            Handy.makeHandy(hand)
+
+            return controller, hand
+        }
+
+        [0,1].map(setup_controller_and_hand_models)
+
         this.scene_modifiers.push((destroy) => {
             new_hand_availability = (this.left_hand?.joints && Object.values(this.left_hand.joints).length > 0 && this?.right_hand?.joints && Object.values(this.right_hand.joints).length > 0)
             // console.log(this?.left_hand?.joints, this?.right_hand?.joints, new_hand_availability)
@@ -119,32 +138,9 @@ class App {
                 this.hand_tracking_available = new_hand_availability
             }
         })
+    }
 
-        const preprocess_hand = (hand) => {
-            hand.addEventListener("connected", hand_connected_callback)
-            hand.addEventListener("disconnected", hand_disconnected_callback)
-        }
-    
-        // Hand 1
-        var controllerGrip1 = this.renderer.xr.getControllerGrip( 0 );
-        controllerGrip1.add( controllerModelFactory.createControllerModel( controllerGrip1 ) );
-        this.scene.add( controllerGrip1 );
-        var hand1 = this.renderer.xr.getHand( 0 );
-        this.scene.add( hand1 );
-        preprocess_hand(hand1)
-        hand1.add( handModelFactory.createHandModel( hand1, 'mesh' ) );
-        Handy.makeHandy(hand1)
-        
-        // Hand 2
-        var controllerGrip2 = this.renderer.xr.getControllerGrip( 1 );
-        controllerGrip2.add( controllerModelFactory.createControllerModel( controllerGrip2 ) );
-        this.scene.add( controllerGrip2 );
-        var hand2 = this.renderer.xr.getHand( 1 );
-        this.scene.add( hand2 );
-        preprocess_hand(hand2)
-        hand2.add( handModelFactory.createHandModel( hand2, 'mesh' ) );
-        Handy.makeHandy(hand2)
-    
+    setup_dummy_hands() {
         // Create dummy hands pre-requisites
         this.dummy_factory = new DummyXRHandModelFactory()
         this.dummyHands = new THREE.Group()
@@ -159,11 +155,9 @@ class App {
         this.dummy_right_hand = this.dummy_factory.createHandModel("right")
         this.dummyHands.add(this.dummy_right_hand)
         this.dummy_right_hand.visible = false
+    }
 
-        // Create app states
-        this.in_session = false
-        this.hand_tracking_available = false
-    
+    setup_content() {
         this.renderer.xr.addEventListener("sessionend", (event) => {
             console.log("Exited XR")
         })
