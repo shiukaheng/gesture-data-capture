@@ -479,28 +479,6 @@ window.IO = _io;
 window.Interpolation = _interpolation;
 window.PoseUtils = _poseUtils;
 window.ObjectUtils = _objectUtils;
-window.testObj = {
-    a: "Hello",
-    b: [
-        1,
-        2,
-        3
-    ],
-    c: {
-        c1: [
-            1,
-            2,
-            3
-        ],
-        c2: {
-            c21: "on9"
-        }
-    }
-};
-function inspect(object) {
-    console.log(object);
-    return object;
-}
 class App {
     constructor(upload_endpoint){
         // Setup three.js elements
@@ -624,8 +602,6 @@ class App {
         this.renderer.xr.addEventListener("sessionend", (event)=>{
             console.log("Exited XR");
         });
-        this.left_hand = null;
-        this.right_hand = null;
         // Setup three.js scene elements
         this.ambient_light = new _three.AmbientLight();
         this.ambient_light.intensity = 0.2;
@@ -868,7 +844,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
     once: true
 });
 
-},{"three":"1AKvZ","color-convert":"g3Be4","three/examples/jsm/webxr/XRControllerModelFactory.js":"lQjc0","three/examples/jsm/webxr/XRHandModelFactory.js":"dKTS4","./lib/DummyXRHandModel":"dCmjv","troika-three-text":"jZx5N","./lib/DataCapture":"3qqgc","./lib/IO":"hiq5a","./lib/Interpolation":"3PyXB","./lib/PoseUtils":"6XW1O","./lib/ObjectUtils":"4q0XH","./lib/InteractiveElements":"ENSer","axios":"iYoWk","@parcel/transformer-js/src/esmodule-helpers.js":"JacNc","@tweenjs/tween.js":"e87sn","handy.js":"jFuxO"}],"1AKvZ":[function(require,module,exports) {
+},{"three":"1AKvZ","three/examples/jsm/webxr/XRHandModelFactory.js":"dKTS4","color-convert":"g3Be4","three/examples/jsm/webxr/XRControllerModelFactory.js":"lQjc0","./lib/DummyXRHandModel":"dCmjv","@tweenjs/tween.js":"e87sn","troika-three-text":"jZx5N","./lib/DataCapture":"3qqgc","./lib/IO":"hiq5a","./lib/Interpolation":"3PyXB","./lib/PoseUtils":"6XW1O","./lib/ObjectUtils":"4q0XH","./lib/InteractiveElements":"ENSer","handy.js":"jFuxO","axios":"iYoWk","@parcel/transformer-js/src/esmodule-helpers.js":"JacNc"}],"1AKvZ":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "ACESFilmicToneMapping", ()=>ACESFilmicToneMapping
@@ -30571,1892 +30547,205 @@ exports.export = function(dest, destName, get) {
     });
 };
 
-},{}],"g3Be4":[function(require,module,exports) {
-const conversions = require('./conversions');
-const route = require('./route');
-const convert = {
-};
-const models = Object.keys(conversions);
-function wrapRaw(fn) {
-    const wrappedFn = function(...args) {
-        const arg0 = args[0];
-        if (arg0 === undefined || arg0 === null) return arg0;
-        if (arg0.length > 1) args = arg0;
-        return fn(args);
-    };
-    // Preserve .conversion property if there is one
-    if ('conversion' in fn) wrappedFn.conversion = fn.conversion;
-    return wrappedFn;
-}
-function wrapRounded(fn) {
-    const wrappedFn = function(...args) {
-        const arg0 = args[0];
-        if (arg0 === undefined || arg0 === null) return arg0;
-        if (arg0.length > 1) args = arg0;
-        const result = fn(args);
-        // We're assuming the result is an array here.
-        // see notice in conversions.js; don't use box types
-        // in conversion functions.
-        if (typeof result === 'object') for(let len = result.length, i = 0; i < len; i++)result[i] = Math.round(result[i]);
-        return result;
-    };
-    // Preserve .conversion property if there is one
-    if ('conversion' in fn) wrappedFn.conversion = fn.conversion;
-    return wrappedFn;
-}
-models.forEach((fromModel)=>{
-    convert[fromModel] = {
-    };
-    Object.defineProperty(convert[fromModel], 'channels', {
-        value: conversions[fromModel].channels
-    });
-    Object.defineProperty(convert[fromModel], 'labels', {
-        value: conversions[fromModel].labels
-    });
-    const routes = route(fromModel);
-    const routeModels = Object.keys(routes);
-    routeModels.forEach((toModel)=>{
-        const fn = routes[toModel];
-        convert[fromModel][toModel] = wrapRounded(fn);
-        convert[fromModel][toModel].raw = wrapRaw(fn);
-    });
-});
-module.exports = convert;
-
-},{"./conversions":"7GNDZ","./route":"f1k4D"}],"7GNDZ":[function(require,module,exports) {
-/* MIT license */ /* eslint-disable no-mixed-operators */ const cssKeywords = require('color-name');
-// NOTE: conversions should only return primitive values (i.e. arrays, or
-//       values that give correct `typeof` results).
-//       do not use box values types (i.e. Number(), String(), etc.)
-const reverseKeywords = {
-};
-for (const key of Object.keys(cssKeywords))reverseKeywords[cssKeywords[key]] = key;
-const convert = {
-    rgb: {
-        channels: 3,
-        labels: 'rgb'
-    },
-    hsl: {
-        channels: 3,
-        labels: 'hsl'
-    },
-    hsv: {
-        channels: 3,
-        labels: 'hsv'
-    },
-    hwb: {
-        channels: 3,
-        labels: 'hwb'
-    },
-    cmyk: {
-        channels: 4,
-        labels: 'cmyk'
-    },
-    xyz: {
-        channels: 3,
-        labels: 'xyz'
-    },
-    lab: {
-        channels: 3,
-        labels: 'lab'
-    },
-    lch: {
-        channels: 3,
-        labels: 'lch'
-    },
-    hex: {
-        channels: 1,
-        labels: [
-            'hex'
-        ]
-    },
-    keyword: {
-        channels: 1,
-        labels: [
-            'keyword'
-        ]
-    },
-    ansi16: {
-        channels: 1,
-        labels: [
-            'ansi16'
-        ]
-    },
-    ansi256: {
-        channels: 1,
-        labels: [
-            'ansi256'
-        ]
-    },
-    hcg: {
-        channels: 3,
-        labels: [
-            'h',
-            'c',
-            'g'
-        ]
-    },
-    apple: {
-        channels: 3,
-        labels: [
-            'r16',
-            'g16',
-            'b16'
-        ]
-    },
-    gray: {
-        channels: 1,
-        labels: [
-            'gray'
-        ]
-    }
-};
-module.exports = convert;
-// Hide .channels and .labels properties
-for (const model of Object.keys(convert)){
-    if (!('channels' in convert[model])) throw new Error('missing channels property: ' + model);
-    if (!('labels' in convert[model])) throw new Error('missing channel labels property: ' + model);
-    if (convert[model].labels.length !== convert[model].channels) throw new Error('channel and label counts mismatch: ' + model);
-    const { channels , labels  } = convert[model];
-    delete convert[model].channels;
-    delete convert[model].labels;
-    Object.defineProperty(convert[model], 'channels', {
-        value: channels
-    });
-    Object.defineProperty(convert[model], 'labels', {
-        value: labels
-    });
-}
-convert.rgb.hsl = function(rgb) {
-    const r = rgb[0] / 255;
-    const g = rgb[1] / 255;
-    const b = rgb[2] / 255;
-    const min = Math.min(r, g, b);
-    const max = Math.max(r, g, b);
-    const delta = max - min;
-    let h;
-    let s;
-    if (max === min) h = 0;
-    else if (r === max) h = (g - b) / delta;
-    else if (g === max) h = 2 + (b - r) / delta;
-    else if (b === max) h = 4 + (r - g) / delta;
-    h = Math.min(h * 60, 360);
-    if (h < 0) h += 360;
-    const l = (min + max) / 2;
-    if (max === min) s = 0;
-    else if (l <= 0.5) s = delta / (max + min);
-    else s = delta / (2 - max - min);
-    return [
-        h,
-        s * 100,
-        l * 100
-    ];
-};
-convert.rgb.hsv = function(rgb) {
-    let rdif;
-    let gdif;
-    let bdif;
-    let h;
-    let s;
-    const r = rgb[0] / 255;
-    const g = rgb[1] / 255;
-    const b = rgb[2] / 255;
-    const v = Math.max(r, g, b);
-    const diff = v - Math.min(r, g, b);
-    const diffc = function(c) {
-        return (v - c) / 6 / diff + 0.5;
-    };
-    if (diff === 0) {
-        h = 0;
-        s = 0;
-    } else {
-        s = diff / v;
-        rdif = diffc(r);
-        gdif = diffc(g);
-        bdif = diffc(b);
-        if (r === v) h = bdif - gdif;
-        else if (g === v) h = 1 / 3 + rdif - bdif;
-        else if (b === v) h = 2 / 3 + gdif - rdif;
-        if (h < 0) h += 1;
-        else if (h > 1) h -= 1;
-    }
-    return [
-        h * 360,
-        s * 100,
-        v * 100
-    ];
-};
-convert.rgb.hwb = function(rgb) {
-    const r = rgb[0];
-    const g = rgb[1];
-    let b = rgb[2];
-    const h = convert.rgb.hsl(rgb)[0];
-    const w = 1 / 255 * Math.min(r, Math.min(g, b));
-    b = 1 - 1 / 255 * Math.max(r, Math.max(g, b));
-    return [
-        h,
-        w * 100,
-        b * 100
-    ];
-};
-convert.rgb.cmyk = function(rgb) {
-    const r = rgb[0] / 255;
-    const g = rgb[1] / 255;
-    const b = rgb[2] / 255;
-    const k = Math.min(1 - r, 1 - g, 1 - b);
-    const c = (1 - r - k) / (1 - k) || 0;
-    const m = (1 - g - k) / (1 - k) || 0;
-    const y = (1 - b - k) / (1 - k) || 0;
-    return [
-        c * 100,
-        m * 100,
-        y * 100,
-        k * 100
-    ];
-};
-function comparativeDistance(x, y) {
-    /*
-		See https://en.m.wikipedia.org/wiki/Euclidean_distance#Squared_Euclidean_distance
-	*/ return (x[0] - y[0]) ** 2 + (x[1] - y[1]) ** 2 + (x[2] - y[2]) ** 2;
-}
-convert.rgb.keyword = function(rgb) {
-    const reversed = reverseKeywords[rgb];
-    if (reversed) return reversed;
-    let currentClosestDistance = Infinity;
-    let currentClosestKeyword;
-    for (const keyword of Object.keys(cssKeywords)){
-        const value = cssKeywords[keyword];
-        // Compute comparative distance
-        const distance = comparativeDistance(rgb, value);
-        // Check if its less, if so set as closest
-        if (distance < currentClosestDistance) {
-            currentClosestDistance = distance;
-            currentClosestKeyword = keyword;
-        }
-    }
-    return currentClosestKeyword;
-};
-convert.keyword.rgb = function(keyword) {
-    return cssKeywords[keyword];
-};
-convert.rgb.xyz = function(rgb) {
-    let r = rgb[0] / 255;
-    let g = rgb[1] / 255;
-    let b = rgb[2] / 255;
-    // Assume sRGB
-    r = r > 0.04045 ? ((r + 0.055) / 1.055) ** 2.4 : r / 12.92;
-    g = g > 0.04045 ? ((g + 0.055) / 1.055) ** 2.4 : g / 12.92;
-    b = b > 0.04045 ? ((b + 0.055) / 1.055) ** 2.4 : b / 12.92;
-    const x = r * 0.4124 + g * 0.3576 + b * 0.1805;
-    const y = r * 0.2126 + g * 0.7152 + b * 0.0722;
-    const z = r * 0.0193 + g * 0.1192 + b * 0.9505;
-    return [
-        x * 100,
-        y * 100,
-        z * 100
-    ];
-};
-convert.rgb.lab = function(rgb) {
-    const xyz = convert.rgb.xyz(rgb);
-    let x = xyz[0];
-    let y = xyz[1];
-    let z = xyz[2];
-    x /= 95.047;
-    y /= 100;
-    z /= 108.883;
-    x = x > 0.008856 ? x ** (1 / 3) : 7.787 * x + 16 / 116;
-    y = y > 0.008856 ? y ** (1 / 3) : 7.787 * y + 16 / 116;
-    z = z > 0.008856 ? z ** (1 / 3) : 7.787 * z + 16 / 116;
-    const l = 116 * y - 16;
-    const a = 500 * (x - y);
-    const b = 200 * (y - z);
-    return [
-        l,
-        a,
-        b
-    ];
-};
-convert.hsl.rgb = function(hsl) {
-    const h = hsl[0] / 360;
-    const s = hsl[1] / 100;
-    const l = hsl[2] / 100;
-    let t2;
-    let t3;
-    let val;
-    if (s === 0) {
-        val = l * 255;
-        return [
-            val,
-            val,
-            val
-        ];
-    }
-    if (l < 0.5) t2 = l * (1 + s);
-    else t2 = l + s - l * s;
-    const t1 = 2 * l - t2;
-    const rgb = [
-        0,
-        0,
-        0
-    ];
-    for(let i = 0; i < 3; i++){
-        t3 = h + 1 / 3 * -(i - 1);
-        if (t3 < 0) t3++;
-        if (t3 > 1) t3--;
-        if (6 * t3 < 1) val = t1 + (t2 - t1) * 6 * t3;
-        else if (2 * t3 < 1) val = t2;
-        else if (3 * t3 < 2) val = t1 + (t2 - t1) * (2 / 3 - t3) * 6;
-        else val = t1;
-        rgb[i] = val * 255;
-    }
-    return rgb;
-};
-convert.hsl.hsv = function(hsl) {
-    const h = hsl[0];
-    let s = hsl[1] / 100;
-    let l = hsl[2] / 100;
-    let smin = s;
-    const lmin = Math.max(l, 0.01);
-    l *= 2;
-    s *= l <= 1 ? l : 2 - l;
-    smin *= lmin <= 1 ? lmin : 2 - lmin;
-    const v = (l + s) / 2;
-    const sv = l === 0 ? 2 * smin / (lmin + smin) : 2 * s / (l + s);
-    return [
-        h,
-        sv * 100,
-        v * 100
-    ];
-};
-convert.hsv.rgb = function(hsv) {
-    const h = hsv[0] / 60;
-    const s = hsv[1] / 100;
-    let v = hsv[2] / 100;
-    const hi = Math.floor(h) % 6;
-    const f = h - Math.floor(h);
-    const p = 255 * v * (1 - s);
-    const q = 255 * v * (1 - s * f);
-    const t = 255 * v * (1 - s * (1 - f));
-    v *= 255;
-    switch(hi){
-        case 0:
-            return [
-                v,
-                t,
-                p
-            ];
-        case 1:
-            return [
-                q,
-                v,
-                p
-            ];
-        case 2:
-            return [
-                p,
-                v,
-                t
-            ];
-        case 3:
-            return [
-                p,
-                q,
-                v
-            ];
-        case 4:
-            return [
-                t,
-                p,
-                v
-            ];
-        case 5:
-            return [
-                v,
-                p,
-                q
-            ];
-    }
-};
-convert.hsv.hsl = function(hsv) {
-    const h = hsv[0];
-    const s = hsv[1] / 100;
-    const v = hsv[2] / 100;
-    const vmin = Math.max(v, 0.01);
-    let sl;
-    let l;
-    l = (2 - s) * v;
-    const lmin = (2 - s) * vmin;
-    sl = s * vmin;
-    sl /= lmin <= 1 ? lmin : 2 - lmin;
-    sl = sl || 0;
-    l /= 2;
-    return [
-        h,
-        sl * 100,
-        l * 100
-    ];
-};
-// http://dev.w3.org/csswg/css-color/#hwb-to-rgb
-convert.hwb.rgb = function(hwb) {
-    const h = hwb[0] / 360;
-    let wh = hwb[1] / 100;
-    let bl = hwb[2] / 100;
-    const ratio = wh + bl;
-    let f;
-    // Wh + bl cant be > 1
-    if (ratio > 1) {
-        wh /= ratio;
-        bl /= ratio;
-    }
-    const i = Math.floor(6 * h);
-    const v = 1 - bl;
-    f = 6 * h - i;
-    if ((i & 1) !== 0) f = 1 - f;
-    const n = wh + f * (v - wh); // Linear interpolation
-    let r;
-    let g;
-    let b;
-    /* eslint-disable max-statements-per-line,no-multi-spaces */ switch(i){
-        default:
-        case 6:
-        case 0:
-            r = v;
-            g = n;
-            b = wh;
-            break;
-        case 1:
-            r = n;
-            g = v;
-            b = wh;
-            break;
-        case 2:
-            r = wh;
-            g = v;
-            b = n;
-            break;
-        case 3:
-            r = wh;
-            g = n;
-            b = v;
-            break;
-        case 4:
-            r = n;
-            g = wh;
-            b = v;
-            break;
-        case 5:
-            r = v;
-            g = wh;
-            b = n;
-            break;
-    }
-    /* eslint-enable max-statements-per-line,no-multi-spaces */ return [
-        r * 255,
-        g * 255,
-        b * 255
-    ];
-};
-convert.cmyk.rgb = function(cmyk) {
-    const c = cmyk[0] / 100;
-    const m = cmyk[1] / 100;
-    const y = cmyk[2] / 100;
-    const k = cmyk[3] / 100;
-    const r = 1 - Math.min(1, c * (1 - k) + k);
-    const g = 1 - Math.min(1, m * (1 - k) + k);
-    const b = 1 - Math.min(1, y * (1 - k) + k);
-    return [
-        r * 255,
-        g * 255,
-        b * 255
-    ];
-};
-convert.xyz.rgb = function(xyz) {
-    const x = xyz[0] / 100;
-    const y = xyz[1] / 100;
-    const z = xyz[2] / 100;
-    let r;
-    let g;
-    let b;
-    r = x * 3.2406 + y * -1.5372 + z * -0.4986;
-    g = x * -0.9689 + y * 1.8758 + z * 0.0415;
-    b = x * 0.0557 + y * -0.204 + z * 1.057;
-    // Assume sRGB
-    r = r > 0.0031308 ? 1.055 * r ** (1 / 2.4) - 0.055 : r * 12.92;
-    g = g > 0.0031308 ? 1.055 * g ** (1 / 2.4) - 0.055 : g * 12.92;
-    b = b > 0.0031308 ? 1.055 * b ** (1 / 2.4) - 0.055 : b * 12.92;
-    r = Math.min(Math.max(0, r), 1);
-    g = Math.min(Math.max(0, g), 1);
-    b = Math.min(Math.max(0, b), 1);
-    return [
-        r * 255,
-        g * 255,
-        b * 255
-    ];
-};
-convert.xyz.lab = function(xyz) {
-    let x = xyz[0];
-    let y = xyz[1];
-    let z = xyz[2];
-    x /= 95.047;
-    y /= 100;
-    z /= 108.883;
-    x = x > 0.008856 ? x ** (1 / 3) : 7.787 * x + 16 / 116;
-    y = y > 0.008856 ? y ** (1 / 3) : 7.787 * y + 16 / 116;
-    z = z > 0.008856 ? z ** (1 / 3) : 7.787 * z + 16 / 116;
-    const l = 116 * y - 16;
-    const a = 500 * (x - y);
-    const b = 200 * (y - z);
-    return [
-        l,
-        a,
-        b
-    ];
-};
-convert.lab.xyz = function(lab) {
-    const l = lab[0];
-    const a = lab[1];
-    const b = lab[2];
-    let x;
-    let y;
-    let z;
-    y = (l + 16) / 116;
-    x = a / 500 + y;
-    z = y - b / 200;
-    const y2 = y ** 3;
-    const x2 = x ** 3;
-    const z2 = z ** 3;
-    y = y2 > 0.008856 ? y2 : (y - 16 / 116) / 7.787;
-    x = x2 > 0.008856 ? x2 : (x - 16 / 116) / 7.787;
-    z = z2 > 0.008856 ? z2 : (z - 16 / 116) / 7.787;
-    x *= 95.047;
-    y *= 100;
-    z *= 108.883;
-    return [
-        x,
-        y,
-        z
-    ];
-};
-convert.lab.lch = function(lab) {
-    const l = lab[0];
-    const a = lab[1];
-    const b = lab[2];
-    let h;
-    const hr = Math.atan2(b, a);
-    h = hr * 360 / 2 / Math.PI;
-    if (h < 0) h += 360;
-    const c = Math.sqrt(a * a + b * b);
-    return [
-        l,
-        c,
-        h
-    ];
-};
-convert.lch.lab = function(lch) {
-    const l = lch[0];
-    const c = lch[1];
-    const h = lch[2];
-    const hr = h / 360 * 2 * Math.PI;
-    const a = c * Math.cos(hr);
-    const b = c * Math.sin(hr);
-    return [
-        l,
-        a,
-        b
-    ];
-};
-convert.rgb.ansi16 = function(args, saturation = null) {
-    const [r, g, b] = args;
-    let value = saturation === null ? convert.rgb.hsv(args)[2] : saturation; // Hsv -> ansi16 optimization
-    value = Math.round(value / 50);
-    if (value === 0) return 30;
-    let ansi = 30 + (Math.round(b / 255) << 2 | Math.round(g / 255) << 1 | Math.round(r / 255));
-    if (value === 2) ansi += 60;
-    return ansi;
-};
-convert.hsv.ansi16 = function(args) {
-    // Optimization here; we already know the value and don't need to get
-    // it converted for us.
-    return convert.rgb.ansi16(convert.hsv.rgb(args), args[2]);
-};
-convert.rgb.ansi256 = function(args) {
-    const r = args[0];
-    const g = args[1];
-    const b = args[2];
-    // We use the extended greyscale palette here, with the exception of
-    // black and white. normal palette only has 4 greyscale shades.
-    if (r === g && g === b) {
-        if (r < 8) return 16;
-        if (r > 248) return 231;
-        return Math.round((r - 8) / 247 * 24) + 232;
-    }
-    const ansi = 16 + 36 * Math.round(r / 255 * 5) + 6 * Math.round(g / 255 * 5) + Math.round(b / 255 * 5);
-    return ansi;
-};
-convert.ansi16.rgb = function(args) {
-    let color = args % 10;
-    // Handle greyscale
-    if (color === 0 || color === 7) {
-        if (args > 50) color += 3.5;
-        color = color / 10.5 * 255;
-        return [
-            color,
-            color,
-            color
-        ];
-    }
-    const mult = (~~(args > 50) + 1) * 0.5;
-    const r = (color & 1) * mult * 255;
-    const g = (color >> 1 & 1) * mult * 255;
-    const b = (color >> 2 & 1) * mult * 255;
-    return [
-        r,
-        g,
-        b
-    ];
-};
-convert.ansi256.rgb = function(args) {
-    // Handle greyscale
-    if (args >= 232) {
-        const c = (args - 232) * 10 + 8;
-        return [
-            c,
-            c,
-            c
-        ];
-    }
-    args -= 16;
-    let rem;
-    const r = Math.floor(args / 36) / 5 * 255;
-    const g = Math.floor((rem = args % 36) / 6) / 5 * 255;
-    const b = rem % 6 / 5 * 255;
-    return [
-        r,
-        g,
-        b
-    ];
-};
-convert.rgb.hex = function(args) {
-    const integer = ((Math.round(args[0]) & 255) << 16) + ((Math.round(args[1]) & 255) << 8) + (Math.round(args[2]) & 255);
-    const string = integer.toString(16).toUpperCase();
-    return '000000'.substring(string.length) + string;
-};
-convert.hex.rgb = function(args) {
-    const match = args.toString(16).match(/[a-f0-9]{6}|[a-f0-9]{3}/i);
-    if (!match) return [
-        0,
-        0,
-        0
-    ];
-    let colorString = match[0];
-    if (match[0].length === 3) colorString = colorString.split('').map((char)=>{
-        return char + char;
-    }).join('');
-    const integer = parseInt(colorString, 16);
-    const r = integer >> 16 & 255;
-    const g = integer >> 8 & 255;
-    const b = integer & 255;
-    return [
-        r,
-        g,
-        b
-    ];
-};
-convert.rgb.hcg = function(rgb) {
-    const r = rgb[0] / 255;
-    const g = rgb[1] / 255;
-    const b = rgb[2] / 255;
-    const max = Math.max(Math.max(r, g), b);
-    const min = Math.min(Math.min(r, g), b);
-    const chroma = max - min;
-    let grayscale;
-    let hue;
-    if (chroma < 1) grayscale = min / (1 - chroma);
-    else grayscale = 0;
-    if (chroma <= 0) hue = 0;
-    else if (max === r) hue = (g - b) / chroma % 6;
-    else if (max === g) hue = 2 + (b - r) / chroma;
-    else hue = 4 + (r - g) / chroma;
-    hue /= 6;
-    hue %= 1;
-    return [
-        hue * 360,
-        chroma * 100,
-        grayscale * 100
-    ];
-};
-convert.hsl.hcg = function(hsl) {
-    const s = hsl[1] / 100;
-    const l = hsl[2] / 100;
-    const c = l < 0.5 ? 2 * s * l : 2 * s * (1 - l);
-    let f = 0;
-    if (c < 1) f = (l - 0.5 * c) / (1 - c);
-    return [
-        hsl[0],
-        c * 100,
-        f * 100
-    ];
-};
-convert.hsv.hcg = function(hsv) {
-    const s = hsv[1] / 100;
-    const v = hsv[2] / 100;
-    const c = s * v;
-    let f = 0;
-    if (c < 1) f = (v - c) / (1 - c);
-    return [
-        hsv[0],
-        c * 100,
-        f * 100
-    ];
-};
-convert.hcg.rgb = function(hcg) {
-    const h = hcg[0] / 360;
-    const c = hcg[1] / 100;
-    const g = hcg[2] / 100;
-    if (c === 0) return [
-        g * 255,
-        g * 255,
-        g * 255
-    ];
-    const pure = [
-        0,
-        0,
-        0
-    ];
-    const hi = h % 1 * 6;
-    const v = hi % 1;
-    const w = 1 - v;
-    let mg = 0;
-    /* eslint-disable max-statements-per-line */ switch(Math.floor(hi)){
-        case 0:
-            pure[0] = 1;
-            pure[1] = v;
-            pure[2] = 0;
-            break;
-        case 1:
-            pure[0] = w;
-            pure[1] = 1;
-            pure[2] = 0;
-            break;
-        case 2:
-            pure[0] = 0;
-            pure[1] = 1;
-            pure[2] = v;
-            break;
-        case 3:
-            pure[0] = 0;
-            pure[1] = w;
-            pure[2] = 1;
-            break;
-        case 4:
-            pure[0] = v;
-            pure[1] = 0;
-            pure[2] = 1;
-            break;
-        default:
-            pure[0] = 1;
-            pure[1] = 0;
-            pure[2] = w;
-    }
-    /* eslint-enable max-statements-per-line */ mg = (1 - c) * g;
-    return [
-        (c * pure[0] + mg) * 255,
-        (c * pure[1] + mg) * 255,
-        (c * pure[2] + mg) * 255
-    ];
-};
-convert.hcg.hsv = function(hcg) {
-    const c = hcg[1] / 100;
-    const g = hcg[2] / 100;
-    const v = c + g * (1 - c);
-    let f = 0;
-    if (v > 0) f = c / v;
-    return [
-        hcg[0],
-        f * 100,
-        v * 100
-    ];
-};
-convert.hcg.hsl = function(hcg) {
-    const c = hcg[1] / 100;
-    const g = hcg[2] / 100;
-    const l = g * (1 - c) + 0.5 * c;
-    let s = 0;
-    if (l > 0 && l < 0.5) s = c / (2 * l);
-    else if (l >= 0.5 && l < 1) s = c / (2 * (1 - l));
-    return [
-        hcg[0],
-        s * 100,
-        l * 100
-    ];
-};
-convert.hcg.hwb = function(hcg) {
-    const c = hcg[1] / 100;
-    const g = hcg[2] / 100;
-    const v = c + g * (1 - c);
-    return [
-        hcg[0],
-        (v - c) * 100,
-        (1 - v) * 100
-    ];
-};
-convert.hwb.hcg = function(hwb) {
-    const w = hwb[1] / 100;
-    const b = hwb[2] / 100;
-    const v = 1 - b;
-    const c = v - w;
-    let g = 0;
-    if (c < 1) g = (v - c) / (1 - c);
-    return [
-        hwb[0],
-        c * 100,
-        g * 100
-    ];
-};
-convert.apple.rgb = function(apple) {
-    return [
-        apple[0] / 65535 * 255,
-        apple[1] / 65535 * 255,
-        apple[2] / 65535 * 255
-    ];
-};
-convert.rgb.apple = function(rgb) {
-    return [
-        rgb[0] / 255 * 65535,
-        rgb[1] / 255 * 65535,
-        rgb[2] / 255 * 65535
-    ];
-};
-convert.gray.rgb = function(args) {
-    return [
-        args[0] / 100 * 255,
-        args[0] / 100 * 255,
-        args[0] / 100 * 255
-    ];
-};
-convert.gray.hsl = function(args) {
-    return [
-        0,
-        0,
-        args[0]
-    ];
-};
-convert.gray.hsv = convert.gray.hsl;
-convert.gray.hwb = function(gray) {
-    return [
-        0,
-        100,
-        gray[0]
-    ];
-};
-convert.gray.cmyk = function(gray) {
-    return [
-        0,
-        0,
-        0,
-        gray[0]
-    ];
-};
-convert.gray.lab = function(gray) {
-    return [
-        gray[0],
-        0,
-        0
-    ];
-};
-convert.gray.hex = function(gray) {
-    const val = Math.round(gray[0] / 100 * 255) & 255;
-    const integer = (val << 16) + (val << 8) + val;
-    const string = integer.toString(16).toUpperCase();
-    return '000000'.substring(string.length) + string;
-};
-convert.rgb.gray = function(rgb) {
-    const val = (rgb[0] + rgb[1] + rgb[2]) / 3;
-    return [
-        val / 255 * 100
-    ];
-};
-
-},{"color-name":"bvxFr"}],"bvxFr":[function(require,module,exports) {
-'use strict';
-module.exports = {
-    "aliceblue": [
-        240,
-        248,
-        255
-    ],
-    "antiquewhite": [
-        250,
-        235,
-        215
-    ],
-    "aqua": [
-        0,
-        255,
-        255
-    ],
-    "aquamarine": [
-        127,
-        255,
-        212
-    ],
-    "azure": [
-        240,
-        255,
-        255
-    ],
-    "beige": [
-        245,
-        245,
-        220
-    ],
-    "bisque": [
-        255,
-        228,
-        196
-    ],
-    "black": [
-        0,
-        0,
-        0
-    ],
-    "blanchedalmond": [
-        255,
-        235,
-        205
-    ],
-    "blue": [
-        0,
-        0,
-        255
-    ],
-    "blueviolet": [
-        138,
-        43,
-        226
-    ],
-    "brown": [
-        165,
-        42,
-        42
-    ],
-    "burlywood": [
-        222,
-        184,
-        135
-    ],
-    "cadetblue": [
-        95,
-        158,
-        160
-    ],
-    "chartreuse": [
-        127,
-        255,
-        0
-    ],
-    "chocolate": [
-        210,
-        105,
-        30
-    ],
-    "coral": [
-        255,
-        127,
-        80
-    ],
-    "cornflowerblue": [
-        100,
-        149,
-        237
-    ],
-    "cornsilk": [
-        255,
-        248,
-        220
-    ],
-    "crimson": [
-        220,
-        20,
-        60
-    ],
-    "cyan": [
-        0,
-        255,
-        255
-    ],
-    "darkblue": [
-        0,
-        0,
-        139
-    ],
-    "darkcyan": [
-        0,
-        139,
-        139
-    ],
-    "darkgoldenrod": [
-        184,
-        134,
-        11
-    ],
-    "darkgray": [
-        169,
-        169,
-        169
-    ],
-    "darkgreen": [
-        0,
-        100,
-        0
-    ],
-    "darkgrey": [
-        169,
-        169,
-        169
-    ],
-    "darkkhaki": [
-        189,
-        183,
-        107
-    ],
-    "darkmagenta": [
-        139,
-        0,
-        139
-    ],
-    "darkolivegreen": [
-        85,
-        107,
-        47
-    ],
-    "darkorange": [
-        255,
-        140,
-        0
-    ],
-    "darkorchid": [
-        153,
-        50,
-        204
-    ],
-    "darkred": [
-        139,
-        0,
-        0
-    ],
-    "darksalmon": [
-        233,
-        150,
-        122
-    ],
-    "darkseagreen": [
-        143,
-        188,
-        143
-    ],
-    "darkslateblue": [
-        72,
-        61,
-        139
-    ],
-    "darkslategray": [
-        47,
-        79,
-        79
-    ],
-    "darkslategrey": [
-        47,
-        79,
-        79
-    ],
-    "darkturquoise": [
-        0,
-        206,
-        209
-    ],
-    "darkviolet": [
-        148,
-        0,
-        211
-    ],
-    "deeppink": [
-        255,
-        20,
-        147
-    ],
-    "deepskyblue": [
-        0,
-        191,
-        255
-    ],
-    "dimgray": [
-        105,
-        105,
-        105
-    ],
-    "dimgrey": [
-        105,
-        105,
-        105
-    ],
-    "dodgerblue": [
-        30,
-        144,
-        255
-    ],
-    "firebrick": [
-        178,
-        34,
-        34
-    ],
-    "floralwhite": [
-        255,
-        250,
-        240
-    ],
-    "forestgreen": [
-        34,
-        139,
-        34
-    ],
-    "fuchsia": [
-        255,
-        0,
-        255
-    ],
-    "gainsboro": [
-        220,
-        220,
-        220
-    ],
-    "ghostwhite": [
-        248,
-        248,
-        255
-    ],
-    "gold": [
-        255,
-        215,
-        0
-    ],
-    "goldenrod": [
-        218,
-        165,
-        32
-    ],
-    "gray": [
-        128,
-        128,
-        128
-    ],
-    "green": [
-        0,
-        128,
-        0
-    ],
-    "greenyellow": [
-        173,
-        255,
-        47
-    ],
-    "grey": [
-        128,
-        128,
-        128
-    ],
-    "honeydew": [
-        240,
-        255,
-        240
-    ],
-    "hotpink": [
-        255,
-        105,
-        180
-    ],
-    "indianred": [
-        205,
-        92,
-        92
-    ],
-    "indigo": [
-        75,
-        0,
-        130
-    ],
-    "ivory": [
-        255,
-        255,
-        240
-    ],
-    "khaki": [
-        240,
-        230,
-        140
-    ],
-    "lavender": [
-        230,
-        230,
-        250
-    ],
-    "lavenderblush": [
-        255,
-        240,
-        245
-    ],
-    "lawngreen": [
-        124,
-        252,
-        0
-    ],
-    "lemonchiffon": [
-        255,
-        250,
-        205
-    ],
-    "lightblue": [
-        173,
-        216,
-        230
-    ],
-    "lightcoral": [
-        240,
-        128,
-        128
-    ],
-    "lightcyan": [
-        224,
-        255,
-        255
-    ],
-    "lightgoldenrodyellow": [
-        250,
-        250,
-        210
-    ],
-    "lightgray": [
-        211,
-        211,
-        211
-    ],
-    "lightgreen": [
-        144,
-        238,
-        144
-    ],
-    "lightgrey": [
-        211,
-        211,
-        211
-    ],
-    "lightpink": [
-        255,
-        182,
-        193
-    ],
-    "lightsalmon": [
-        255,
-        160,
-        122
-    ],
-    "lightseagreen": [
-        32,
-        178,
-        170
-    ],
-    "lightskyblue": [
-        135,
-        206,
-        250
-    ],
-    "lightslategray": [
-        119,
-        136,
-        153
-    ],
-    "lightslategrey": [
-        119,
-        136,
-        153
-    ],
-    "lightsteelblue": [
-        176,
-        196,
-        222
-    ],
-    "lightyellow": [
-        255,
-        255,
-        224
-    ],
-    "lime": [
-        0,
-        255,
-        0
-    ],
-    "limegreen": [
-        50,
-        205,
-        50
-    ],
-    "linen": [
-        250,
-        240,
-        230
-    ],
-    "magenta": [
-        255,
-        0,
-        255
-    ],
-    "maroon": [
-        128,
-        0,
-        0
-    ],
-    "mediumaquamarine": [
-        102,
-        205,
-        170
-    ],
-    "mediumblue": [
-        0,
-        0,
-        205
-    ],
-    "mediumorchid": [
-        186,
-        85,
-        211
-    ],
-    "mediumpurple": [
-        147,
-        112,
-        219
-    ],
-    "mediumseagreen": [
-        60,
-        179,
-        113
-    ],
-    "mediumslateblue": [
-        123,
-        104,
-        238
-    ],
-    "mediumspringgreen": [
-        0,
-        250,
-        154
-    ],
-    "mediumturquoise": [
-        72,
-        209,
-        204
-    ],
-    "mediumvioletred": [
-        199,
-        21,
-        133
-    ],
-    "midnightblue": [
-        25,
-        25,
-        112
-    ],
-    "mintcream": [
-        245,
-        255,
-        250
-    ],
-    "mistyrose": [
-        255,
-        228,
-        225
-    ],
-    "moccasin": [
-        255,
-        228,
-        181
-    ],
-    "navajowhite": [
-        255,
-        222,
-        173
-    ],
-    "navy": [
-        0,
-        0,
-        128
-    ],
-    "oldlace": [
-        253,
-        245,
-        230
-    ],
-    "olive": [
-        128,
-        128,
-        0
-    ],
-    "olivedrab": [
-        107,
-        142,
-        35
-    ],
-    "orange": [
-        255,
-        165,
-        0
-    ],
-    "orangered": [
-        255,
-        69,
-        0
-    ],
-    "orchid": [
-        218,
-        112,
-        214
-    ],
-    "palegoldenrod": [
-        238,
-        232,
-        170
-    ],
-    "palegreen": [
-        152,
-        251,
-        152
-    ],
-    "paleturquoise": [
-        175,
-        238,
-        238
-    ],
-    "palevioletred": [
-        219,
-        112,
-        147
-    ],
-    "papayawhip": [
-        255,
-        239,
-        213
-    ],
-    "peachpuff": [
-        255,
-        218,
-        185
-    ],
-    "peru": [
-        205,
-        133,
-        63
-    ],
-    "pink": [
-        255,
-        192,
-        203
-    ],
-    "plum": [
-        221,
-        160,
-        221
-    ],
-    "powderblue": [
-        176,
-        224,
-        230
-    ],
-    "purple": [
-        128,
-        0,
-        128
-    ],
-    "rebeccapurple": [
-        102,
-        51,
-        153
-    ],
-    "red": [
-        255,
-        0,
-        0
-    ],
-    "rosybrown": [
-        188,
-        143,
-        143
-    ],
-    "royalblue": [
-        65,
-        105,
-        225
-    ],
-    "saddlebrown": [
-        139,
-        69,
-        19
-    ],
-    "salmon": [
-        250,
-        128,
-        114
-    ],
-    "sandybrown": [
-        244,
-        164,
-        96
-    ],
-    "seagreen": [
-        46,
-        139,
-        87
-    ],
-    "seashell": [
-        255,
-        245,
-        238
-    ],
-    "sienna": [
-        160,
-        82,
-        45
-    ],
-    "silver": [
-        192,
-        192,
-        192
-    ],
-    "skyblue": [
-        135,
-        206,
-        235
-    ],
-    "slateblue": [
-        106,
-        90,
-        205
-    ],
-    "slategray": [
-        112,
-        128,
-        144
-    ],
-    "slategrey": [
-        112,
-        128,
-        144
-    ],
-    "snow": [
-        255,
-        250,
-        250
-    ],
-    "springgreen": [
-        0,
-        255,
-        127
-    ],
-    "steelblue": [
-        70,
-        130,
-        180
-    ],
-    "tan": [
-        210,
-        180,
-        140
-    ],
-    "teal": [
-        0,
-        128,
-        128
-    ],
-    "thistle": [
-        216,
-        191,
-        216
-    ],
-    "tomato": [
-        255,
-        99,
-        71
-    ],
-    "turquoise": [
-        64,
-        224,
-        208
-    ],
-    "violet": [
-        238,
-        130,
-        238
-    ],
-    "wheat": [
-        245,
-        222,
-        179
-    ],
-    "white": [
-        255,
-        255,
-        255
-    ],
-    "whitesmoke": [
-        245,
-        245,
-        245
-    ],
-    "yellow": [
-        255,
-        255,
-        0
-    ],
-    "yellowgreen": [
-        154,
-        205,
-        50
-    ]
-};
-
-},{}],"f1k4D":[function(require,module,exports) {
-const conversions = require('./conversions');
-/*
-	This function routes a model to all other models.
-
-	all functions that are routed have a property `.conversion` attached
-	to the returned synthetic function. This property is an array
-	of strings, each with the steps in between the 'from' and 'to'
-	color models (inclusive).
-
-	conversions that are not possible simply are not included.
-*/ function buildGraph() {
-    const graph = {
-    };
-    // https://jsperf.com/object-keys-vs-for-in-with-closure/3
-    const models = Object.keys(conversions);
-    for(let len = models.length, i = 0; i < len; i++)graph[models[i]] = {
-        // http://jsperf.com/1-vs-infinity
-        // micro-opt, but this is simple.
-        distance: -1,
-        parent: null
-    };
-    return graph;
-}
-// https://en.wikipedia.org/wiki/Breadth-first_search
-function deriveBFS(fromModel) {
-    const graph = buildGraph();
-    const queue = [
-        fromModel
-    ]; // Unshift -> queue -> pop
-    graph[fromModel].distance = 0;
-    while(queue.length){
-        const current = queue.pop();
-        const adjacents = Object.keys(conversions[current]);
-        for(let len = adjacents.length, i = 0; i < len; i++){
-            const adjacent = adjacents[i];
-            const node = graph[adjacent];
-            if (node.distance === -1) {
-                node.distance = graph[current].distance + 1;
-                node.parent = current;
-                queue.unshift(adjacent);
-            }
-        }
-    }
-    return graph;
-}
-function link(from, to) {
-    return function(args) {
-        return to(from(args));
-    };
-}
-function wrapConversion(toModel, graph) {
-    const path = [
-        graph[toModel].parent,
-        toModel
-    ];
-    let fn = conversions[graph[toModel].parent][toModel];
-    let cur = graph[toModel].parent;
-    while(graph[cur].parent){
-        path.unshift(graph[cur].parent);
-        fn = link(conversions[graph[cur].parent][cur], fn);
-        cur = graph[cur].parent;
-    }
-    fn.conversion = path;
-    return fn;
-}
-module.exports = function(fromModel) {
-    const graph = deriveBFS(fromModel);
-    const conversion = {
-    };
-    const models = Object.keys(graph);
-    for(let len = models.length, i = 0; i < len; i++){
-        const toModel = models[i];
-        const node = graph[toModel];
-        if (node.parent === null) continue;
-        conversion[toModel] = wrapConversion(toModel, graph);
-    }
-    return conversion;
-};
-
-},{"./conversions":"7GNDZ"}],"lQjc0":[function(require,module,exports) {
+},{}],"dKTS4":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "XRControllerModelFactory", ()=>XRControllerModelFactory
+parcelHelpers.export(exports, "XRHandModelFactory", ()=>XRHandModelFactory
 );
 var _three = require("three");
-var _gltfloaderJs = require("../loaders/GLTFLoader.js");
-var _motionControllersModuleJs = require("../libs/motion-controllers.module.js");
-const DEFAULT_PROFILES_PATH = 'https://cdn.jsdelivr.net/npm/@webxr-input-profiles/assets@1.0/dist/profiles';
-const DEFAULT_PROFILE = 'generic-trigger';
-class XRControllerModel extends _three.Object3D {
-    constructor(){
+var _xrhandPrimitiveModelJs = require("./XRHandPrimitiveModel.js");
+var _xrhandMeshModelJs = require("./XRHandMeshModel.js");
+class XRHandModel extends _three.Object3D {
+    constructor(controller1){
         super();
+        this.controller = controller1;
         this.motionController = null;
         this.envMap = null;
+        this.mesh = null;
     }
-    setEnvironmentMap(envMap) {
-        if (this.envMap == envMap) return this;
-        this.envMap = envMap;
-        this.traverse((child)=>{
-            if (child.isMesh) {
-                child.material.envMap = this.envMap;
-                child.material.needsUpdate = true;
-            }
-        });
+    updateMatrixWorld(force) {
+        super.updateMatrixWorld(force);
+        if (this.motionController) this.motionController.updateMesh();
+    }
+}
+class XRHandModelFactory {
+    constructor(){
+        this.path = null;
+    }
+    setPath(path) {
+        this.path = path;
         return this;
     }
-    /**
-	 * Polls data from the XRInputSource and updates the model's components to match
-	 * the real world data
-	 */ updateMatrixWorld(force) {
-        super.updateMatrixWorld(force);
-        if (!this.motionController) return;
-        // Cause the MotionController to poll the Gamepad for data
-        this.motionController.updateFromGamepad();
-        // Update the 3D model to reflect the button, thumbstick, and touchpad state
-        Object.values(this.motionController.components).forEach((component)=>{
-            // Update node data based on the visual responses' current states
-            Object.values(component.visualResponses).forEach((visualResponse)=>{
-                const { valueNode , minNode , maxNode , value , valueNodeProperty  } = visualResponse;
-                // Skip if the visual response node is not found. No error is needed,
-                // because it will have been reported at load time.
-                if (!valueNode) return;
-                // Calculate the new properties based on the weight supplied
-                if (valueNodeProperty === _motionControllersModuleJs.Constants.VisualResponseProperty.VISIBILITY) valueNode.visible = value;
-                else if (valueNodeProperty === _motionControllersModuleJs.Constants.VisualResponseProperty.TRANSFORM) {
-                    valueNode.quaternion.slerpQuaternions(minNode.quaternion, maxNode.quaternion, value);
-                    valueNode.position.lerpVectors(minNode.position, maxNode.position, value);
-                }
-            });
-        });
-    }
-}
-/**
- * Walks the model's tree to find the nodes needed to animate the components and
- * saves them to the motionContoller components for use in the frame loop. When
- * touchpads are found, attaches a touch dot to them.
- */ function findNodes(motionController, scene) {
-    // Loop through the components and find the nodes needed for each components' visual responses
-    Object.values(motionController.components).forEach((component)=>{
-        const { type , touchPointNodeName , visualResponses  } = component;
-        if (type === _motionControllersModuleJs.Constants.ComponentType.TOUCHPAD) {
-            component.touchPointNode = scene.getObjectByName(touchPointNodeName);
-            if (component.touchPointNode) {
-                // Attach a touch dot to the touchpad.
-                const sphereGeometry = new _three.SphereGeometry(0.001);
-                const material = new _three.MeshBasicMaterial({
-                    color: 255
-                });
-                const sphere = new _three.Mesh(sphereGeometry, material);
-                component.touchPointNode.add(sphere);
-            } else console.warn(`Could not find touch dot, ${component.touchPointNodeName}, in touchpad component ${component.id}`);
-        }
-        // Loop through all the visual responses to be applied to this component
-        Object.values(visualResponses).forEach((visualResponse)=>{
-            const { valueNodeName , minNodeName , maxNodeName , valueNodeProperty  } = visualResponse;
-            // If animating a transform, find the two nodes to be interpolated between.
-            if (valueNodeProperty === _motionControllersModuleJs.Constants.VisualResponseProperty.TRANSFORM) {
-                visualResponse.minNode = scene.getObjectByName(minNodeName);
-                visualResponse.maxNode = scene.getObjectByName(maxNodeName);
-                // If the extents cannot be found, skip this animation
-                if (!visualResponse.minNode) {
-                    console.warn(`Could not find ${minNodeName} in the model`);
-                    return;
-                }
-                if (!visualResponse.maxNode) {
-                    console.warn(`Could not find ${maxNodeName} in the model`);
-                    return;
-                }
-            }
-            // If the target node cannot be found, skip this animation
-            visualResponse.valueNode = scene.getObjectByName(valueNodeName);
-            if (!visualResponse.valueNode) console.warn(`Could not find ${valueNodeName} in the model`);
-        });
-    });
-}
-function addAssetSceneToControllerModel(controllerModel, scene) {
-    // Find the nodes needed for animation and cache them on the motionController.
-    findNodes(controllerModel.motionController, scene);
-    // Apply any environment map that the mesh already has set.
-    if (controllerModel.envMap) scene.traverse((child)=>{
-        if (child.isMesh) {
-            child.material.envMap = controllerModel.envMap;
-            child.material.needsUpdate = true;
-        }
-    });
-    // Add the glTF scene to the controllerModel.
-    controllerModel.add(scene);
-}
-class XRControllerModelFactory {
-    constructor(gltfLoader = null){
-        this.gltfLoader = gltfLoader;
-        this.path = DEFAULT_PROFILES_PATH;
-        this._assetCache = {
-        };
-        // If a GLTFLoader wasn't supplied to the constructor create a new one.
-        if (!this.gltfLoader) this.gltfLoader = new _gltfloaderJs.GLTFLoader();
-    }
-    createControllerModel(controller) {
-        const controllerModel = new XRControllerModel();
-        let scene = null;
+    createHandModel(controller, profile) {
+        const handModel = new XRHandModel(controller);
         controller.addEventListener('connected', (event)=>{
             const xrInputSource = event.data;
-            if (xrInputSource.targetRayMode !== 'tracked-pointer' || !xrInputSource.gamepad) return;
-            _motionControllersModuleJs.fetchProfile(xrInputSource, this.path, DEFAULT_PROFILE).then(({ profile , assetPath  })=>{
-                controllerModel.motionController = new _motionControllersModuleJs.MotionController(xrInputSource, profile, assetPath);
-                const cachedAsset = this._assetCache[controllerModel.motionController.assetUrl];
-                if (cachedAsset) {
-                    scene = cachedAsset.scene.clone();
-                    addAssetSceneToControllerModel(controllerModel, scene);
-                } else {
-                    if (!this.gltfLoader) throw new Error('GLTFLoader not set.');
-                    this.gltfLoader.setPath('');
-                    this.gltfLoader.load(controllerModel.motionController.assetUrl, (asset)=>{
-                        this._assetCache[controllerModel.motionController.assetUrl] = asset;
-                        scene = asset.scene.clone();
-                        addAssetSceneToControllerModel(controllerModel, scene);
-                    }, null, ()=>{
-                        throw new Error(`Asset ${controllerModel.motionController.assetUrl} missing or malformed.`);
-                    });
-                }
-            }).catch((err)=>{
-                console.warn(err);
-            });
+            if (xrInputSource.hand && !handModel.motionController) {
+                handModel.xrInputSource = xrInputSource;
+                // @todo Detect profile if not provided
+                if (profile === undefined || profile === 'spheres') handModel.motionController = new _xrhandPrimitiveModelJs.XRHandPrimitiveModel(handModel, controller, this.path, xrInputSource.handedness, {
+                    primitive: 'sphere'
+                });
+                else if (profile === 'boxes') handModel.motionController = new _xrhandPrimitiveModelJs.XRHandPrimitiveModel(handModel, controller, this.path, xrInputSource.handedness, {
+                    primitive: 'box'
+                });
+                else if (profile === 'mesh') handModel.motionController = new _xrhandMeshModelJs.XRHandMeshModel(handModel, controller, this.path, xrInputSource.handedness);
+            }
         });
         controller.addEventListener('disconnected', ()=>{
-            controllerModel.motionController = null;
-            controllerModel.remove(scene);
-            scene = null;
+        // handModel.motionController = null;
+        // handModel.remove( scene );
+        // scene = null;
         });
-        return controllerModel;
+        return handModel;
     }
 }
 
-},{"three":"1AKvZ","../loaders/GLTFLoader.js":"jzUEM","../libs/motion-controllers.module.js":"cWTkz","@parcel/transformer-js/src/esmodule-helpers.js":"JacNc"}],"jzUEM":[function(require,module,exports) {
+},{"three":"1AKvZ","./XRHandPrimitiveModel.js":"aMXgY","./XRHandMeshModel.js":"kWKvy","@parcel/transformer-js/src/esmodule-helpers.js":"JacNc"}],"aMXgY":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "XRHandPrimitiveModel", ()=>XRHandPrimitiveModel
+);
+var _three = require("three");
+const _matrix = new _three.Matrix4();
+const _vector = new _three.Vector3();
+class XRHandPrimitiveModel {
+    constructor(handModel, controller, path, handedness, options){
+        this.controller = controller;
+        this.handModel = handModel;
+        this.envMap = null;
+        let geometry;
+        if (!options || !options.primitive || options.primitive === 'sphere') geometry = new _three.SphereGeometry(1, 10, 10);
+        else if (options.primitive === 'box') geometry = new _three.BoxGeometry(1, 1, 1);
+        const material = new _three.MeshStandardMaterial();
+        this.handMesh = new _three.InstancedMesh(geometry, material, 30);
+        this.handMesh.instanceMatrix.setUsage(_three.DynamicDrawUsage); // will be updated every frame
+        this.handMesh.castShadow = true;
+        this.handMesh.receiveShadow = true;
+        this.handModel.add(this.handMesh);
+        this.joints = [
+            'wrist',
+            'thumb-metacarpal',
+            'thumb-phalanx-proximal',
+            'thumb-phalanx-distal',
+            'thumb-tip',
+            'index-finger-metacarpal',
+            'index-finger-phalanx-proximal',
+            'index-finger-phalanx-intermediate',
+            'index-finger-phalanx-distal',
+            'index-finger-tip',
+            'middle-finger-metacarpal',
+            'middle-finger-phalanx-proximal',
+            'middle-finger-phalanx-intermediate',
+            'middle-finger-phalanx-distal',
+            'middle-finger-tip',
+            'ring-finger-metacarpal',
+            'ring-finger-phalanx-proximal',
+            'ring-finger-phalanx-intermediate',
+            'ring-finger-phalanx-distal',
+            'ring-finger-tip',
+            'pinky-finger-metacarpal',
+            'pinky-finger-phalanx-proximal',
+            'pinky-finger-phalanx-intermediate',
+            'pinky-finger-phalanx-distal',
+            'pinky-finger-tip'
+        ];
+    }
+    updateMesh() {
+        const defaultRadius = 0.008;
+        const joints = this.controller.joints;
+        let count = 0;
+        for(let i = 0; i < this.joints.length; i++){
+            const joint = joints[this.joints[i]];
+            if (joint.visible) {
+                _vector.setScalar(joint.jointRadius || defaultRadius);
+                _matrix.compose(joint.position, joint.quaternion, _vector);
+                this.handMesh.setMatrixAt(i, _matrix);
+                count++;
+            }
+        }
+        this.handMesh.count = count;
+        this.handMesh.instanceMatrix.needsUpdate = true;
+    }
+}
+
+},{"three":"1AKvZ","@parcel/transformer-js/src/esmodule-helpers.js":"JacNc"}],"kWKvy":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "XRHandMeshModel", ()=>XRHandMeshModel
+);
+var _gltfloaderJs = require("../loaders/GLTFLoader.js");
+const DEFAULT_HAND_PROFILE_PATH = 'https://cdn.jsdelivr.net/npm/@webxr-input-profiles/assets@1.0/dist/profiles/generic-hand/';
+class XRHandMeshModel {
+    constructor(handModel, controller, path, handedness){
+        this.controller = controller;
+        this.handModel = handModel;
+        this.bones = [];
+        const loader = new _gltfloaderJs.GLTFLoader();
+        loader.setPath(path || DEFAULT_HAND_PROFILE_PATH);
+        loader.load(`${handedness}.glb`, (gltf)=>{
+            const object = gltf.scene.children[0];
+            this.handModel.add(object);
+            const mesh = object.getObjectByProperty('type', 'SkinnedMesh');
+            mesh.frustumCulled = false;
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
+            const joints = [
+                'wrist',
+                'thumb-metacarpal',
+                'thumb-phalanx-proximal',
+                'thumb-phalanx-distal',
+                'thumb-tip',
+                'index-finger-metacarpal',
+                'index-finger-phalanx-proximal',
+                'index-finger-phalanx-intermediate',
+                'index-finger-phalanx-distal',
+                'index-finger-tip',
+                'middle-finger-metacarpal',
+                'middle-finger-phalanx-proximal',
+                'middle-finger-phalanx-intermediate',
+                'middle-finger-phalanx-distal',
+                'middle-finger-tip',
+                'ring-finger-metacarpal',
+                'ring-finger-phalanx-proximal',
+                'ring-finger-phalanx-intermediate',
+                'ring-finger-phalanx-distal',
+                'ring-finger-tip',
+                'pinky-finger-metacarpal',
+                'pinky-finger-phalanx-proximal',
+                'pinky-finger-phalanx-intermediate',
+                'pinky-finger-phalanx-distal',
+                'pinky-finger-tip', 
+            ];
+            joints.forEach((jointName)=>{
+                const bone = object.getObjectByName(jointName);
+                if (bone !== undefined) bone.jointName = jointName;
+                else console.warn(`Couldn't find ${jointName} in ${handedness} hand mesh`);
+                this.bones.push(bone);
+            });
+        });
+    }
+    updateMesh() {
+        // XR Joints
+        const XRJoints = this.controller.joints;
+        for(let i = 0; i < this.bones.length; i++){
+            const bone = this.bones[i];
+            if (bone) {
+                const XRJoint = XRJoints[bone.jointName];
+                if (XRJoint.visible) {
+                    const position = XRJoint.position;
+                    if (bone) {
+                        bone.position.copy(position);
+                        bone.quaternion.copy(XRJoint.quaternion);
+                    // bone.scale.setScalar( XRJoint.jointRadius || defaultRadius );
+                    }
+                }
+            }
+        }
+    }
+}
+
+},{"../loaders/GLTFLoader.js":"jzUEM","@parcel/transformer-js/src/esmodule-helpers.js":"JacNc"}],"jzUEM":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "GLTFLoader", ()=>GLTFLoader
@@ -34735,7 +33024,1892 @@ function buildNodeHierachy(nodeId, parentObject, json2, parser10) {
     return newGeometry;
 }
 
-},{"three":"1AKvZ","@parcel/transformer-js/src/esmodule-helpers.js":"JacNc"}],"cWTkz":[function(require,module,exports) {
+},{"three":"1AKvZ","@parcel/transformer-js/src/esmodule-helpers.js":"JacNc"}],"g3Be4":[function(require,module,exports) {
+const conversions = require('./conversions');
+const route = require('./route');
+const convert = {
+};
+const models = Object.keys(conversions);
+function wrapRaw(fn) {
+    const wrappedFn = function(...args) {
+        const arg0 = args[0];
+        if (arg0 === undefined || arg0 === null) return arg0;
+        if (arg0.length > 1) args = arg0;
+        return fn(args);
+    };
+    // Preserve .conversion property if there is one
+    if ('conversion' in fn) wrappedFn.conversion = fn.conversion;
+    return wrappedFn;
+}
+function wrapRounded(fn) {
+    const wrappedFn = function(...args) {
+        const arg0 = args[0];
+        if (arg0 === undefined || arg0 === null) return arg0;
+        if (arg0.length > 1) args = arg0;
+        const result = fn(args);
+        // We're assuming the result is an array here.
+        // see notice in conversions.js; don't use box types
+        // in conversion functions.
+        if (typeof result === 'object') for(let len = result.length, i = 0; i < len; i++)result[i] = Math.round(result[i]);
+        return result;
+    };
+    // Preserve .conversion property if there is one
+    if ('conversion' in fn) wrappedFn.conversion = fn.conversion;
+    return wrappedFn;
+}
+models.forEach((fromModel)=>{
+    convert[fromModel] = {
+    };
+    Object.defineProperty(convert[fromModel], 'channels', {
+        value: conversions[fromModel].channels
+    });
+    Object.defineProperty(convert[fromModel], 'labels', {
+        value: conversions[fromModel].labels
+    });
+    const routes = route(fromModel);
+    const routeModels = Object.keys(routes);
+    routeModels.forEach((toModel)=>{
+        const fn = routes[toModel];
+        convert[fromModel][toModel] = wrapRounded(fn);
+        convert[fromModel][toModel].raw = wrapRaw(fn);
+    });
+});
+module.exports = convert;
+
+},{"./conversions":"7GNDZ","./route":"f1k4D"}],"7GNDZ":[function(require,module,exports) {
+/* MIT license */ /* eslint-disable no-mixed-operators */ const cssKeywords = require('color-name');
+// NOTE: conversions should only return primitive values (i.e. arrays, or
+//       values that give correct `typeof` results).
+//       do not use box values types (i.e. Number(), String(), etc.)
+const reverseKeywords = {
+};
+for (const key of Object.keys(cssKeywords))reverseKeywords[cssKeywords[key]] = key;
+const convert = {
+    rgb: {
+        channels: 3,
+        labels: 'rgb'
+    },
+    hsl: {
+        channels: 3,
+        labels: 'hsl'
+    },
+    hsv: {
+        channels: 3,
+        labels: 'hsv'
+    },
+    hwb: {
+        channels: 3,
+        labels: 'hwb'
+    },
+    cmyk: {
+        channels: 4,
+        labels: 'cmyk'
+    },
+    xyz: {
+        channels: 3,
+        labels: 'xyz'
+    },
+    lab: {
+        channels: 3,
+        labels: 'lab'
+    },
+    lch: {
+        channels: 3,
+        labels: 'lch'
+    },
+    hex: {
+        channels: 1,
+        labels: [
+            'hex'
+        ]
+    },
+    keyword: {
+        channels: 1,
+        labels: [
+            'keyword'
+        ]
+    },
+    ansi16: {
+        channels: 1,
+        labels: [
+            'ansi16'
+        ]
+    },
+    ansi256: {
+        channels: 1,
+        labels: [
+            'ansi256'
+        ]
+    },
+    hcg: {
+        channels: 3,
+        labels: [
+            'h',
+            'c',
+            'g'
+        ]
+    },
+    apple: {
+        channels: 3,
+        labels: [
+            'r16',
+            'g16',
+            'b16'
+        ]
+    },
+    gray: {
+        channels: 1,
+        labels: [
+            'gray'
+        ]
+    }
+};
+module.exports = convert;
+// Hide .channels and .labels properties
+for (const model of Object.keys(convert)){
+    if (!('channels' in convert[model])) throw new Error('missing channels property: ' + model);
+    if (!('labels' in convert[model])) throw new Error('missing channel labels property: ' + model);
+    if (convert[model].labels.length !== convert[model].channels) throw new Error('channel and label counts mismatch: ' + model);
+    const { channels , labels  } = convert[model];
+    delete convert[model].channels;
+    delete convert[model].labels;
+    Object.defineProperty(convert[model], 'channels', {
+        value: channels
+    });
+    Object.defineProperty(convert[model], 'labels', {
+        value: labels
+    });
+}
+convert.rgb.hsl = function(rgb) {
+    const r = rgb[0] / 255;
+    const g = rgb[1] / 255;
+    const b = rgb[2] / 255;
+    const min = Math.min(r, g, b);
+    const max = Math.max(r, g, b);
+    const delta = max - min;
+    let h;
+    let s;
+    if (max === min) h = 0;
+    else if (r === max) h = (g - b) / delta;
+    else if (g === max) h = 2 + (b - r) / delta;
+    else if (b === max) h = 4 + (r - g) / delta;
+    h = Math.min(h * 60, 360);
+    if (h < 0) h += 360;
+    const l = (min + max) / 2;
+    if (max === min) s = 0;
+    else if (l <= 0.5) s = delta / (max + min);
+    else s = delta / (2 - max - min);
+    return [
+        h,
+        s * 100,
+        l * 100
+    ];
+};
+convert.rgb.hsv = function(rgb) {
+    let rdif;
+    let gdif;
+    let bdif;
+    let h;
+    let s;
+    const r = rgb[0] / 255;
+    const g = rgb[1] / 255;
+    const b = rgb[2] / 255;
+    const v = Math.max(r, g, b);
+    const diff = v - Math.min(r, g, b);
+    const diffc = function(c) {
+        return (v - c) / 6 / diff + 0.5;
+    };
+    if (diff === 0) {
+        h = 0;
+        s = 0;
+    } else {
+        s = diff / v;
+        rdif = diffc(r);
+        gdif = diffc(g);
+        bdif = diffc(b);
+        if (r === v) h = bdif - gdif;
+        else if (g === v) h = 1 / 3 + rdif - bdif;
+        else if (b === v) h = 2 / 3 + gdif - rdif;
+        if (h < 0) h += 1;
+        else if (h > 1) h -= 1;
+    }
+    return [
+        h * 360,
+        s * 100,
+        v * 100
+    ];
+};
+convert.rgb.hwb = function(rgb) {
+    const r = rgb[0];
+    const g = rgb[1];
+    let b = rgb[2];
+    const h = convert.rgb.hsl(rgb)[0];
+    const w = 1 / 255 * Math.min(r, Math.min(g, b));
+    b = 1 - 1 / 255 * Math.max(r, Math.max(g, b));
+    return [
+        h,
+        w * 100,
+        b * 100
+    ];
+};
+convert.rgb.cmyk = function(rgb) {
+    const r = rgb[0] / 255;
+    const g = rgb[1] / 255;
+    const b = rgb[2] / 255;
+    const k = Math.min(1 - r, 1 - g, 1 - b);
+    const c = (1 - r - k) / (1 - k) || 0;
+    const m = (1 - g - k) / (1 - k) || 0;
+    const y = (1 - b - k) / (1 - k) || 0;
+    return [
+        c * 100,
+        m * 100,
+        y * 100,
+        k * 100
+    ];
+};
+function comparativeDistance(x, y) {
+    /*
+		See https://en.m.wikipedia.org/wiki/Euclidean_distance#Squared_Euclidean_distance
+	*/ return (x[0] - y[0]) ** 2 + (x[1] - y[1]) ** 2 + (x[2] - y[2]) ** 2;
+}
+convert.rgb.keyword = function(rgb) {
+    const reversed = reverseKeywords[rgb];
+    if (reversed) return reversed;
+    let currentClosestDistance = Infinity;
+    let currentClosestKeyword;
+    for (const keyword of Object.keys(cssKeywords)){
+        const value = cssKeywords[keyword];
+        // Compute comparative distance
+        const distance = comparativeDistance(rgb, value);
+        // Check if its less, if so set as closest
+        if (distance < currentClosestDistance) {
+            currentClosestDistance = distance;
+            currentClosestKeyword = keyword;
+        }
+    }
+    return currentClosestKeyword;
+};
+convert.keyword.rgb = function(keyword) {
+    return cssKeywords[keyword];
+};
+convert.rgb.xyz = function(rgb) {
+    let r = rgb[0] / 255;
+    let g = rgb[1] / 255;
+    let b = rgb[2] / 255;
+    // Assume sRGB
+    r = r > 0.04045 ? ((r + 0.055) / 1.055) ** 2.4 : r / 12.92;
+    g = g > 0.04045 ? ((g + 0.055) / 1.055) ** 2.4 : g / 12.92;
+    b = b > 0.04045 ? ((b + 0.055) / 1.055) ** 2.4 : b / 12.92;
+    const x = r * 0.4124 + g * 0.3576 + b * 0.1805;
+    const y = r * 0.2126 + g * 0.7152 + b * 0.0722;
+    const z = r * 0.0193 + g * 0.1192 + b * 0.9505;
+    return [
+        x * 100,
+        y * 100,
+        z * 100
+    ];
+};
+convert.rgb.lab = function(rgb) {
+    const xyz = convert.rgb.xyz(rgb);
+    let x = xyz[0];
+    let y = xyz[1];
+    let z = xyz[2];
+    x /= 95.047;
+    y /= 100;
+    z /= 108.883;
+    x = x > 0.008856 ? x ** (1 / 3) : 7.787 * x + 16 / 116;
+    y = y > 0.008856 ? y ** (1 / 3) : 7.787 * y + 16 / 116;
+    z = z > 0.008856 ? z ** (1 / 3) : 7.787 * z + 16 / 116;
+    const l = 116 * y - 16;
+    const a = 500 * (x - y);
+    const b = 200 * (y - z);
+    return [
+        l,
+        a,
+        b
+    ];
+};
+convert.hsl.rgb = function(hsl) {
+    const h = hsl[0] / 360;
+    const s = hsl[1] / 100;
+    const l = hsl[2] / 100;
+    let t2;
+    let t3;
+    let val;
+    if (s === 0) {
+        val = l * 255;
+        return [
+            val,
+            val,
+            val
+        ];
+    }
+    if (l < 0.5) t2 = l * (1 + s);
+    else t2 = l + s - l * s;
+    const t1 = 2 * l - t2;
+    const rgb = [
+        0,
+        0,
+        0
+    ];
+    for(let i = 0; i < 3; i++){
+        t3 = h + 1 / 3 * -(i - 1);
+        if (t3 < 0) t3++;
+        if (t3 > 1) t3--;
+        if (6 * t3 < 1) val = t1 + (t2 - t1) * 6 * t3;
+        else if (2 * t3 < 1) val = t2;
+        else if (3 * t3 < 2) val = t1 + (t2 - t1) * (2 / 3 - t3) * 6;
+        else val = t1;
+        rgb[i] = val * 255;
+    }
+    return rgb;
+};
+convert.hsl.hsv = function(hsl) {
+    const h = hsl[0];
+    let s = hsl[1] / 100;
+    let l = hsl[2] / 100;
+    let smin = s;
+    const lmin = Math.max(l, 0.01);
+    l *= 2;
+    s *= l <= 1 ? l : 2 - l;
+    smin *= lmin <= 1 ? lmin : 2 - lmin;
+    const v = (l + s) / 2;
+    const sv = l === 0 ? 2 * smin / (lmin + smin) : 2 * s / (l + s);
+    return [
+        h,
+        sv * 100,
+        v * 100
+    ];
+};
+convert.hsv.rgb = function(hsv) {
+    const h = hsv[0] / 60;
+    const s = hsv[1] / 100;
+    let v = hsv[2] / 100;
+    const hi = Math.floor(h) % 6;
+    const f = h - Math.floor(h);
+    const p = 255 * v * (1 - s);
+    const q = 255 * v * (1 - s * f);
+    const t = 255 * v * (1 - s * (1 - f));
+    v *= 255;
+    switch(hi){
+        case 0:
+            return [
+                v,
+                t,
+                p
+            ];
+        case 1:
+            return [
+                q,
+                v,
+                p
+            ];
+        case 2:
+            return [
+                p,
+                v,
+                t
+            ];
+        case 3:
+            return [
+                p,
+                q,
+                v
+            ];
+        case 4:
+            return [
+                t,
+                p,
+                v
+            ];
+        case 5:
+            return [
+                v,
+                p,
+                q
+            ];
+    }
+};
+convert.hsv.hsl = function(hsv) {
+    const h = hsv[0];
+    const s = hsv[1] / 100;
+    const v = hsv[2] / 100;
+    const vmin = Math.max(v, 0.01);
+    let sl;
+    let l;
+    l = (2 - s) * v;
+    const lmin = (2 - s) * vmin;
+    sl = s * vmin;
+    sl /= lmin <= 1 ? lmin : 2 - lmin;
+    sl = sl || 0;
+    l /= 2;
+    return [
+        h,
+        sl * 100,
+        l * 100
+    ];
+};
+// http://dev.w3.org/csswg/css-color/#hwb-to-rgb
+convert.hwb.rgb = function(hwb) {
+    const h = hwb[0] / 360;
+    let wh = hwb[1] / 100;
+    let bl = hwb[2] / 100;
+    const ratio = wh + bl;
+    let f;
+    // Wh + bl cant be > 1
+    if (ratio > 1) {
+        wh /= ratio;
+        bl /= ratio;
+    }
+    const i = Math.floor(6 * h);
+    const v = 1 - bl;
+    f = 6 * h - i;
+    if ((i & 1) !== 0) f = 1 - f;
+    const n = wh + f * (v - wh); // Linear interpolation
+    let r;
+    let g;
+    let b;
+    /* eslint-disable max-statements-per-line,no-multi-spaces */ switch(i){
+        default:
+        case 6:
+        case 0:
+            r = v;
+            g = n;
+            b = wh;
+            break;
+        case 1:
+            r = n;
+            g = v;
+            b = wh;
+            break;
+        case 2:
+            r = wh;
+            g = v;
+            b = n;
+            break;
+        case 3:
+            r = wh;
+            g = n;
+            b = v;
+            break;
+        case 4:
+            r = n;
+            g = wh;
+            b = v;
+            break;
+        case 5:
+            r = v;
+            g = wh;
+            b = n;
+            break;
+    }
+    /* eslint-enable max-statements-per-line,no-multi-spaces */ return [
+        r * 255,
+        g * 255,
+        b * 255
+    ];
+};
+convert.cmyk.rgb = function(cmyk) {
+    const c = cmyk[0] / 100;
+    const m = cmyk[1] / 100;
+    const y = cmyk[2] / 100;
+    const k = cmyk[3] / 100;
+    const r = 1 - Math.min(1, c * (1 - k) + k);
+    const g = 1 - Math.min(1, m * (1 - k) + k);
+    const b = 1 - Math.min(1, y * (1 - k) + k);
+    return [
+        r * 255,
+        g * 255,
+        b * 255
+    ];
+};
+convert.xyz.rgb = function(xyz) {
+    const x = xyz[0] / 100;
+    const y = xyz[1] / 100;
+    const z = xyz[2] / 100;
+    let r;
+    let g;
+    let b;
+    r = x * 3.2406 + y * -1.5372 + z * -0.4986;
+    g = x * -0.9689 + y * 1.8758 + z * 0.0415;
+    b = x * 0.0557 + y * -0.204 + z * 1.057;
+    // Assume sRGB
+    r = r > 0.0031308 ? 1.055 * r ** (1 / 2.4) - 0.055 : r * 12.92;
+    g = g > 0.0031308 ? 1.055 * g ** (1 / 2.4) - 0.055 : g * 12.92;
+    b = b > 0.0031308 ? 1.055 * b ** (1 / 2.4) - 0.055 : b * 12.92;
+    r = Math.min(Math.max(0, r), 1);
+    g = Math.min(Math.max(0, g), 1);
+    b = Math.min(Math.max(0, b), 1);
+    return [
+        r * 255,
+        g * 255,
+        b * 255
+    ];
+};
+convert.xyz.lab = function(xyz) {
+    let x = xyz[0];
+    let y = xyz[1];
+    let z = xyz[2];
+    x /= 95.047;
+    y /= 100;
+    z /= 108.883;
+    x = x > 0.008856 ? x ** (1 / 3) : 7.787 * x + 16 / 116;
+    y = y > 0.008856 ? y ** (1 / 3) : 7.787 * y + 16 / 116;
+    z = z > 0.008856 ? z ** (1 / 3) : 7.787 * z + 16 / 116;
+    const l = 116 * y - 16;
+    const a = 500 * (x - y);
+    const b = 200 * (y - z);
+    return [
+        l,
+        a,
+        b
+    ];
+};
+convert.lab.xyz = function(lab) {
+    const l = lab[0];
+    const a = lab[1];
+    const b = lab[2];
+    let x;
+    let y;
+    let z;
+    y = (l + 16) / 116;
+    x = a / 500 + y;
+    z = y - b / 200;
+    const y2 = y ** 3;
+    const x2 = x ** 3;
+    const z2 = z ** 3;
+    y = y2 > 0.008856 ? y2 : (y - 16 / 116) / 7.787;
+    x = x2 > 0.008856 ? x2 : (x - 16 / 116) / 7.787;
+    z = z2 > 0.008856 ? z2 : (z - 16 / 116) / 7.787;
+    x *= 95.047;
+    y *= 100;
+    z *= 108.883;
+    return [
+        x,
+        y,
+        z
+    ];
+};
+convert.lab.lch = function(lab) {
+    const l = lab[0];
+    const a = lab[1];
+    const b = lab[2];
+    let h;
+    const hr = Math.atan2(b, a);
+    h = hr * 360 / 2 / Math.PI;
+    if (h < 0) h += 360;
+    const c = Math.sqrt(a * a + b * b);
+    return [
+        l,
+        c,
+        h
+    ];
+};
+convert.lch.lab = function(lch) {
+    const l = lch[0];
+    const c = lch[1];
+    const h = lch[2];
+    const hr = h / 360 * 2 * Math.PI;
+    const a = c * Math.cos(hr);
+    const b = c * Math.sin(hr);
+    return [
+        l,
+        a,
+        b
+    ];
+};
+convert.rgb.ansi16 = function(args, saturation = null) {
+    const [r, g, b] = args;
+    let value = saturation === null ? convert.rgb.hsv(args)[2] : saturation; // Hsv -> ansi16 optimization
+    value = Math.round(value / 50);
+    if (value === 0) return 30;
+    let ansi = 30 + (Math.round(b / 255) << 2 | Math.round(g / 255) << 1 | Math.round(r / 255));
+    if (value === 2) ansi += 60;
+    return ansi;
+};
+convert.hsv.ansi16 = function(args) {
+    // Optimization here; we already know the value and don't need to get
+    // it converted for us.
+    return convert.rgb.ansi16(convert.hsv.rgb(args), args[2]);
+};
+convert.rgb.ansi256 = function(args) {
+    const r = args[0];
+    const g = args[1];
+    const b = args[2];
+    // We use the extended greyscale palette here, with the exception of
+    // black and white. normal palette only has 4 greyscale shades.
+    if (r === g && g === b) {
+        if (r < 8) return 16;
+        if (r > 248) return 231;
+        return Math.round((r - 8) / 247 * 24) + 232;
+    }
+    const ansi = 16 + 36 * Math.round(r / 255 * 5) + 6 * Math.round(g / 255 * 5) + Math.round(b / 255 * 5);
+    return ansi;
+};
+convert.ansi16.rgb = function(args) {
+    let color = args % 10;
+    // Handle greyscale
+    if (color === 0 || color === 7) {
+        if (args > 50) color += 3.5;
+        color = color / 10.5 * 255;
+        return [
+            color,
+            color,
+            color
+        ];
+    }
+    const mult = (~~(args > 50) + 1) * 0.5;
+    const r = (color & 1) * mult * 255;
+    const g = (color >> 1 & 1) * mult * 255;
+    const b = (color >> 2 & 1) * mult * 255;
+    return [
+        r,
+        g,
+        b
+    ];
+};
+convert.ansi256.rgb = function(args) {
+    // Handle greyscale
+    if (args >= 232) {
+        const c = (args - 232) * 10 + 8;
+        return [
+            c,
+            c,
+            c
+        ];
+    }
+    args -= 16;
+    let rem;
+    const r = Math.floor(args / 36) / 5 * 255;
+    const g = Math.floor((rem = args % 36) / 6) / 5 * 255;
+    const b = rem % 6 / 5 * 255;
+    return [
+        r,
+        g,
+        b
+    ];
+};
+convert.rgb.hex = function(args) {
+    const integer = ((Math.round(args[0]) & 255) << 16) + ((Math.round(args[1]) & 255) << 8) + (Math.round(args[2]) & 255);
+    const string = integer.toString(16).toUpperCase();
+    return '000000'.substring(string.length) + string;
+};
+convert.hex.rgb = function(args) {
+    const match = args.toString(16).match(/[a-f0-9]{6}|[a-f0-9]{3}/i);
+    if (!match) return [
+        0,
+        0,
+        0
+    ];
+    let colorString = match[0];
+    if (match[0].length === 3) colorString = colorString.split('').map((char)=>{
+        return char + char;
+    }).join('');
+    const integer = parseInt(colorString, 16);
+    const r = integer >> 16 & 255;
+    const g = integer >> 8 & 255;
+    const b = integer & 255;
+    return [
+        r,
+        g,
+        b
+    ];
+};
+convert.rgb.hcg = function(rgb) {
+    const r = rgb[0] / 255;
+    const g = rgb[1] / 255;
+    const b = rgb[2] / 255;
+    const max = Math.max(Math.max(r, g), b);
+    const min = Math.min(Math.min(r, g), b);
+    const chroma = max - min;
+    let grayscale;
+    let hue;
+    if (chroma < 1) grayscale = min / (1 - chroma);
+    else grayscale = 0;
+    if (chroma <= 0) hue = 0;
+    else if (max === r) hue = (g - b) / chroma % 6;
+    else if (max === g) hue = 2 + (b - r) / chroma;
+    else hue = 4 + (r - g) / chroma;
+    hue /= 6;
+    hue %= 1;
+    return [
+        hue * 360,
+        chroma * 100,
+        grayscale * 100
+    ];
+};
+convert.hsl.hcg = function(hsl) {
+    const s = hsl[1] / 100;
+    const l = hsl[2] / 100;
+    const c = l < 0.5 ? 2 * s * l : 2 * s * (1 - l);
+    let f = 0;
+    if (c < 1) f = (l - 0.5 * c) / (1 - c);
+    return [
+        hsl[0],
+        c * 100,
+        f * 100
+    ];
+};
+convert.hsv.hcg = function(hsv) {
+    const s = hsv[1] / 100;
+    const v = hsv[2] / 100;
+    const c = s * v;
+    let f = 0;
+    if (c < 1) f = (v - c) / (1 - c);
+    return [
+        hsv[0],
+        c * 100,
+        f * 100
+    ];
+};
+convert.hcg.rgb = function(hcg) {
+    const h = hcg[0] / 360;
+    const c = hcg[1] / 100;
+    const g = hcg[2] / 100;
+    if (c === 0) return [
+        g * 255,
+        g * 255,
+        g * 255
+    ];
+    const pure = [
+        0,
+        0,
+        0
+    ];
+    const hi = h % 1 * 6;
+    const v = hi % 1;
+    const w = 1 - v;
+    let mg = 0;
+    /* eslint-disable max-statements-per-line */ switch(Math.floor(hi)){
+        case 0:
+            pure[0] = 1;
+            pure[1] = v;
+            pure[2] = 0;
+            break;
+        case 1:
+            pure[0] = w;
+            pure[1] = 1;
+            pure[2] = 0;
+            break;
+        case 2:
+            pure[0] = 0;
+            pure[1] = 1;
+            pure[2] = v;
+            break;
+        case 3:
+            pure[0] = 0;
+            pure[1] = w;
+            pure[2] = 1;
+            break;
+        case 4:
+            pure[0] = v;
+            pure[1] = 0;
+            pure[2] = 1;
+            break;
+        default:
+            pure[0] = 1;
+            pure[1] = 0;
+            pure[2] = w;
+    }
+    /* eslint-enable max-statements-per-line */ mg = (1 - c) * g;
+    return [
+        (c * pure[0] + mg) * 255,
+        (c * pure[1] + mg) * 255,
+        (c * pure[2] + mg) * 255
+    ];
+};
+convert.hcg.hsv = function(hcg) {
+    const c = hcg[1] / 100;
+    const g = hcg[2] / 100;
+    const v = c + g * (1 - c);
+    let f = 0;
+    if (v > 0) f = c / v;
+    return [
+        hcg[0],
+        f * 100,
+        v * 100
+    ];
+};
+convert.hcg.hsl = function(hcg) {
+    const c = hcg[1] / 100;
+    const g = hcg[2] / 100;
+    const l = g * (1 - c) + 0.5 * c;
+    let s = 0;
+    if (l > 0 && l < 0.5) s = c / (2 * l);
+    else if (l >= 0.5 && l < 1) s = c / (2 * (1 - l));
+    return [
+        hcg[0],
+        s * 100,
+        l * 100
+    ];
+};
+convert.hcg.hwb = function(hcg) {
+    const c = hcg[1] / 100;
+    const g = hcg[2] / 100;
+    const v = c + g * (1 - c);
+    return [
+        hcg[0],
+        (v - c) * 100,
+        (1 - v) * 100
+    ];
+};
+convert.hwb.hcg = function(hwb) {
+    const w = hwb[1] / 100;
+    const b = hwb[2] / 100;
+    const v = 1 - b;
+    const c = v - w;
+    let g = 0;
+    if (c < 1) g = (v - c) / (1 - c);
+    return [
+        hwb[0],
+        c * 100,
+        g * 100
+    ];
+};
+convert.apple.rgb = function(apple) {
+    return [
+        apple[0] / 65535 * 255,
+        apple[1] / 65535 * 255,
+        apple[2] / 65535 * 255
+    ];
+};
+convert.rgb.apple = function(rgb) {
+    return [
+        rgb[0] / 255 * 65535,
+        rgb[1] / 255 * 65535,
+        rgb[2] / 255 * 65535
+    ];
+};
+convert.gray.rgb = function(args) {
+    return [
+        args[0] / 100 * 255,
+        args[0] / 100 * 255,
+        args[0] / 100 * 255
+    ];
+};
+convert.gray.hsl = function(args) {
+    return [
+        0,
+        0,
+        args[0]
+    ];
+};
+convert.gray.hsv = convert.gray.hsl;
+convert.gray.hwb = function(gray) {
+    return [
+        0,
+        100,
+        gray[0]
+    ];
+};
+convert.gray.cmyk = function(gray) {
+    return [
+        0,
+        0,
+        0,
+        gray[0]
+    ];
+};
+convert.gray.lab = function(gray) {
+    return [
+        gray[0],
+        0,
+        0
+    ];
+};
+convert.gray.hex = function(gray) {
+    const val = Math.round(gray[0] / 100 * 255) & 255;
+    const integer = (val << 16) + (val << 8) + val;
+    const string = integer.toString(16).toUpperCase();
+    return '000000'.substring(string.length) + string;
+};
+convert.rgb.gray = function(rgb) {
+    const val = (rgb[0] + rgb[1] + rgb[2]) / 3;
+    return [
+        val / 255 * 100
+    ];
+};
+
+},{"color-name":"bvxFr"}],"bvxFr":[function(require,module,exports) {
+'use strict';
+module.exports = {
+    "aliceblue": [
+        240,
+        248,
+        255
+    ],
+    "antiquewhite": [
+        250,
+        235,
+        215
+    ],
+    "aqua": [
+        0,
+        255,
+        255
+    ],
+    "aquamarine": [
+        127,
+        255,
+        212
+    ],
+    "azure": [
+        240,
+        255,
+        255
+    ],
+    "beige": [
+        245,
+        245,
+        220
+    ],
+    "bisque": [
+        255,
+        228,
+        196
+    ],
+    "black": [
+        0,
+        0,
+        0
+    ],
+    "blanchedalmond": [
+        255,
+        235,
+        205
+    ],
+    "blue": [
+        0,
+        0,
+        255
+    ],
+    "blueviolet": [
+        138,
+        43,
+        226
+    ],
+    "brown": [
+        165,
+        42,
+        42
+    ],
+    "burlywood": [
+        222,
+        184,
+        135
+    ],
+    "cadetblue": [
+        95,
+        158,
+        160
+    ],
+    "chartreuse": [
+        127,
+        255,
+        0
+    ],
+    "chocolate": [
+        210,
+        105,
+        30
+    ],
+    "coral": [
+        255,
+        127,
+        80
+    ],
+    "cornflowerblue": [
+        100,
+        149,
+        237
+    ],
+    "cornsilk": [
+        255,
+        248,
+        220
+    ],
+    "crimson": [
+        220,
+        20,
+        60
+    ],
+    "cyan": [
+        0,
+        255,
+        255
+    ],
+    "darkblue": [
+        0,
+        0,
+        139
+    ],
+    "darkcyan": [
+        0,
+        139,
+        139
+    ],
+    "darkgoldenrod": [
+        184,
+        134,
+        11
+    ],
+    "darkgray": [
+        169,
+        169,
+        169
+    ],
+    "darkgreen": [
+        0,
+        100,
+        0
+    ],
+    "darkgrey": [
+        169,
+        169,
+        169
+    ],
+    "darkkhaki": [
+        189,
+        183,
+        107
+    ],
+    "darkmagenta": [
+        139,
+        0,
+        139
+    ],
+    "darkolivegreen": [
+        85,
+        107,
+        47
+    ],
+    "darkorange": [
+        255,
+        140,
+        0
+    ],
+    "darkorchid": [
+        153,
+        50,
+        204
+    ],
+    "darkred": [
+        139,
+        0,
+        0
+    ],
+    "darksalmon": [
+        233,
+        150,
+        122
+    ],
+    "darkseagreen": [
+        143,
+        188,
+        143
+    ],
+    "darkslateblue": [
+        72,
+        61,
+        139
+    ],
+    "darkslategray": [
+        47,
+        79,
+        79
+    ],
+    "darkslategrey": [
+        47,
+        79,
+        79
+    ],
+    "darkturquoise": [
+        0,
+        206,
+        209
+    ],
+    "darkviolet": [
+        148,
+        0,
+        211
+    ],
+    "deeppink": [
+        255,
+        20,
+        147
+    ],
+    "deepskyblue": [
+        0,
+        191,
+        255
+    ],
+    "dimgray": [
+        105,
+        105,
+        105
+    ],
+    "dimgrey": [
+        105,
+        105,
+        105
+    ],
+    "dodgerblue": [
+        30,
+        144,
+        255
+    ],
+    "firebrick": [
+        178,
+        34,
+        34
+    ],
+    "floralwhite": [
+        255,
+        250,
+        240
+    ],
+    "forestgreen": [
+        34,
+        139,
+        34
+    ],
+    "fuchsia": [
+        255,
+        0,
+        255
+    ],
+    "gainsboro": [
+        220,
+        220,
+        220
+    ],
+    "ghostwhite": [
+        248,
+        248,
+        255
+    ],
+    "gold": [
+        255,
+        215,
+        0
+    ],
+    "goldenrod": [
+        218,
+        165,
+        32
+    ],
+    "gray": [
+        128,
+        128,
+        128
+    ],
+    "green": [
+        0,
+        128,
+        0
+    ],
+    "greenyellow": [
+        173,
+        255,
+        47
+    ],
+    "grey": [
+        128,
+        128,
+        128
+    ],
+    "honeydew": [
+        240,
+        255,
+        240
+    ],
+    "hotpink": [
+        255,
+        105,
+        180
+    ],
+    "indianred": [
+        205,
+        92,
+        92
+    ],
+    "indigo": [
+        75,
+        0,
+        130
+    ],
+    "ivory": [
+        255,
+        255,
+        240
+    ],
+    "khaki": [
+        240,
+        230,
+        140
+    ],
+    "lavender": [
+        230,
+        230,
+        250
+    ],
+    "lavenderblush": [
+        255,
+        240,
+        245
+    ],
+    "lawngreen": [
+        124,
+        252,
+        0
+    ],
+    "lemonchiffon": [
+        255,
+        250,
+        205
+    ],
+    "lightblue": [
+        173,
+        216,
+        230
+    ],
+    "lightcoral": [
+        240,
+        128,
+        128
+    ],
+    "lightcyan": [
+        224,
+        255,
+        255
+    ],
+    "lightgoldenrodyellow": [
+        250,
+        250,
+        210
+    ],
+    "lightgray": [
+        211,
+        211,
+        211
+    ],
+    "lightgreen": [
+        144,
+        238,
+        144
+    ],
+    "lightgrey": [
+        211,
+        211,
+        211
+    ],
+    "lightpink": [
+        255,
+        182,
+        193
+    ],
+    "lightsalmon": [
+        255,
+        160,
+        122
+    ],
+    "lightseagreen": [
+        32,
+        178,
+        170
+    ],
+    "lightskyblue": [
+        135,
+        206,
+        250
+    ],
+    "lightslategray": [
+        119,
+        136,
+        153
+    ],
+    "lightslategrey": [
+        119,
+        136,
+        153
+    ],
+    "lightsteelblue": [
+        176,
+        196,
+        222
+    ],
+    "lightyellow": [
+        255,
+        255,
+        224
+    ],
+    "lime": [
+        0,
+        255,
+        0
+    ],
+    "limegreen": [
+        50,
+        205,
+        50
+    ],
+    "linen": [
+        250,
+        240,
+        230
+    ],
+    "magenta": [
+        255,
+        0,
+        255
+    ],
+    "maroon": [
+        128,
+        0,
+        0
+    ],
+    "mediumaquamarine": [
+        102,
+        205,
+        170
+    ],
+    "mediumblue": [
+        0,
+        0,
+        205
+    ],
+    "mediumorchid": [
+        186,
+        85,
+        211
+    ],
+    "mediumpurple": [
+        147,
+        112,
+        219
+    ],
+    "mediumseagreen": [
+        60,
+        179,
+        113
+    ],
+    "mediumslateblue": [
+        123,
+        104,
+        238
+    ],
+    "mediumspringgreen": [
+        0,
+        250,
+        154
+    ],
+    "mediumturquoise": [
+        72,
+        209,
+        204
+    ],
+    "mediumvioletred": [
+        199,
+        21,
+        133
+    ],
+    "midnightblue": [
+        25,
+        25,
+        112
+    ],
+    "mintcream": [
+        245,
+        255,
+        250
+    ],
+    "mistyrose": [
+        255,
+        228,
+        225
+    ],
+    "moccasin": [
+        255,
+        228,
+        181
+    ],
+    "navajowhite": [
+        255,
+        222,
+        173
+    ],
+    "navy": [
+        0,
+        0,
+        128
+    ],
+    "oldlace": [
+        253,
+        245,
+        230
+    ],
+    "olive": [
+        128,
+        128,
+        0
+    ],
+    "olivedrab": [
+        107,
+        142,
+        35
+    ],
+    "orange": [
+        255,
+        165,
+        0
+    ],
+    "orangered": [
+        255,
+        69,
+        0
+    ],
+    "orchid": [
+        218,
+        112,
+        214
+    ],
+    "palegoldenrod": [
+        238,
+        232,
+        170
+    ],
+    "palegreen": [
+        152,
+        251,
+        152
+    ],
+    "paleturquoise": [
+        175,
+        238,
+        238
+    ],
+    "palevioletred": [
+        219,
+        112,
+        147
+    ],
+    "papayawhip": [
+        255,
+        239,
+        213
+    ],
+    "peachpuff": [
+        255,
+        218,
+        185
+    ],
+    "peru": [
+        205,
+        133,
+        63
+    ],
+    "pink": [
+        255,
+        192,
+        203
+    ],
+    "plum": [
+        221,
+        160,
+        221
+    ],
+    "powderblue": [
+        176,
+        224,
+        230
+    ],
+    "purple": [
+        128,
+        0,
+        128
+    ],
+    "rebeccapurple": [
+        102,
+        51,
+        153
+    ],
+    "red": [
+        255,
+        0,
+        0
+    ],
+    "rosybrown": [
+        188,
+        143,
+        143
+    ],
+    "royalblue": [
+        65,
+        105,
+        225
+    ],
+    "saddlebrown": [
+        139,
+        69,
+        19
+    ],
+    "salmon": [
+        250,
+        128,
+        114
+    ],
+    "sandybrown": [
+        244,
+        164,
+        96
+    ],
+    "seagreen": [
+        46,
+        139,
+        87
+    ],
+    "seashell": [
+        255,
+        245,
+        238
+    ],
+    "sienna": [
+        160,
+        82,
+        45
+    ],
+    "silver": [
+        192,
+        192,
+        192
+    ],
+    "skyblue": [
+        135,
+        206,
+        235
+    ],
+    "slateblue": [
+        106,
+        90,
+        205
+    ],
+    "slategray": [
+        112,
+        128,
+        144
+    ],
+    "slategrey": [
+        112,
+        128,
+        144
+    ],
+    "snow": [
+        255,
+        250,
+        250
+    ],
+    "springgreen": [
+        0,
+        255,
+        127
+    ],
+    "steelblue": [
+        70,
+        130,
+        180
+    ],
+    "tan": [
+        210,
+        180,
+        140
+    ],
+    "teal": [
+        0,
+        128,
+        128
+    ],
+    "thistle": [
+        216,
+        191,
+        216
+    ],
+    "tomato": [
+        255,
+        99,
+        71
+    ],
+    "turquoise": [
+        64,
+        224,
+        208
+    ],
+    "violet": [
+        238,
+        130,
+        238
+    ],
+    "wheat": [
+        245,
+        222,
+        179
+    ],
+    "white": [
+        255,
+        255,
+        255
+    ],
+    "whitesmoke": [
+        245,
+        245,
+        245
+    ],
+    "yellow": [
+        255,
+        255,
+        0
+    ],
+    "yellowgreen": [
+        154,
+        205,
+        50
+    ]
+};
+
+},{}],"f1k4D":[function(require,module,exports) {
+const conversions = require('./conversions');
+/*
+	This function routes a model to all other models.
+
+	all functions that are routed have a property `.conversion` attached
+	to the returned synthetic function. This property is an array
+	of strings, each with the steps in between the 'from' and 'to'
+	color models (inclusive).
+
+	conversions that are not possible simply are not included.
+*/ function buildGraph() {
+    const graph = {
+    };
+    // https://jsperf.com/object-keys-vs-for-in-with-closure/3
+    const models = Object.keys(conversions);
+    for(let len = models.length, i = 0; i < len; i++)graph[models[i]] = {
+        // http://jsperf.com/1-vs-infinity
+        // micro-opt, but this is simple.
+        distance: -1,
+        parent: null
+    };
+    return graph;
+}
+// https://en.wikipedia.org/wiki/Breadth-first_search
+function deriveBFS(fromModel) {
+    const graph = buildGraph();
+    const queue = [
+        fromModel
+    ]; // Unshift -> queue -> pop
+    graph[fromModel].distance = 0;
+    while(queue.length){
+        const current = queue.pop();
+        const adjacents = Object.keys(conversions[current]);
+        for(let len = adjacents.length, i = 0; i < len; i++){
+            const adjacent = adjacents[i];
+            const node = graph[adjacent];
+            if (node.distance === -1) {
+                node.distance = graph[current].distance + 1;
+                node.parent = current;
+                queue.unshift(adjacent);
+            }
+        }
+    }
+    return graph;
+}
+function link(from, to) {
+    return function(args) {
+        return to(from(args));
+    };
+}
+function wrapConversion(toModel, graph) {
+    const path = [
+        graph[toModel].parent,
+        toModel
+    ];
+    let fn = conversions[graph[toModel].parent][toModel];
+    let cur = graph[toModel].parent;
+    while(graph[cur].parent){
+        path.unshift(graph[cur].parent);
+        fn = link(conversions[graph[cur].parent][cur], fn);
+        cur = graph[cur].parent;
+    }
+    fn.conversion = path;
+    return fn;
+}
+module.exports = function(fromModel) {
+    const graph = deriveBFS(fromModel);
+    const conversion = {
+    };
+    const models = Object.keys(graph);
+    for(let len = models.length, i = 0; i < len; i++){
+        const toModel = models[i];
+        const node = graph[toModel];
+        if (node.parent === null) continue;
+        conversion[toModel] = wrapConversion(toModel, graph);
+    }
+    return conversion;
+};
+
+},{"./conversions":"7GNDZ"}],"lQjc0":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "XRControllerModelFactory", ()=>XRControllerModelFactory
+);
+var _three = require("three");
+var _gltfloaderJs = require("../loaders/GLTFLoader.js");
+var _motionControllersModuleJs = require("../libs/motion-controllers.module.js");
+const DEFAULT_PROFILES_PATH = 'https://cdn.jsdelivr.net/npm/@webxr-input-profiles/assets@1.0/dist/profiles';
+const DEFAULT_PROFILE = 'generic-trigger';
+class XRControllerModel extends _three.Object3D {
+    constructor(){
+        super();
+        this.motionController = null;
+        this.envMap = null;
+    }
+    setEnvironmentMap(envMap) {
+        if (this.envMap == envMap) return this;
+        this.envMap = envMap;
+        this.traverse((child)=>{
+            if (child.isMesh) {
+                child.material.envMap = this.envMap;
+                child.material.needsUpdate = true;
+            }
+        });
+        return this;
+    }
+    /**
+	 * Polls data from the XRInputSource and updates the model's components to match
+	 * the real world data
+	 */ updateMatrixWorld(force) {
+        super.updateMatrixWorld(force);
+        if (!this.motionController) return;
+        // Cause the MotionController to poll the Gamepad for data
+        this.motionController.updateFromGamepad();
+        // Update the 3D model to reflect the button, thumbstick, and touchpad state
+        Object.values(this.motionController.components).forEach((component)=>{
+            // Update node data based on the visual responses' current states
+            Object.values(component.visualResponses).forEach((visualResponse)=>{
+                const { valueNode , minNode , maxNode , value , valueNodeProperty  } = visualResponse;
+                // Skip if the visual response node is not found. No error is needed,
+                // because it will have been reported at load time.
+                if (!valueNode) return;
+                // Calculate the new properties based on the weight supplied
+                if (valueNodeProperty === _motionControllersModuleJs.Constants.VisualResponseProperty.VISIBILITY) valueNode.visible = value;
+                else if (valueNodeProperty === _motionControllersModuleJs.Constants.VisualResponseProperty.TRANSFORM) {
+                    valueNode.quaternion.slerpQuaternions(minNode.quaternion, maxNode.quaternion, value);
+                    valueNode.position.lerpVectors(minNode.position, maxNode.position, value);
+                }
+            });
+        });
+    }
+}
+/**
+ * Walks the model's tree to find the nodes needed to animate the components and
+ * saves them to the motionContoller components for use in the frame loop. When
+ * touchpads are found, attaches a touch dot to them.
+ */ function findNodes(motionController, scene) {
+    // Loop through the components and find the nodes needed for each components' visual responses
+    Object.values(motionController.components).forEach((component)=>{
+        const { type , touchPointNodeName , visualResponses  } = component;
+        if (type === _motionControllersModuleJs.Constants.ComponentType.TOUCHPAD) {
+            component.touchPointNode = scene.getObjectByName(touchPointNodeName);
+            if (component.touchPointNode) {
+                // Attach a touch dot to the touchpad.
+                const sphereGeometry = new _three.SphereGeometry(0.001);
+                const material = new _three.MeshBasicMaterial({
+                    color: 255
+                });
+                const sphere = new _three.Mesh(sphereGeometry, material);
+                component.touchPointNode.add(sphere);
+            } else console.warn(`Could not find touch dot, ${component.touchPointNodeName}, in touchpad component ${component.id}`);
+        }
+        // Loop through all the visual responses to be applied to this component
+        Object.values(visualResponses).forEach((visualResponse)=>{
+            const { valueNodeName , minNodeName , maxNodeName , valueNodeProperty  } = visualResponse;
+            // If animating a transform, find the two nodes to be interpolated between.
+            if (valueNodeProperty === _motionControllersModuleJs.Constants.VisualResponseProperty.TRANSFORM) {
+                visualResponse.minNode = scene.getObjectByName(minNodeName);
+                visualResponse.maxNode = scene.getObjectByName(maxNodeName);
+                // If the extents cannot be found, skip this animation
+                if (!visualResponse.minNode) {
+                    console.warn(`Could not find ${minNodeName} in the model`);
+                    return;
+                }
+                if (!visualResponse.maxNode) {
+                    console.warn(`Could not find ${maxNodeName} in the model`);
+                    return;
+                }
+            }
+            // If the target node cannot be found, skip this animation
+            visualResponse.valueNode = scene.getObjectByName(valueNodeName);
+            if (!visualResponse.valueNode) console.warn(`Could not find ${valueNodeName} in the model`);
+        });
+    });
+}
+function addAssetSceneToControllerModel(controllerModel, scene) {
+    // Find the nodes needed for animation and cache them on the motionController.
+    findNodes(controllerModel.motionController, scene);
+    // Apply any environment map that the mesh already has set.
+    if (controllerModel.envMap) scene.traverse((child)=>{
+        if (child.isMesh) {
+            child.material.envMap = controllerModel.envMap;
+            child.material.needsUpdate = true;
+        }
+    });
+    // Add the glTF scene to the controllerModel.
+    controllerModel.add(scene);
+}
+class XRControllerModelFactory {
+    constructor(gltfLoader = null){
+        this.gltfLoader = gltfLoader;
+        this.path = DEFAULT_PROFILES_PATH;
+        this._assetCache = {
+        };
+        // If a GLTFLoader wasn't supplied to the constructor create a new one.
+        if (!this.gltfLoader) this.gltfLoader = new _gltfloaderJs.GLTFLoader();
+    }
+    createControllerModel(controller) {
+        const controllerModel = new XRControllerModel();
+        let scene = null;
+        controller.addEventListener('connected', (event)=>{
+            const xrInputSource = event.data;
+            if (xrInputSource.targetRayMode !== 'tracked-pointer' || !xrInputSource.gamepad) return;
+            _motionControllersModuleJs.fetchProfile(xrInputSource, this.path, DEFAULT_PROFILE).then(({ profile , assetPath  })=>{
+                controllerModel.motionController = new _motionControllersModuleJs.MotionController(xrInputSource, profile, assetPath);
+                const cachedAsset = this._assetCache[controllerModel.motionController.assetUrl];
+                if (cachedAsset) {
+                    scene = cachedAsset.scene.clone();
+                    addAssetSceneToControllerModel(controllerModel, scene);
+                } else {
+                    if (!this.gltfLoader) throw new Error('GLTFLoader not set.');
+                    this.gltfLoader.setPath('');
+                    this.gltfLoader.load(controllerModel.motionController.assetUrl, (asset)=>{
+                        this._assetCache[controllerModel.motionController.assetUrl] = asset;
+                        scene = asset.scene.clone();
+                        addAssetSceneToControllerModel(controllerModel, scene);
+                    }, null, ()=>{
+                        throw new Error(`Asset ${controllerModel.motionController.assetUrl} missing or malformed.`);
+                    });
+                }
+            }).catch((err)=>{
+                console.warn(err);
+            });
+        });
+        controller.addEventListener('disconnected', ()=>{
+            controllerModel.motionController = null;
+            controllerModel.remove(scene);
+            scene = null;
+        });
+        return controllerModel;
+    }
+}
+
+},{"three":"1AKvZ","../loaders/GLTFLoader.js":"jzUEM","../libs/motion-controllers.module.js":"cWTkz","@parcel/transformer-js/src/esmodule-helpers.js":"JacNc"}],"cWTkz":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "Constants", ()=>Constants
@@ -35036,205 +35210,7 @@ class Component {
     }
 }
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"JacNc"}],"dKTS4":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "XRHandModelFactory", ()=>XRHandModelFactory
-);
-var _three = require("three");
-var _xrhandPrimitiveModelJs = require("./XRHandPrimitiveModel.js");
-var _xrhandMeshModelJs = require("./XRHandMeshModel.js");
-class XRHandModel extends _three.Object3D {
-    constructor(controller1){
-        super();
-        this.controller = controller1;
-        this.motionController = null;
-        this.envMap = null;
-        this.mesh = null;
-    }
-    updateMatrixWorld(force) {
-        super.updateMatrixWorld(force);
-        if (this.motionController) this.motionController.updateMesh();
-    }
-}
-class XRHandModelFactory {
-    constructor(){
-        this.path = null;
-    }
-    setPath(path) {
-        this.path = path;
-        return this;
-    }
-    createHandModel(controller, profile) {
-        const handModel = new XRHandModel(controller);
-        controller.addEventListener('connected', (event)=>{
-            const xrInputSource = event.data;
-            if (xrInputSource.hand && !handModel.motionController) {
-                handModel.xrInputSource = xrInputSource;
-                // @todo Detect profile if not provided
-                if (profile === undefined || profile === 'spheres') handModel.motionController = new _xrhandPrimitiveModelJs.XRHandPrimitiveModel(handModel, controller, this.path, xrInputSource.handedness, {
-                    primitive: 'sphere'
-                });
-                else if (profile === 'boxes') handModel.motionController = new _xrhandPrimitiveModelJs.XRHandPrimitiveModel(handModel, controller, this.path, xrInputSource.handedness, {
-                    primitive: 'box'
-                });
-                else if (profile === 'mesh') handModel.motionController = new _xrhandMeshModelJs.XRHandMeshModel(handModel, controller, this.path, xrInputSource.handedness);
-            }
-        });
-        controller.addEventListener('disconnected', ()=>{
-        // handModel.motionController = null;
-        // handModel.remove( scene );
-        // scene = null;
-        });
-        return handModel;
-    }
-}
-
-},{"three":"1AKvZ","./XRHandPrimitiveModel.js":"aMXgY","./XRHandMeshModel.js":"kWKvy","@parcel/transformer-js/src/esmodule-helpers.js":"JacNc"}],"aMXgY":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "XRHandPrimitiveModel", ()=>XRHandPrimitiveModel
-);
-var _three = require("three");
-const _matrix = new _three.Matrix4();
-const _vector = new _three.Vector3();
-class XRHandPrimitiveModel {
-    constructor(handModel, controller, path, handedness, options){
-        this.controller = controller;
-        this.handModel = handModel;
-        this.envMap = null;
-        let geometry;
-        if (!options || !options.primitive || options.primitive === 'sphere') geometry = new _three.SphereGeometry(1, 10, 10);
-        else if (options.primitive === 'box') geometry = new _three.BoxGeometry(1, 1, 1);
-        const material = new _three.MeshStandardMaterial();
-        this.handMesh = new _three.InstancedMesh(geometry, material, 30);
-        this.handMesh.instanceMatrix.setUsage(_three.DynamicDrawUsage); // will be updated every frame
-        this.handMesh.castShadow = true;
-        this.handMesh.receiveShadow = true;
-        this.handModel.add(this.handMesh);
-        this.joints = [
-            'wrist',
-            'thumb-metacarpal',
-            'thumb-phalanx-proximal',
-            'thumb-phalanx-distal',
-            'thumb-tip',
-            'index-finger-metacarpal',
-            'index-finger-phalanx-proximal',
-            'index-finger-phalanx-intermediate',
-            'index-finger-phalanx-distal',
-            'index-finger-tip',
-            'middle-finger-metacarpal',
-            'middle-finger-phalanx-proximal',
-            'middle-finger-phalanx-intermediate',
-            'middle-finger-phalanx-distal',
-            'middle-finger-tip',
-            'ring-finger-metacarpal',
-            'ring-finger-phalanx-proximal',
-            'ring-finger-phalanx-intermediate',
-            'ring-finger-phalanx-distal',
-            'ring-finger-tip',
-            'pinky-finger-metacarpal',
-            'pinky-finger-phalanx-proximal',
-            'pinky-finger-phalanx-intermediate',
-            'pinky-finger-phalanx-distal',
-            'pinky-finger-tip'
-        ];
-    }
-    updateMesh() {
-        const defaultRadius = 0.008;
-        const joints = this.controller.joints;
-        let count = 0;
-        for(let i = 0; i < this.joints.length; i++){
-            const joint = joints[this.joints[i]];
-            if (joint.visible) {
-                _vector.setScalar(joint.jointRadius || defaultRadius);
-                _matrix.compose(joint.position, joint.quaternion, _vector);
-                this.handMesh.setMatrixAt(i, _matrix);
-                count++;
-            }
-        }
-        this.handMesh.count = count;
-        this.handMesh.instanceMatrix.needsUpdate = true;
-    }
-}
-
-},{"three":"1AKvZ","@parcel/transformer-js/src/esmodule-helpers.js":"JacNc"}],"kWKvy":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "XRHandMeshModel", ()=>XRHandMeshModel
-);
-var _gltfloaderJs = require("../loaders/GLTFLoader.js");
-const DEFAULT_HAND_PROFILE_PATH = 'https://cdn.jsdelivr.net/npm/@webxr-input-profiles/assets@1.0/dist/profiles/generic-hand/';
-class XRHandMeshModel {
-    constructor(handModel, controller, path, handedness){
-        this.controller = controller;
-        this.handModel = handModel;
-        this.bones = [];
-        const loader = new _gltfloaderJs.GLTFLoader();
-        loader.setPath(path || DEFAULT_HAND_PROFILE_PATH);
-        loader.load(`${handedness}.glb`, (gltf)=>{
-            const object = gltf.scene.children[0];
-            this.handModel.add(object);
-            const mesh = object.getObjectByProperty('type', 'SkinnedMesh');
-            mesh.frustumCulled = false;
-            mesh.castShadow = true;
-            mesh.receiveShadow = true;
-            const joints = [
-                'wrist',
-                'thumb-metacarpal',
-                'thumb-phalanx-proximal',
-                'thumb-phalanx-distal',
-                'thumb-tip',
-                'index-finger-metacarpal',
-                'index-finger-phalanx-proximal',
-                'index-finger-phalanx-intermediate',
-                'index-finger-phalanx-distal',
-                'index-finger-tip',
-                'middle-finger-metacarpal',
-                'middle-finger-phalanx-proximal',
-                'middle-finger-phalanx-intermediate',
-                'middle-finger-phalanx-distal',
-                'middle-finger-tip',
-                'ring-finger-metacarpal',
-                'ring-finger-phalanx-proximal',
-                'ring-finger-phalanx-intermediate',
-                'ring-finger-phalanx-distal',
-                'ring-finger-tip',
-                'pinky-finger-metacarpal',
-                'pinky-finger-phalanx-proximal',
-                'pinky-finger-phalanx-intermediate',
-                'pinky-finger-phalanx-distal',
-                'pinky-finger-tip', 
-            ];
-            joints.forEach((jointName)=>{
-                const bone = object.getObjectByName(jointName);
-                if (bone !== undefined) bone.jointName = jointName;
-                else console.warn(`Couldn't find ${jointName} in ${handedness} hand mesh`);
-                this.bones.push(bone);
-            });
-        });
-    }
-    updateMesh() {
-        // XR Joints
-        const XRJoints = this.controller.joints;
-        for(let i = 0; i < this.bones.length; i++){
-            const bone = this.bones[i];
-            if (bone) {
-                const XRJoint = XRJoints[bone.jointName];
-                if (XRJoint.visible) {
-                    const position = XRJoint.position;
-                    if (bone) {
-                        bone.position.copy(position);
-                        bone.quaternion.copy(XRJoint.quaternion);
-                    // bone.scale.setScalar( XRJoint.jointRadius || defaultRadius );
-                    }
-                }
-            }
-        }
-    }
-}
-
-},{"../loaders/GLTFLoader.js":"jzUEM","@parcel/transformer-js/src/esmodule-helpers.js":"JacNc"}],"dCmjv":[function(require,module,exports) {
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"JacNc"}],"dCmjv":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "DummyXRHandMeshModel", ()=>DummyXRHandMeshModel
@@ -35339,7 +35315,833 @@ class DummyXRHandModelFactory {
     }
 }
 
-},{"three":"1AKvZ","three/examples/jsm/webxr/XRHandPrimitiveModel.js":"aMXgY","three/examples/jsm/webxr/XRHandMeshModel.js":"kWKvy","three/examples/jsm/loaders/GLTFLoader.js":"jzUEM","@parcel/transformer-js/src/esmodule-helpers.js":"JacNc"}],"jZx5N":[function(require,module,exports) {
+},{"three":"1AKvZ","three/examples/jsm/webxr/XRHandPrimitiveModel.js":"aMXgY","three/examples/jsm/webxr/XRHandMeshModel.js":"kWKvy","three/examples/jsm/loaders/GLTFLoader.js":"jzUEM","@parcel/transformer-js/src/esmodule-helpers.js":"JacNc"}],"e87sn":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "Easing", ()=>Easing
+);
+parcelHelpers.export(exports, "Group", ()=>Group
+);
+parcelHelpers.export(exports, "Interpolation", ()=>Interpolation
+);
+parcelHelpers.export(exports, "Sequence", ()=>Sequence
+);
+parcelHelpers.export(exports, "Tween", ()=>Tween
+);
+parcelHelpers.export(exports, "VERSION", ()=>VERSION
+);
+parcelHelpers.export(exports, "add", ()=>add
+);
+parcelHelpers.export(exports, "getAll", ()=>getAll
+);
+parcelHelpers.export(exports, "nextId", ()=>nextId
+);
+parcelHelpers.export(exports, "now", ()=>now$1
+);
+parcelHelpers.export(exports, "remove", ()=>remove
+);
+parcelHelpers.export(exports, "removeAll", ()=>removeAll
+);
+parcelHelpers.export(exports, "update", ()=>update
+);
+var process = require("process");
+/**
+ * The Ease class provides a collection of easing functions for use with tween.js.
+ */ var Easing = {
+    Linear: {
+        None: function(amount) {
+            return amount;
+        }
+    },
+    Quadratic: {
+        In: function(amount) {
+            return amount * amount;
+        },
+        Out: function(amount) {
+            return amount * (2 - amount);
+        },
+        InOut: function(amount) {
+            if ((amount *= 2) < 1) return 0.5 * amount * amount;
+            return -0.5 * ((--amount) * (amount - 2) - 1);
+        }
+    },
+    Cubic: {
+        In: function(amount) {
+            return amount * amount * amount;
+        },
+        Out: function(amount) {
+            return (--amount) * amount * amount + 1;
+        },
+        InOut: function(amount) {
+            if ((amount *= 2) < 1) return 0.5 * amount * amount * amount;
+            return 0.5 * ((amount -= 2) * amount * amount + 2);
+        }
+    },
+    Quartic: {
+        In: function(amount) {
+            return amount * amount * amount * amount;
+        },
+        Out: function(amount) {
+            return 1 - (--amount) * amount * amount * amount;
+        },
+        InOut: function(amount) {
+            if ((amount *= 2) < 1) return 0.5 * amount * amount * amount * amount;
+            return -0.5 * ((amount -= 2) * amount * amount * amount - 2);
+        }
+    },
+    Quintic: {
+        In: function(amount) {
+            return amount * amount * amount * amount * amount;
+        },
+        Out: function(amount) {
+            return (--amount) * amount * amount * amount * amount + 1;
+        },
+        InOut: function(amount) {
+            if ((amount *= 2) < 1) return 0.5 * amount * amount * amount * amount * amount;
+            return 0.5 * ((amount -= 2) * amount * amount * amount * amount + 2);
+        }
+    },
+    Sinusoidal: {
+        In: function(amount) {
+            return 1 - Math.cos(amount * Math.PI / 2);
+        },
+        Out: function(amount) {
+            return Math.sin(amount * Math.PI / 2);
+        },
+        InOut: function(amount) {
+            return 0.5 * (1 - Math.cos(Math.PI * amount));
+        }
+    },
+    Exponential: {
+        In: function(amount) {
+            return amount === 0 ? 0 : Math.pow(1024, amount - 1);
+        },
+        Out: function(amount) {
+            return amount === 1 ? 1 : 1 - Math.pow(2, -10 * amount);
+        },
+        InOut: function(amount) {
+            if (amount === 0) return 0;
+            if (amount === 1) return 1;
+            if ((amount *= 2) < 1) return 0.5 * Math.pow(1024, amount - 1);
+            return 0.5 * (-Math.pow(2, -10 * (amount - 1)) + 2);
+        }
+    },
+    Circular: {
+        In: function(amount) {
+            return 1 - Math.sqrt(1 - amount * amount);
+        },
+        Out: function(amount) {
+            return Math.sqrt(1 - (--amount) * amount);
+        },
+        InOut: function(amount) {
+            if ((amount *= 2) < 1) return -0.5 * (Math.sqrt(1 - amount * amount) - 1);
+            return 0.5 * (Math.sqrt(1 - (amount -= 2) * amount) + 1);
+        }
+    },
+    Elastic: {
+        In: function(amount) {
+            if (amount === 0) return 0;
+            if (amount === 1) return 1;
+            return -Math.pow(2, 10 * (amount - 1)) * Math.sin((amount - 1.1) * 5 * Math.PI);
+        },
+        Out: function(amount) {
+            if (amount === 0) return 0;
+            if (amount === 1) return 1;
+            return Math.pow(2, -10 * amount) * Math.sin((amount - 0.1) * 5 * Math.PI) + 1;
+        },
+        InOut: function(amount) {
+            if (amount === 0) return 0;
+            if (amount === 1) return 1;
+            amount *= 2;
+            if (amount < 1) return -0.5 * Math.pow(2, 10 * (amount - 1)) * Math.sin((amount - 1.1) * 5 * Math.PI);
+            return 0.5 * Math.pow(2, -10 * (amount - 1)) * Math.sin((amount - 1.1) * 5 * Math.PI) + 1;
+        }
+    },
+    Back: {
+        In: function(amount) {
+            var s = 1.70158;
+            return amount * amount * ((s + 1) * amount - s);
+        },
+        Out: function(amount) {
+            var s = 1.70158;
+            return (--amount) * amount * ((s + 1) * amount + s) + 1;
+        },
+        InOut: function(amount) {
+            var s = 2.5949095;
+            if ((amount *= 2) < 1) return 0.5 * (amount * amount * ((s + 1) * amount - s));
+            return 0.5 * ((amount -= 2) * amount * ((s + 1) * amount + s) + 2);
+        }
+    },
+    Bounce: {
+        In: function(amount) {
+            return 1 - Easing.Bounce.Out(1 - amount);
+        },
+        Out: function(amount) {
+            if (amount < 1 / 2.75) return 7.5625 * amount * amount;
+            else if (amount < 2 / 2.75) return 7.5625 * (amount -= 1.5 / 2.75) * amount + 0.75;
+            else if (amount < 2.5 / 2.75) return 7.5625 * (amount -= 2.25 / 2.75) * amount + 0.9375;
+            else return 7.5625 * (amount -= 2.625 / 2.75) * amount + 0.984375;
+        },
+        InOut: function(amount) {
+            if (amount < 0.5) return Easing.Bounce.In(amount * 2) * 0.5;
+            return Easing.Bounce.Out(amount * 2 - 1) * 0.5 + 0.5;
+        }
+    }
+};
+var now;
+// Include a performance.now polyfill.
+// In node.js, use process.hrtime.
+// eslint-disable-next-line
+// @ts-ignore
+if (typeof self === 'undefined' && typeof process !== 'undefined' && process.hrtime) now = function() {
+    // eslint-disable-next-line
+    // @ts-ignore
+    var time = process.hrtime();
+    // Convert [seconds, nanoseconds] to milliseconds.
+    return time[0] * 1000 + time[1] / 1000000;
+};
+else if (typeof self !== 'undefined' && self.performance !== undefined && self.performance.now !== undefined) // This must be bound, because directly assigning this function
+// leads to an invocation exception in Chrome.
+now = self.performance.now.bind(self.performance);
+else if (Date.now !== undefined) now = Date.now;
+else now = function() {
+    return new Date().getTime();
+};
+var now$1 = now;
+/**
+ * Controlling groups of tweens
+ *
+ * Using the TWEEN singleton to manage your tweens can cause issues in large apps with many components.
+ * In these cases, you may want to create your own smaller groups of tween
+ */ var Group = function() {
+    function Group1() {
+        this._tweens = {
+        };
+        this._tweensAddedDuringUpdate = {
+        };
+    }
+    Group1.prototype.getAll = function() {
+        var _this = this;
+        return Object.keys(this._tweens).map(function(tweenId) {
+            return _this._tweens[tweenId];
+        });
+    };
+    Group1.prototype.removeAll = function() {
+        this._tweens = {
+        };
+    };
+    Group1.prototype.add = function(tween) {
+        this._tweens[tween.getId()] = tween;
+        this._tweensAddedDuringUpdate[tween.getId()] = tween;
+    };
+    Group1.prototype.remove = function(tween) {
+        delete this._tweens[tween.getId()];
+        delete this._tweensAddedDuringUpdate[tween.getId()];
+    };
+    Group1.prototype.update = function(time, preserve) {
+        if (time === void 0) time = now$1();
+        if (preserve === void 0) preserve = false;
+        var tweenIds = Object.keys(this._tweens);
+        if (tweenIds.length === 0) return false;
+        // Tweens are updated in "batches". If you add a new tween during an
+        // update, then the new tween will be updated in the next batch.
+        // If you remove a tween during an update, it may or may not be updated.
+        // However, if the removed tween was added during the current batch,
+        // then it will not be updated.
+        while(tweenIds.length > 0){
+            this._tweensAddedDuringUpdate = {
+            };
+            for(var i = 0; i < tweenIds.length; i++){
+                var tween = this._tweens[tweenIds[i]];
+                var autoStart = !preserve;
+                if (tween && tween.update(time, autoStart) === false && !preserve) delete this._tweens[tweenIds[i]];
+            }
+            tweenIds = Object.keys(this._tweensAddedDuringUpdate);
+        }
+        return true;
+    };
+    return Group1;
+}();
+/**
+ *
+ */ var Interpolation = {
+    Linear: function(v, k) {
+        var m = v.length - 1;
+        var f = m * k;
+        var i = Math.floor(f);
+        var fn = Interpolation.Utils.Linear;
+        if (k < 0) return fn(v[0], v[1], f);
+        if (k > 1) return fn(v[m], v[m - 1], m - f);
+        return fn(v[i], v[i + 1 > m ? m : i + 1], f - i);
+    },
+    Bezier: function(v, k) {
+        var b = 0;
+        var n = v.length - 1;
+        var pw = Math.pow;
+        var bn = Interpolation.Utils.Bernstein;
+        for(var i = 0; i <= n; i++)b += pw(1 - k, n - i) * pw(k, i) * v[i] * bn(n, i);
+        return b;
+    },
+    CatmullRom: function(v, k) {
+        var m = v.length - 1;
+        var f = m * k;
+        var i = Math.floor(f);
+        var fn = Interpolation.Utils.CatmullRom;
+        if (v[0] === v[m]) {
+            if (k < 0) i = Math.floor(f = m * (1 + k));
+            return fn(v[(i - 1 + m) % m], v[i], v[(i + 1) % m], v[(i + 2) % m], f - i);
+        } else {
+            if (k < 0) return v[0] - (fn(v[0], v[0], v[1], v[1], -f) - v[0]);
+            if (k > 1) return v[m] - (fn(v[m], v[m], v[m - 1], v[m - 1], f - m) - v[m]);
+            return fn(v[i ? i - 1 : 0], v[i], v[m < i + 1 ? m : i + 1], v[m < i + 2 ? m : i + 2], f - i);
+        }
+    },
+    Utils: {
+        Linear: function(p0, p1, t) {
+            return (p1 - p0) * t + p0;
+        },
+        Bernstein: function(n, i) {
+            var fc = Interpolation.Utils.Factorial;
+            return fc(n) / fc(i) / fc(n - i);
+        },
+        Factorial: function() {
+            var a = [
+                1
+            ];
+            return function(n) {
+                var s = 1;
+                if (a[n]) return a[n];
+                for(var i = n; i > 1; i--)s *= i;
+                a[n] = s;
+                return s;
+            };
+        }(),
+        CatmullRom: function(p0, p1, p2, p3, t) {
+            var v0 = (p2 - p0) * 0.5;
+            var v1 = (p3 - p1) * 0.5;
+            var t2 = t * t;
+            var t3 = t * t2;
+            return (2 * p1 - 2 * p2 + v0 + v1) * t3 + (-3 * p1 + 3 * p2 - 2 * v0 - v1) * t2 + v0 * t + p1;
+        }
+    }
+};
+/**
+ * Utils
+ */ var Sequence = function() {
+    function Sequence1() {
+    }
+    Sequence1.nextId = function() {
+        return Sequence1._nextId++;
+    };
+    Sequence1._nextId = 0;
+    return Sequence1;
+}();
+var mainGroup = new Group();
+/**
+ * Tween.js - Licensed under the MIT license
+ * https://github.com/tweenjs/tween.js
+ * ----------------------------------------------
+ *
+ * See https://github.com/tweenjs/tween.js/graphs/contributors for the full list of contributors.
+ * Thank you all, you're awesome!
+ */ var Tween = function() {
+    function Tween1(_object, _group) {
+        if (_group === void 0) _group = mainGroup;
+        this._object = _object;
+        this._group = _group;
+        this._isPaused = false;
+        this._pauseStart = 0;
+        this._valuesStart = {
+        };
+        this._valuesEnd = {
+        };
+        this._valuesStartRepeat = {
+        };
+        this._duration = 1000;
+        this._initialRepeat = 0;
+        this._repeat = 0;
+        this._yoyo = false;
+        this._isPlaying = false;
+        this._reversed = false;
+        this._delayTime = 0;
+        this._startTime = 0;
+        this._easingFunction = Easing.Linear.None;
+        this._interpolationFunction = Interpolation.Linear;
+        this._chainedTweens = [];
+        this._onStartCallbackFired = false;
+        this._id = Sequence.nextId();
+        this._isChainStopped = false;
+        this._goToEnd = false;
+    }
+    Tween1.prototype.getId = function() {
+        return this._id;
+    };
+    Tween1.prototype.isPlaying = function() {
+        return this._isPlaying;
+    };
+    Tween1.prototype.isPaused = function() {
+        return this._isPaused;
+    };
+    Tween1.prototype.to = function(properties, duration) {
+        // TODO? restore this, then update the 07_dynamic_to example to set fox
+        // tween's to on each update. That way the behavior is opt-in (there's
+        // currently no opt-out).
+        // for (const prop in properties) this._valuesEnd[prop] = properties[prop]
+        this._valuesEnd = Object.create(properties);
+        if (duration !== undefined) this._duration = duration;
+        return this;
+    };
+    Tween1.prototype.duration = function(d) {
+        this._duration = d;
+        return this;
+    };
+    Tween1.prototype.start = function(time) {
+        if (this._isPlaying) return this;
+        // eslint-disable-next-line
+        this._group && this._group.add(this);
+        this._repeat = this._initialRepeat;
+        if (this._reversed) {
+            // If we were reversed (f.e. using the yoyo feature) then we need to
+            // flip the tween direction back to forward.
+            this._reversed = false;
+            for(var property in this._valuesStartRepeat){
+                this._swapEndStartRepeatValues(property);
+                this._valuesStart[property] = this._valuesStartRepeat[property];
+            }
+        }
+        this._isPlaying = true;
+        this._isPaused = false;
+        this._onStartCallbackFired = false;
+        this._isChainStopped = false;
+        this._startTime = time !== undefined ? typeof time === 'string' ? now$1() + parseFloat(time) : time : now$1();
+        this._startTime += this._delayTime;
+        this._setupProperties(this._object, this._valuesStart, this._valuesEnd, this._valuesStartRepeat);
+        return this;
+    };
+    Tween1.prototype._setupProperties = function(_object, _valuesStart, _valuesEnd, _valuesStartRepeat) {
+        for(var property in _valuesEnd){
+            var startValue = _object[property];
+            var startValueIsArray = Array.isArray(startValue);
+            var propType = startValueIsArray ? 'array' : typeof startValue;
+            var isInterpolationList = !startValueIsArray && Array.isArray(_valuesEnd[property]);
+            // If `to()` specifies a property that doesn't exist in the source object,
+            // we should not set that property in the object
+            if (propType === 'undefined' || propType === 'function') continue;
+            // Check if an Array was provided as property value
+            if (isInterpolationList) {
+                var endValues = _valuesEnd[property];
+                if (endValues.length === 0) continue;
+                // handle an array of relative values
+                endValues = endValues.map(this._handleRelativeValue.bind(this, startValue));
+                // Create a local copy of the Array with the start value at the front
+                _valuesEnd[property] = [
+                    startValue
+                ].concat(endValues);
+            }
+            // handle the deepness of the values
+            if ((propType === 'object' || startValueIsArray) && startValue && !isInterpolationList) {
+                _valuesStart[property] = startValueIsArray ? [] : {
+                };
+                // eslint-disable-next-line
+                for(var prop in startValue)// eslint-disable-next-line
+                // @ts-ignore FIXME?
+                _valuesStart[property][prop] = startValue[prop];
+                _valuesStartRepeat[property] = startValueIsArray ? [] : {
+                }; // TODO? repeat nested values? And yoyo? And array values?
+                // eslint-disable-next-line
+                // @ts-ignore FIXME?
+                this._setupProperties(startValue, _valuesStart[property], _valuesEnd[property], _valuesStartRepeat[property]);
+            } else {
+                // Save the starting value, but only once.
+                if (typeof _valuesStart[property] === 'undefined') _valuesStart[property] = startValue;
+                if (!startValueIsArray) // eslint-disable-next-line
+                // @ts-ignore FIXME?
+                _valuesStart[property] *= 1; // Ensures we're using numbers, not strings
+                if (isInterpolationList) // eslint-disable-next-line
+                // @ts-ignore FIXME?
+                _valuesStartRepeat[property] = _valuesEnd[property].slice().reverse();
+                else _valuesStartRepeat[property] = _valuesStart[property] || 0;
+            }
+        }
+    };
+    Tween1.prototype.stop = function() {
+        if (!this._isChainStopped) {
+            this._isChainStopped = true;
+            this.stopChainedTweens();
+        }
+        if (!this._isPlaying) return this;
+        // eslint-disable-next-line
+        this._group && this._group.remove(this);
+        this._isPlaying = false;
+        this._isPaused = false;
+        if (this._onStopCallback) this._onStopCallback(this._object);
+        return this;
+    };
+    Tween1.prototype.end = function() {
+        this._goToEnd = true;
+        this.update(Infinity);
+        return this;
+    };
+    Tween1.prototype.pause = function(time) {
+        if (time === void 0) time = now$1();
+        if (this._isPaused || !this._isPlaying) return this;
+        this._isPaused = true;
+        this._pauseStart = time;
+        // eslint-disable-next-line
+        this._group && this._group.remove(this);
+        return this;
+    };
+    Tween1.prototype.resume = function(time) {
+        if (time === void 0) time = now$1();
+        if (!this._isPaused || !this._isPlaying) return this;
+        this._isPaused = false;
+        this._startTime += time - this._pauseStart;
+        this._pauseStart = 0;
+        // eslint-disable-next-line
+        this._group && this._group.add(this);
+        return this;
+    };
+    Tween1.prototype.stopChainedTweens = function() {
+        for(var i = 0, numChainedTweens = this._chainedTweens.length; i < numChainedTweens; i++)this._chainedTweens[i].stop();
+        return this;
+    };
+    Tween1.prototype.group = function(group) {
+        this._group = group;
+        return this;
+    };
+    Tween1.prototype.delay = function(amount) {
+        this._delayTime = amount;
+        return this;
+    };
+    Tween1.prototype.repeat = function(times) {
+        this._initialRepeat = times;
+        this._repeat = times;
+        return this;
+    };
+    Tween1.prototype.repeatDelay = function(amount) {
+        this._repeatDelayTime = amount;
+        return this;
+    };
+    Tween1.prototype.yoyo = function(yoyo) {
+        this._yoyo = yoyo;
+        return this;
+    };
+    Tween1.prototype.easing = function(easingFunction) {
+        this._easingFunction = easingFunction;
+        return this;
+    };
+    Tween1.prototype.interpolation = function(interpolationFunction) {
+        this._interpolationFunction = interpolationFunction;
+        return this;
+    };
+    Tween1.prototype.chain = function() {
+        var tweens = [];
+        for(var _i = 0; _i < arguments.length; _i++)tweens[_i] = arguments[_i];
+        this._chainedTweens = tweens;
+        return this;
+    };
+    Tween1.prototype.onStart = function(callback) {
+        this._onStartCallback = callback;
+        return this;
+    };
+    Tween1.prototype.onUpdate = function(callback) {
+        this._onUpdateCallback = callback;
+        return this;
+    };
+    Tween1.prototype.onRepeat = function(callback) {
+        this._onRepeatCallback = callback;
+        return this;
+    };
+    Tween1.prototype.onComplete = function(callback) {
+        this._onCompleteCallback = callback;
+        return this;
+    };
+    Tween1.prototype.onStop = function(callback) {
+        this._onStopCallback = callback;
+        return this;
+    };
+    /**
+     * @returns true if the tween is still playing after the update, false
+     * otherwise (calling update on a paused tween still returns true because
+     * it is still playing, just paused).
+     */ Tween1.prototype.update = function(time, autoStart) {
+        if (time === void 0) time = now$1();
+        if (autoStart === void 0) autoStart = true;
+        if (this._isPaused) return true;
+        var property;
+        var elapsed;
+        var endTime = this._startTime + this._duration;
+        if (!this._goToEnd && !this._isPlaying) {
+            if (time > endTime) return false;
+            if (autoStart) this.start(time);
+        }
+        this._goToEnd = false;
+        if (time < this._startTime) return true;
+        if (this._onStartCallbackFired === false) {
+            if (this._onStartCallback) this._onStartCallback(this._object);
+            this._onStartCallbackFired = true;
+        }
+        elapsed = (time - this._startTime) / this._duration;
+        elapsed = this._duration === 0 || elapsed > 1 ? 1 : elapsed;
+        var value = this._easingFunction(elapsed);
+        // properties transformations
+        this._updateProperties(this._object, this._valuesStart, this._valuesEnd, value);
+        if (this._onUpdateCallback) this._onUpdateCallback(this._object, elapsed);
+        if (elapsed === 1) {
+            if (this._repeat > 0) {
+                if (isFinite(this._repeat)) this._repeat--;
+                // Reassign starting values, restart by making startTime = now
+                for(property in this._valuesStartRepeat){
+                    if (!this._yoyo && typeof this._valuesEnd[property] === 'string') this._valuesStartRepeat[property] = // eslint-disable-next-line
+                    // @ts-ignore FIXME?
+                    this._valuesStartRepeat[property] + parseFloat(this._valuesEnd[property]);
+                    if (this._yoyo) this._swapEndStartRepeatValues(property);
+                    this._valuesStart[property] = this._valuesStartRepeat[property];
+                }
+                if (this._yoyo) this._reversed = !this._reversed;
+                if (this._repeatDelayTime !== undefined) this._startTime = time + this._repeatDelayTime;
+                else this._startTime = time + this._delayTime;
+                if (this._onRepeatCallback) this._onRepeatCallback(this._object);
+                return true;
+            } else {
+                if (this._onCompleteCallback) this._onCompleteCallback(this._object);
+                for(var i = 0, numChainedTweens = this._chainedTweens.length; i < numChainedTweens; i++)// Make the chained tweens start exactly at the time they should,
+                // even if the `update()` method was called way past the duration of the tween
+                this._chainedTweens[i].start(this._startTime + this._duration);
+                this._isPlaying = false;
+                return false;
+            }
+        }
+        return true;
+    };
+    Tween1.prototype._updateProperties = function(_object, _valuesStart, _valuesEnd, value) {
+        for(var property in _valuesEnd){
+            // Don't update properties that do not exist in the source object
+            if (_valuesStart[property] === undefined) continue;
+            var start = _valuesStart[property] || 0;
+            var end = _valuesEnd[property];
+            var startIsArray = Array.isArray(_object[property]);
+            var endIsArray = Array.isArray(end);
+            var isInterpolationList = !startIsArray && endIsArray;
+            if (isInterpolationList) _object[property] = this._interpolationFunction(end, value);
+            else if (typeof end === 'object' && end) // eslint-disable-next-line
+            // @ts-ignore FIXME?
+            this._updateProperties(_object[property], start, end, value);
+            else {
+                // Parses relative end values with start as base (e.g.: +10, -3)
+                end = this._handleRelativeValue(start, end);
+                // Protect against non numeric properties.
+                if (typeof end === 'number') // eslint-disable-next-line
+                // @ts-ignore FIXME?
+                _object[property] = start + (end - start) * value;
+            }
+        }
+    };
+    Tween1.prototype._handleRelativeValue = function(start, end) {
+        if (typeof end !== 'string') return end;
+        if (end.charAt(0) === '+' || end.charAt(0) === '-') return start + parseFloat(end);
+        else return parseFloat(end);
+    };
+    Tween1.prototype._swapEndStartRepeatValues = function(property) {
+        var tmp = this._valuesStartRepeat[property];
+        var endValue = this._valuesEnd[property];
+        if (typeof endValue === 'string') this._valuesStartRepeat[property] = this._valuesStartRepeat[property] + parseFloat(endValue);
+        else this._valuesStartRepeat[property] = this._valuesEnd[property];
+        this._valuesEnd[property] = tmp;
+    };
+    return Tween1;
+}();
+var VERSION = '18.6.4';
+/**
+ * Tween.js - Licensed under the MIT license
+ * https://github.com/tweenjs/tween.js
+ * ----------------------------------------------
+ *
+ * See https://github.com/tweenjs/tween.js/graphs/contributors for the full list of contributors.
+ * Thank you all, you're awesome!
+ */ var nextId = Sequence.nextId;
+/**
+ * Controlling groups of tweens
+ *
+ * Using the TWEEN singleton to manage your tweens can cause issues in large apps with many components.
+ * In these cases, you may want to create your own smaller groups of tweens.
+ */ var TWEEN = mainGroup;
+// This is the best way to export things in a way that's compatible with both ES
+// Modules and CommonJS, without build hacks, and so as not to break the
+// existing API.
+// https://github.com/rollup/rollup/issues/1961#issuecomment-423037881
+var getAll = TWEEN.getAll.bind(TWEEN);
+var removeAll = TWEEN.removeAll.bind(TWEEN);
+var add = TWEEN.add.bind(TWEEN);
+var remove = TWEEN.remove.bind(TWEEN);
+var update = TWEEN.update.bind(TWEEN);
+var exports1 = {
+    Easing: Easing,
+    Group: Group,
+    Interpolation: Interpolation,
+    now: now$1,
+    Sequence: Sequence,
+    nextId: nextId,
+    Tween: Tween,
+    VERSION: VERSION,
+    getAll: getAll,
+    removeAll: removeAll,
+    add: add,
+    remove: remove,
+    update: update
+};
+exports.default = exports1;
+
+},{"process":"6Upk8","@parcel/transformer-js/src/esmodule-helpers.js":"JacNc"}],"6Upk8":[function(require,module,exports) {
+// shim for using process in browser
+var process = module.exports = {
+};
+// cached from whatever global is present so that test runners that stub it
+// don't break things.  But we need to wrap it in a try catch in case it is
+// wrapped in strict mode code which doesn't define any globals.  It's inside a
+// function because try/catches deoptimize in certain engines.
+var cachedSetTimeout;
+var cachedClearTimeout;
+function defaultSetTimout() {
+    throw new Error('setTimeout has not been defined');
+}
+function defaultClearTimeout() {
+    throw new Error('clearTimeout has not been defined');
+}
+(function() {
+    try {
+        if (typeof setTimeout === 'function') cachedSetTimeout = setTimeout;
+        else cachedSetTimeout = defaultSetTimout;
+    } catch (e) {
+        cachedSetTimeout = defaultSetTimout;
+    }
+    try {
+        if (typeof clearTimeout === 'function') cachedClearTimeout = clearTimeout;
+        else cachedClearTimeout = defaultClearTimeout;
+    } catch (e) {
+        cachedClearTimeout = defaultClearTimeout;
+    }
+})();
+function runTimeout(fun) {
+    if (cachedSetTimeout === setTimeout) //normal enviroments in sane situations
+    return setTimeout(fun, 0);
+    // if setTimeout wasn't available but was latter defined
+    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+        cachedSetTimeout = setTimeout;
+        return setTimeout(fun, 0);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedSetTimeout(fun, 0);
+    } catch (e) {
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
+            return cachedSetTimeout.call(null, fun, 0);
+        } catch (e1) {
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
+            return cachedSetTimeout.call(this, fun, 0);
+        }
+    }
+}
+function runClearTimeout(marker) {
+    if (cachedClearTimeout === clearTimeout) //normal enviroments in sane situations
+    return clearTimeout(marker);
+    // if clearTimeout wasn't available but was latter defined
+    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+        cachedClearTimeout = clearTimeout;
+        return clearTimeout(marker);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedClearTimeout(marker);
+    } catch (e) {
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
+            return cachedClearTimeout.call(null, marker);
+        } catch (e1) {
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
+            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
+            return cachedClearTimeout.call(this, marker);
+        }
+    }
+}
+var queue = [];
+var draining = false;
+var currentQueue;
+var queueIndex = -1;
+function cleanUpNextTick() {
+    if (!draining || !currentQueue) return;
+    draining = false;
+    if (currentQueue.length) queue = currentQueue.concat(queue);
+    else queueIndex = -1;
+    if (queue.length) drainQueue();
+}
+function drainQueue() {
+    if (draining) return;
+    var timeout = runTimeout(cleanUpNextTick);
+    draining = true;
+    var len = queue.length;
+    while(len){
+        currentQueue = queue;
+        queue = [];
+        while((++queueIndex) < len)if (currentQueue) currentQueue[queueIndex].run();
+        queueIndex = -1;
+        len = queue.length;
+    }
+    currentQueue = null;
+    draining = false;
+    runClearTimeout(timeout);
+}
+process.nextTick = function(fun) {
+    var args = new Array(arguments.length - 1);
+    if (arguments.length > 1) for(var i = 1; i < arguments.length; i++)args[i - 1] = arguments[i];
+    queue.push(new Item(fun, args));
+    if (queue.length === 1 && !draining) runTimeout(drainQueue);
+};
+// v8 likes predictible objects
+function Item(fun, array) {
+    this.fun = fun;
+    this.array = array;
+}
+Item.prototype.run = function() {
+    this.fun.apply(null, this.array);
+};
+process.title = 'browser';
+process.browser = true;
+process.env = {
+};
+process.argv = [];
+process.version = ''; // empty string to avoid regexp issues
+process.versions = {
+};
+function noop() {
+}
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+process.prependListener = noop;
+process.prependOnceListener = noop;
+process.listeners = function(name) {
+    return [];
+};
+process.binding = function(name) {
+    throw new Error('process.binding is not supported');
+};
+process.cwd = function() {
+    return '/';
+};
+process.chdir = function(dir) {
+    throw new Error('process.chdir is not supported');
+};
+process.umask = function() {
+    return 0;
+};
+
+},{}],"jZx5N":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "GlyphsGeometry", ()=>GlyphsGeometry
@@ -41530,7 +42332,7 @@ function recordTemplate(scene_modifiers, left_hand, right_hand, camera, music_ur
 function playbackTemplate(data) {
 }
 
-},{"three":"1AKvZ","./PoseUtils":"6XW1O","@parcel/transformer-js/src/esmodule-helpers.js":"JacNc","./ObjectUtils":"4q0XH"}],"6XW1O":[function(require,module,exports) {
+},{"three":"1AKvZ","./PoseUtils":"6XW1O","./ObjectUtils":"4q0XH","@parcel/transformer-js/src/esmodule-helpers.js":"JacNc"}],"6XW1O":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "serializeJoints", ()=>serializeJoints
@@ -56143,2242 +56945,7 @@ function createCountdown(seconds = 3, on_update = (number)=>{
     return;
 }
 
-},{"three":"1AKvZ","@parcel/transformer-js/src/esmodule-helpers.js":"JacNc"}],"iYoWk":[function(require,module,exports) {
-module.exports = require('./lib/axios');
-
-},{"./lib/axios":"3QmO2"}],"3QmO2":[function(require,module,exports) {
-'use strict';
-var utils = require('./utils');
-var bind = require('./helpers/bind');
-var Axios = require('./core/Axios');
-var mergeConfig = require('./core/mergeConfig');
-var defaults = require('./defaults');
-/**
- * Create an instance of Axios
- *
- * @param {Object} defaultConfig The default config for the instance
- * @return {Axios} A new instance of Axios
- */ function createInstance(defaultConfig) {
-    var context = new Axios(defaultConfig);
-    var instance = bind(Axios.prototype.request, context);
-    // Copy axios.prototype to instance
-    utils.extend(instance, Axios.prototype, context);
-    // Copy context to instance
-    utils.extend(instance, context);
-    // Factory for creating new instances
-    instance.create = function create(instanceConfig) {
-        return createInstance(mergeConfig(defaultConfig, instanceConfig));
-    };
-    return instance;
-}
-// Create the default instance to be exported
-var axios = createInstance(defaults);
-// Expose Axios class to allow class inheritance
-axios.Axios = Axios;
-// Expose Cancel & CancelToken
-axios.Cancel = require('./cancel/Cancel');
-axios.CancelToken = require('./cancel/CancelToken');
-axios.isCancel = require('./cancel/isCancel');
-axios.VERSION = require('./env/data').version;
-// Expose all/spread
-axios.all = function all(promises) {
-    return Promise.all(promises);
-};
-axios.spread = require('./helpers/spread');
-// Expose isAxiosError
-axios.isAxiosError = require('./helpers/isAxiosError');
-module.exports = axios;
-// Allow use of default import syntax in TypeScript
-module.exports.default = axios;
-
-},{"./utils":"hOPY0","./helpers/bind":"4bHkG","./core/Axios":"KVzea","./core/mergeConfig":"8vb7m","./defaults":"g96L2","./cancel/Cancel":"iGO1D","./cancel/CancelToken":"6kJtU","./cancel/isCancel":"6KzET","./env/data":"7dluA","./helpers/spread":"3fmMu","./helpers/isAxiosError":"1NqDP"}],"hOPY0":[function(require,module,exports) {
-'use strict';
-var bind = require('./helpers/bind');
-// utils is a library of generic helper functions non-specific to axios
-var toString = Object.prototype.toString;
-/**
- * Determine if a value is an Array
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is an Array, otherwise false
- */ function isArray(val) {
-    return toString.call(val) === '[object Array]';
-}
-/**
- * Determine if a value is undefined
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if the value is undefined, otherwise false
- */ function isUndefined(val) {
-    return typeof val === 'undefined';
-}
-/**
- * Determine if a value is a Buffer
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a Buffer, otherwise false
- */ function isBuffer(val) {
-    return val !== null && !isUndefined(val) && val.constructor !== null && !isUndefined(val.constructor) && typeof val.constructor.isBuffer === 'function' && val.constructor.isBuffer(val);
-}
-/**
- * Determine if a value is an ArrayBuffer
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is an ArrayBuffer, otherwise false
- */ function isArrayBuffer(val) {
-    return toString.call(val) === '[object ArrayBuffer]';
-}
-/**
- * Determine if a value is a FormData
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is an FormData, otherwise false
- */ function isFormData(val) {
-    return typeof FormData !== 'undefined' && val instanceof FormData;
-}
-/**
- * Determine if a value is a view on an ArrayBuffer
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a view on an ArrayBuffer, otherwise false
- */ function isArrayBufferView(val) {
-    var result;
-    if (typeof ArrayBuffer !== 'undefined' && ArrayBuffer.isView) result = ArrayBuffer.isView(val);
-    else result = val && val.buffer && val.buffer instanceof ArrayBuffer;
-    return result;
-}
-/**
- * Determine if a value is a String
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a String, otherwise false
- */ function isString(val) {
-    return typeof val === 'string';
-}
-/**
- * Determine if a value is a Number
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a Number, otherwise false
- */ function isNumber(val) {
-    return typeof val === 'number';
-}
-/**
- * Determine if a value is an Object
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is an Object, otherwise false
- */ function isObject(val) {
-    return val !== null && typeof val === 'object';
-}
-/**
- * Determine if a value is a plain Object
- *
- * @param {Object} val The value to test
- * @return {boolean} True if value is a plain Object, otherwise false
- */ function isPlainObject(val) {
-    if (toString.call(val) !== '[object Object]') return false;
-    var prototype = Object.getPrototypeOf(val);
-    return prototype === null || prototype === Object.prototype;
-}
-/**
- * Determine if a value is a Date
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a Date, otherwise false
- */ function isDate(val) {
-    return toString.call(val) === '[object Date]';
-}
-/**
- * Determine if a value is a File
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a File, otherwise false
- */ function isFile(val) {
-    return toString.call(val) === '[object File]';
-}
-/**
- * Determine if a value is a Blob
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a Blob, otherwise false
- */ function isBlob(val) {
-    return toString.call(val) === '[object Blob]';
-}
-/**
- * Determine if a value is a Function
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a Function, otherwise false
- */ function isFunction(val) {
-    return toString.call(val) === '[object Function]';
-}
-/**
- * Determine if a value is a Stream
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a Stream, otherwise false
- */ function isStream(val) {
-    return isObject(val) && isFunction(val.pipe);
-}
-/**
- * Determine if a value is a URLSearchParams object
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a URLSearchParams object, otherwise false
- */ function isURLSearchParams(val) {
-    return typeof URLSearchParams !== 'undefined' && val instanceof URLSearchParams;
-}
-/**
- * Trim excess whitespace off the beginning and end of a string
- *
- * @param {String} str The String to trim
- * @returns {String} The String freed of excess whitespace
- */ function trim(str) {
-    return str.trim ? str.trim() : str.replace(/^\s+|\s+$/g, '');
-}
-/**
- * Determine if we're running in a standard browser environment
- *
- * This allows axios to run in a web worker, and react-native.
- * Both environments support XMLHttpRequest, but not fully standard globals.
- *
- * web workers:
- *  typeof window -> undefined
- *  typeof document -> undefined
- *
- * react-native:
- *  navigator.product -> 'ReactNative'
- * nativescript
- *  navigator.product -> 'NativeScript' or 'NS'
- */ function isStandardBrowserEnv() {
-    if (typeof navigator !== 'undefined' && (navigator.product === 'ReactNative' || navigator.product === 'NativeScript' || navigator.product === 'NS')) return false;
-    return typeof window !== 'undefined' && typeof document !== 'undefined';
-}
-/**
- * Iterate over an Array or an Object invoking a function for each item.
- *
- * If `obj` is an Array callback will be called passing
- * the value, index, and complete array for each item.
- *
- * If 'obj' is an Object callback will be called passing
- * the value, key, and complete object for each property.
- *
- * @param {Object|Array} obj The object to iterate
- * @param {Function} fn The callback to invoke for each item
- */ function forEach(obj, fn) {
-    // Don't bother if no value provided
-    if (obj === null || typeof obj === 'undefined') return;
-    // Force an array if not already something iterable
-    if (typeof obj !== 'object') /*eslint no-param-reassign:0*/ obj = [
-        obj
-    ];
-    if (isArray(obj)) // Iterate over array values
-    for(var i = 0, l = obj.length; i < l; i++)fn.call(null, obj[i], i, obj);
-    else {
-        // Iterate over object keys
-        for(var key in obj)if (Object.prototype.hasOwnProperty.call(obj, key)) fn.call(null, obj[key], key, obj);
-    }
-}
-/**
- * Accepts varargs expecting each argument to be an object, then
- * immutably merges the properties of each object and returns result.
- *
- * When multiple objects contain the same key the later object in
- * the arguments list will take precedence.
- *
- * Example:
- *
- * ```js
- * var result = merge({foo: 123}, {foo: 456});
- * console.log(result.foo); // outputs 456
- * ```
- *
- * @param {Object} obj1 Object to merge
- * @returns {Object} Result of all merge properties
- */ function merge() {
-    var result = {
-    };
-    function assignValue(val, key) {
-        if (isPlainObject(result[key]) && isPlainObject(val)) result[key] = merge(result[key], val);
-        else if (isPlainObject(val)) result[key] = merge({
-        }, val);
-        else if (isArray(val)) result[key] = val.slice();
-        else result[key] = val;
-    }
-    for(var i = 0, l = arguments.length; i < l; i++)forEach(arguments[i], assignValue);
-    return result;
-}
-/**
- * Extends object a by mutably adding to it the properties of object b.
- *
- * @param {Object} a The object to be extended
- * @param {Object} b The object to copy properties from
- * @param {Object} thisArg The object to bind function to
- * @return {Object} The resulting value of object a
- */ function extend(a, b, thisArg) {
-    forEach(b, function assignValue(val, key) {
-        if (thisArg && typeof val === 'function') a[key] = bind(val, thisArg);
-        else a[key] = val;
-    });
-    return a;
-}
-/**
- * Remove byte order marker. This catches EF BB BF (the UTF-8 BOM)
- *
- * @param {string} content with BOM
- * @return {string} content value without BOM
- */ function stripBOM(content) {
-    if (content.charCodeAt(0) === 65279) content = content.slice(1);
-    return content;
-}
-module.exports = {
-    isArray: isArray,
-    isArrayBuffer: isArrayBuffer,
-    isBuffer: isBuffer,
-    isFormData: isFormData,
-    isArrayBufferView: isArrayBufferView,
-    isString: isString,
-    isNumber: isNumber,
-    isObject: isObject,
-    isPlainObject: isPlainObject,
-    isUndefined: isUndefined,
-    isDate: isDate,
-    isFile: isFile,
-    isBlob: isBlob,
-    isFunction: isFunction,
-    isStream: isStream,
-    isURLSearchParams: isURLSearchParams,
-    isStandardBrowserEnv: isStandardBrowserEnv,
-    forEach: forEach,
-    merge: merge,
-    extend: extend,
-    trim: trim,
-    stripBOM: stripBOM
-};
-
-},{"./helpers/bind":"4bHkG"}],"4bHkG":[function(require,module,exports) {
-'use strict';
-module.exports = function bind(fn, thisArg) {
-    return function wrap() {
-        var args = new Array(arguments.length);
-        for(var i = 0; i < args.length; i++)args[i] = arguments[i];
-        return fn.apply(thisArg, args);
-    };
-};
-
-},{}],"KVzea":[function(require,module,exports) {
-'use strict';
-var utils = require('./../utils');
-var buildURL = require('../helpers/buildURL');
-var InterceptorManager = require('./InterceptorManager');
-var dispatchRequest = require('./dispatchRequest');
-var mergeConfig = require('./mergeConfig');
-var validator = require('../helpers/validator');
-var validators = validator.validators;
-/**
- * Create a new instance of Axios
- *
- * @param {Object} instanceConfig The default config for the instance
- */ function Axios(instanceConfig) {
-    this.defaults = instanceConfig;
-    this.interceptors = {
-        request: new InterceptorManager(),
-        response: new InterceptorManager()
-    };
-}
-/**
- * Dispatch a request
- *
- * @param {Object} config The config specific for this request (merged with this.defaults)
- */ Axios.prototype.request = function request(config) {
-    /*eslint no-param-reassign:0*/ // Allow for axios('example/url'[, config]) a la fetch API
-    if (typeof config === 'string') {
-        config = arguments[1] || {
-        };
-        config.url = arguments[0];
-    } else config = config || {
-    };
-    config = mergeConfig(this.defaults, config);
-    // Set config.method
-    if (config.method) config.method = config.method.toLowerCase();
-    else if (this.defaults.method) config.method = this.defaults.method.toLowerCase();
-    else config.method = 'get';
-    var transitional = config.transitional;
-    if (transitional !== undefined) validator.assertOptions(transitional, {
-        silentJSONParsing: validators.transitional(validators.boolean),
-        forcedJSONParsing: validators.transitional(validators.boolean),
-        clarifyTimeoutError: validators.transitional(validators.boolean)
-    }, false);
-    // filter out skipped interceptors
-    var requestInterceptorChain = [];
-    var synchronousRequestInterceptors = true;
-    this.interceptors.request.forEach(function unshiftRequestInterceptors(interceptor) {
-        if (typeof interceptor.runWhen === 'function' && interceptor.runWhen(config) === false) return;
-        synchronousRequestInterceptors = synchronousRequestInterceptors && interceptor.synchronous;
-        requestInterceptorChain.unshift(interceptor.fulfilled, interceptor.rejected);
-    });
-    var responseInterceptorChain = [];
-    this.interceptors.response.forEach(function pushResponseInterceptors(interceptor) {
-        responseInterceptorChain.push(interceptor.fulfilled, interceptor.rejected);
-    });
-    var promise;
-    if (!synchronousRequestInterceptors) {
-        var chain = [
-            dispatchRequest,
-            undefined
-        ];
-        Array.prototype.unshift.apply(chain, requestInterceptorChain);
-        chain = chain.concat(responseInterceptorChain);
-        promise = Promise.resolve(config);
-        while(chain.length)promise = promise.then(chain.shift(), chain.shift());
-        return promise;
-    }
-    var newConfig = config;
-    while(requestInterceptorChain.length){
-        var onFulfilled = requestInterceptorChain.shift();
-        var onRejected = requestInterceptorChain.shift();
-        try {
-            newConfig = onFulfilled(newConfig);
-        } catch (error) {
-            onRejected(error);
-            break;
-        }
-    }
-    try {
-        promise = dispatchRequest(newConfig);
-    } catch (error) {
-        return Promise.reject(error);
-    }
-    while(responseInterceptorChain.length)promise = promise.then(responseInterceptorChain.shift(), responseInterceptorChain.shift());
-    return promise;
-};
-Axios.prototype.getUri = function getUri(config) {
-    config = mergeConfig(this.defaults, config);
-    return buildURL(config.url, config.params, config.paramsSerializer).replace(/^\?/, '');
-};
-// Provide aliases for supported request methods
-utils.forEach([
-    'delete',
-    'get',
-    'head',
-    'options'
-], function forEachMethodNoData(method) {
-    /*eslint func-names:0*/ Axios.prototype[method] = function(url, config) {
-        return this.request(mergeConfig(config || {
-        }, {
-            method: method,
-            url: url,
-            data: (config || {
-            }).data
-        }));
-    };
-});
-utils.forEach([
-    'post',
-    'put',
-    'patch'
-], function forEachMethodWithData(method) {
-    /*eslint func-names:0*/ Axios.prototype[method] = function(url, data, config) {
-        return this.request(mergeConfig(config || {
-        }, {
-            method: method,
-            url: url,
-            data: data
-        }));
-    };
-});
-module.exports = Axios;
-
-},{"./../utils":"hOPY0","../helpers/buildURL":"3Jodf","./InterceptorManager":"9kkIC","./dispatchRequest":"dmFav","./mergeConfig":"8vb7m","../helpers/validator":"4sigL"}],"3Jodf":[function(require,module,exports) {
-'use strict';
-var utils = require('./../utils');
-function encode(val) {
-    return encodeURIComponent(val).replace(/%3A/gi, ':').replace(/%24/g, '$').replace(/%2C/gi, ',').replace(/%20/g, '+').replace(/%5B/gi, '[').replace(/%5D/gi, ']');
-}
-/**
- * Build a URL by appending params to the end
- *
- * @param {string} url The base of the url (e.g., http://www.google.com)
- * @param {object} [params] The params to be appended
- * @returns {string} The formatted url
- */ module.exports = function buildURL(url, params, paramsSerializer) {
-    /*eslint no-param-reassign:0*/ if (!params) return url;
-    var serializedParams;
-    if (paramsSerializer) serializedParams = paramsSerializer(params);
-    else if (utils.isURLSearchParams(params)) serializedParams = params.toString();
-    else {
-        var parts = [];
-        utils.forEach(params, function serialize(val, key) {
-            if (val === null || typeof val === 'undefined') return;
-            if (utils.isArray(val)) key = key + '[]';
-            else val = [
-                val
-            ];
-            utils.forEach(val, function parseValue(v) {
-                if (utils.isDate(v)) v = v.toISOString();
-                else if (utils.isObject(v)) v = JSON.stringify(v);
-                parts.push(encode(key) + '=' + encode(v));
-            });
-        });
-        serializedParams = parts.join('&');
-    }
-    if (serializedParams) {
-        var hashmarkIndex = url.indexOf('#');
-        if (hashmarkIndex !== -1) url = url.slice(0, hashmarkIndex);
-        url += (url.indexOf('?') === -1 ? '?' : '&') + serializedParams;
-    }
-    return url;
-};
-
-},{"./../utils":"hOPY0"}],"9kkIC":[function(require,module,exports) {
-'use strict';
-var utils = require('./../utils');
-function InterceptorManager() {
-    this.handlers = [];
-}
-/**
- * Add a new interceptor to the stack
- *
- * @param {Function} fulfilled The function to handle `then` for a `Promise`
- * @param {Function} rejected The function to handle `reject` for a `Promise`
- *
- * @return {Number} An ID used to remove interceptor later
- */ InterceptorManager.prototype.use = function use(fulfilled, rejected, options) {
-    this.handlers.push({
-        fulfilled: fulfilled,
-        rejected: rejected,
-        synchronous: options ? options.synchronous : false,
-        runWhen: options ? options.runWhen : null
-    });
-    return this.handlers.length - 1;
-};
-/**
- * Remove an interceptor from the stack
- *
- * @param {Number} id The ID that was returned by `use`
- */ InterceptorManager.prototype.eject = function eject(id) {
-    if (this.handlers[id]) this.handlers[id] = null;
-};
-/**
- * Iterate over all the registered interceptors
- *
- * This method is particularly useful for skipping over any
- * interceptors that may have become `null` calling `eject`.
- *
- * @param {Function} fn The function to call for each interceptor
- */ InterceptorManager.prototype.forEach = function forEach(fn) {
-    utils.forEach(this.handlers, function forEachHandler(h) {
-        if (h !== null) fn(h);
-    });
-};
-module.exports = InterceptorManager;
-
-},{"./../utils":"hOPY0"}],"dmFav":[function(require,module,exports) {
-'use strict';
-var utils = require('./../utils');
-var transformData = require('./transformData');
-var isCancel = require('../cancel/isCancel');
-var defaults = require('../defaults');
-var Cancel = require('../cancel/Cancel');
-/**
- * Throws a `Cancel` if cancellation has been requested.
- */ function throwIfCancellationRequested(config) {
-    if (config.cancelToken) config.cancelToken.throwIfRequested();
-    if (config.signal && config.signal.aborted) throw new Cancel('canceled');
-}
-/**
- * Dispatch a request to the server using the configured adapter.
- *
- * @param {object} config The config that is to be used for the request
- * @returns {Promise} The Promise to be fulfilled
- */ module.exports = function dispatchRequest(config) {
-    throwIfCancellationRequested(config);
-    // Ensure headers exist
-    config.headers = config.headers || {
-    };
-    // Transform request data
-    config.data = transformData.call(config, config.data, config.headers, config.transformRequest);
-    // Flatten headers
-    config.headers = utils.merge(config.headers.common || {
-    }, config.headers[config.method] || {
-    }, config.headers);
-    utils.forEach([
-        'delete',
-        'get',
-        'head',
-        'post',
-        'put',
-        'patch',
-        'common'
-    ], function cleanHeaderConfig(method) {
-        delete config.headers[method];
-    });
-    var adapter = config.adapter || defaults.adapter;
-    return adapter(config).then(function onAdapterResolution(response) {
-        throwIfCancellationRequested(config);
-        // Transform response data
-        response.data = transformData.call(config, response.data, response.headers, config.transformResponse);
-        return response;
-    }, function onAdapterRejection(reason) {
-        if (!isCancel(reason)) {
-            throwIfCancellationRequested(config);
-            // Transform response data
-            if (reason && reason.response) reason.response.data = transformData.call(config, reason.response.data, reason.response.headers, config.transformResponse);
-        }
-        return Promise.reject(reason);
-    });
-};
-
-},{"./../utils":"hOPY0","./transformData":"57wgh","../cancel/isCancel":"6KzET","../defaults":"g96L2","../cancel/Cancel":"iGO1D"}],"57wgh":[function(require,module,exports) {
-'use strict';
-var utils = require('./../utils');
-var defaults = require('./../defaults');
-/**
- * Transform the data for a request or a response
- *
- * @param {Object|String} data The data to be transformed
- * @param {Array} headers The headers for the request or response
- * @param {Array|Function} fns A single function or Array of functions
- * @returns {*} The resulting transformed data
- */ module.exports = function transformData(data, headers, fns) {
-    var context = this || defaults;
-    /*eslint no-param-reassign:0*/ utils.forEach(fns, function transform(fn) {
-        data = fn.call(context, data, headers);
-    });
-    return data;
-};
-
-},{"./../utils":"hOPY0","./../defaults":"g96L2"}],"g96L2":[function(require,module,exports) {
-var process = require("process");
-'use strict';
-var utils = require('./utils');
-var normalizeHeaderName = require('./helpers/normalizeHeaderName');
-var enhanceError = require('./core/enhanceError');
-var DEFAULT_CONTENT_TYPE = {
-    'Content-Type': 'application/x-www-form-urlencoded'
-};
-function setContentTypeIfUnset(headers, value) {
-    if (!utils.isUndefined(headers) && utils.isUndefined(headers['Content-Type'])) headers['Content-Type'] = value;
-}
-function getDefaultAdapter() {
-    var adapter;
-    if (typeof XMLHttpRequest !== 'undefined') // For browsers use XHR adapter
-    adapter = require('./adapters/xhr');
-    else if (typeof process !== 'undefined' && Object.prototype.toString.call(process) === '[object process]') // For node use HTTP adapter
-    adapter = require('./adapters/http');
-    return adapter;
-}
-function stringifySafely(rawValue, parser, encoder) {
-    if (utils.isString(rawValue)) try {
-        (parser || JSON.parse)(rawValue);
-        return utils.trim(rawValue);
-    } catch (e) {
-        if (e.name !== 'SyntaxError') throw e;
-    }
-    return (encoder || JSON.stringify)(rawValue);
-}
-var defaults = {
-    transitional: {
-        silentJSONParsing: true,
-        forcedJSONParsing: true,
-        clarifyTimeoutError: false
-    },
-    adapter: getDefaultAdapter(),
-    transformRequest: [
-        function transformRequest(data, headers) {
-            normalizeHeaderName(headers, 'Accept');
-            normalizeHeaderName(headers, 'Content-Type');
-            if (utils.isFormData(data) || utils.isArrayBuffer(data) || utils.isBuffer(data) || utils.isStream(data) || utils.isFile(data) || utils.isBlob(data)) return data;
-            if (utils.isArrayBufferView(data)) return data.buffer;
-            if (utils.isURLSearchParams(data)) {
-                setContentTypeIfUnset(headers, 'application/x-www-form-urlencoded;charset=utf-8');
-                return data.toString();
-            }
-            if (utils.isObject(data) || headers && headers['Content-Type'] === 'application/json') {
-                setContentTypeIfUnset(headers, 'application/json');
-                return stringifySafely(data);
-            }
-            return data;
-        }
-    ],
-    transformResponse: [
-        function transformResponse(data) {
-            var transitional = this.transitional || defaults.transitional;
-            var silentJSONParsing = transitional && transitional.silentJSONParsing;
-            var forcedJSONParsing = transitional && transitional.forcedJSONParsing;
-            var strictJSONParsing = !silentJSONParsing && this.responseType === 'json';
-            if (strictJSONParsing || forcedJSONParsing && utils.isString(data) && data.length) try {
-                return JSON.parse(data);
-            } catch (e) {
-                if (strictJSONParsing) {
-                    if (e.name === 'SyntaxError') throw enhanceError(e, this, 'E_JSON_PARSE');
-                    throw e;
-                }
-            }
-            return data;
-        }
-    ],
-    /**
-   * A timeout in milliseconds to abort a request. If set to 0 (default) a
-   * timeout is not created.
-   */ timeout: 0,
-    xsrfCookieName: 'XSRF-TOKEN',
-    xsrfHeaderName: 'X-XSRF-TOKEN',
-    maxContentLength: -1,
-    maxBodyLength: -1,
-    validateStatus: function validateStatus(status) {
-        return status >= 200 && status < 300;
-    },
-    headers: {
-        common: {
-            'Accept': 'application/json, text/plain, */*'
-        }
-    }
-};
-utils.forEach([
-    'delete',
-    'get',
-    'head'
-], function forEachMethodNoData(method) {
-    defaults.headers[method] = {
-    };
-});
-utils.forEach([
-    'post',
-    'put',
-    'patch'
-], function forEachMethodWithData(method) {
-    defaults.headers[method] = utils.merge(DEFAULT_CONTENT_TYPE);
-});
-module.exports = defaults;
-
-},{"process":"6Upk8","./utils":"hOPY0","./helpers/normalizeHeaderName":"6GUF5","./core/enhanceError":"3f4N4","./adapters/xhr":"4uZQD","./adapters/http":"4uZQD"}],"6Upk8":[function(require,module,exports) {
-// shim for using process in browser
-var process = module.exports = {
-};
-// cached from whatever global is present so that test runners that stub it
-// don't break things.  But we need to wrap it in a try catch in case it is
-// wrapped in strict mode code which doesn't define any globals.  It's inside a
-// function because try/catches deoptimize in certain engines.
-var cachedSetTimeout;
-var cachedClearTimeout;
-function defaultSetTimout() {
-    throw new Error('setTimeout has not been defined');
-}
-function defaultClearTimeout() {
-    throw new Error('clearTimeout has not been defined');
-}
-(function() {
-    try {
-        if (typeof setTimeout === 'function') cachedSetTimeout = setTimeout;
-        else cachedSetTimeout = defaultSetTimout;
-    } catch (e) {
-        cachedSetTimeout = defaultSetTimout;
-    }
-    try {
-        if (typeof clearTimeout === 'function') cachedClearTimeout = clearTimeout;
-        else cachedClearTimeout = defaultClearTimeout;
-    } catch (e) {
-        cachedClearTimeout = defaultClearTimeout;
-    }
-})();
-function runTimeout(fun) {
-    if (cachedSetTimeout === setTimeout) //normal enviroments in sane situations
-    return setTimeout(fun, 0);
-    // if setTimeout wasn't available but was latter defined
-    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
-        cachedSetTimeout = setTimeout;
-        return setTimeout(fun, 0);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedSetTimeout(fun, 0);
-    } catch (e) {
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
-            return cachedSetTimeout.call(null, fun, 0);
-        } catch (e1) {
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
-            return cachedSetTimeout.call(this, fun, 0);
-        }
-    }
-}
-function runClearTimeout(marker) {
-    if (cachedClearTimeout === clearTimeout) //normal enviroments in sane situations
-    return clearTimeout(marker);
-    // if clearTimeout wasn't available but was latter defined
-    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
-        cachedClearTimeout = clearTimeout;
-        return clearTimeout(marker);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedClearTimeout(marker);
-    } catch (e) {
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
-            return cachedClearTimeout.call(null, marker);
-        } catch (e1) {
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
-            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
-            return cachedClearTimeout.call(this, marker);
-        }
-    }
-}
-var queue = [];
-var draining = false;
-var currentQueue;
-var queueIndex = -1;
-function cleanUpNextTick() {
-    if (!draining || !currentQueue) return;
-    draining = false;
-    if (currentQueue.length) queue = currentQueue.concat(queue);
-    else queueIndex = -1;
-    if (queue.length) drainQueue();
-}
-function drainQueue() {
-    if (draining) return;
-    var timeout = runTimeout(cleanUpNextTick);
-    draining = true;
-    var len = queue.length;
-    while(len){
-        currentQueue = queue;
-        queue = [];
-        while((++queueIndex) < len)if (currentQueue) currentQueue[queueIndex].run();
-        queueIndex = -1;
-        len = queue.length;
-    }
-    currentQueue = null;
-    draining = false;
-    runClearTimeout(timeout);
-}
-process.nextTick = function(fun) {
-    var args = new Array(arguments.length - 1);
-    if (arguments.length > 1) for(var i = 1; i < arguments.length; i++)args[i - 1] = arguments[i];
-    queue.push(new Item(fun, args));
-    if (queue.length === 1 && !draining) runTimeout(drainQueue);
-};
-// v8 likes predictible objects
-function Item(fun, array) {
-    this.fun = fun;
-    this.array = array;
-}
-Item.prototype.run = function() {
-    this.fun.apply(null, this.array);
-};
-process.title = 'browser';
-process.browser = true;
-process.env = {
-};
-process.argv = [];
-process.version = ''; // empty string to avoid regexp issues
-process.versions = {
-};
-function noop() {
-}
-process.on = noop;
-process.addListener = noop;
-process.once = noop;
-process.off = noop;
-process.removeListener = noop;
-process.removeAllListeners = noop;
-process.emit = noop;
-process.prependListener = noop;
-process.prependOnceListener = noop;
-process.listeners = function(name) {
-    return [];
-};
-process.binding = function(name) {
-    throw new Error('process.binding is not supported');
-};
-process.cwd = function() {
-    return '/';
-};
-process.chdir = function(dir) {
-    throw new Error('process.chdir is not supported');
-};
-process.umask = function() {
-    return 0;
-};
-
-},{}],"6GUF5":[function(require,module,exports) {
-'use strict';
-var utils = require('../utils');
-module.exports = function normalizeHeaderName(headers, normalizedName) {
-    utils.forEach(headers, function processHeader(value, name) {
-        if (name !== normalizedName && name.toUpperCase() === normalizedName.toUpperCase()) {
-            headers[normalizedName] = value;
-            delete headers[name];
-        }
-    });
-};
-
-},{"../utils":"hOPY0"}],"3f4N4":[function(require,module,exports) {
-'use strict';
-/**
- * Update an Error with the specified config, error code, and response.
- *
- * @param {Error} error The error to update.
- * @param {Object} config The config.
- * @param {string} [code] The error code (for example, 'ECONNABORTED').
- * @param {Object} [request] The request.
- * @param {Object} [response] The response.
- * @returns {Error} The error.
- */ module.exports = function enhanceError(error, config, code, request, response) {
-    error.config = config;
-    if (code) error.code = code;
-    error.request = request;
-    error.response = response;
-    error.isAxiosError = true;
-    error.toJSON = function toJSON() {
-        return {
-            // Standard
-            message: this.message,
-            name: this.name,
-            // Microsoft
-            description: this.description,
-            number: this.number,
-            // Mozilla
-            fileName: this.fileName,
-            lineNumber: this.lineNumber,
-            columnNumber: this.columnNumber,
-            stack: this.stack,
-            // Axios
-            config: this.config,
-            code: this.code,
-            status: this.response && this.response.status ? this.response.status : null
-        };
-    };
-    return error;
-};
-
-},{}],"4uZQD":[function(require,module,exports) {
-'use strict';
-var utils = require('./../utils');
-var settle = require('./../core/settle');
-var cookies = require('./../helpers/cookies');
-var buildURL = require('./../helpers/buildURL');
-var buildFullPath = require('../core/buildFullPath');
-var parseHeaders = require('./../helpers/parseHeaders');
-var isURLSameOrigin = require('./../helpers/isURLSameOrigin');
-var createError = require('../core/createError');
-var defaults = require('../defaults');
-var Cancel = require('../cancel/Cancel');
-module.exports = function xhrAdapter(config) {
-    return new Promise(function dispatchXhrRequest(resolve, reject) {
-        var requestData = config.data;
-        var requestHeaders = config.headers;
-        var responseType = config.responseType;
-        var onCanceled;
-        function done() {
-            if (config.cancelToken) config.cancelToken.unsubscribe(onCanceled);
-            if (config.signal) config.signal.removeEventListener('abort', onCanceled);
-        }
-        if (utils.isFormData(requestData)) delete requestHeaders['Content-Type']; // Let the browser set it
-        var request = new XMLHttpRequest();
-        // HTTP basic authentication
-        if (config.auth) {
-            var username = config.auth.username || '';
-            var password = config.auth.password ? unescape(encodeURIComponent(config.auth.password)) : '';
-            requestHeaders.Authorization = 'Basic ' + btoa(username + ':' + password);
-        }
-        var fullPath = buildFullPath(config.baseURL, config.url);
-        request.open(config.method.toUpperCase(), buildURL(fullPath, config.params, config.paramsSerializer), true);
-        // Set the request timeout in MS
-        request.timeout = config.timeout;
-        function onloadend() {
-            if (!request) return;
-            // Prepare the response
-            var responseHeaders = 'getAllResponseHeaders' in request ? parseHeaders(request.getAllResponseHeaders()) : null;
-            var responseData = !responseType || responseType === 'text' || responseType === 'json' ? request.responseText : request.response;
-            var response = {
-                data: responseData,
-                status: request.status,
-                statusText: request.statusText,
-                headers: responseHeaders,
-                config: config,
-                request: request
-            };
-            settle(function _resolve(value) {
-                resolve(value);
-                done();
-            }, function _reject(err) {
-                reject(err);
-                done();
-            }, response);
-            // Clean up request
-            request = null;
-        }
-        if ('onloadend' in request) // Use onloadend if available
-        request.onloadend = onloadend;
-        else // Listen for ready state to emulate onloadend
-        request.onreadystatechange = function handleLoad() {
-            if (!request || request.readyState !== 4) return;
-            // The request errored out and we didn't get a response, this will be
-            // handled by onerror instead
-            // With one exception: request that using file: protocol, most browsers
-            // will return status as 0 even though it's a successful request
-            if (request.status === 0 && !(request.responseURL && request.responseURL.indexOf('file:') === 0)) return;
-            // readystate handler is calling before onerror or ontimeout handlers,
-            // so we should call onloadend on the next 'tick'
-            setTimeout(onloadend);
-        };
-        // Handle browser request cancellation (as opposed to a manual cancellation)
-        request.onabort = function handleAbort() {
-            if (!request) return;
-            reject(createError('Request aborted', config, 'ECONNABORTED', request));
-            // Clean up request
-            request = null;
-        };
-        // Handle low level network errors
-        request.onerror = function handleError() {
-            // Real errors are hidden from us by the browser
-            // onerror should only fire if it's a network error
-            reject(createError('Network Error', config, null, request));
-            // Clean up request
-            request = null;
-        };
-        // Handle timeout
-        request.ontimeout = function handleTimeout() {
-            var timeoutErrorMessage = config.timeout ? 'timeout of ' + config.timeout + 'ms exceeded' : 'timeout exceeded';
-            var transitional = config.transitional || defaults.transitional;
-            if (config.timeoutErrorMessage) timeoutErrorMessage = config.timeoutErrorMessage;
-            reject(createError(timeoutErrorMessage, config, transitional.clarifyTimeoutError ? 'ETIMEDOUT' : 'ECONNABORTED', request));
-            // Clean up request
-            request = null;
-        };
-        // Add xsrf header
-        // This is only done if running in a standard browser environment.
-        // Specifically not if we're in a web worker, or react-native.
-        if (utils.isStandardBrowserEnv()) {
-            // Add xsrf header
-            var xsrfValue = (config.withCredentials || isURLSameOrigin(fullPath)) && config.xsrfCookieName ? cookies.read(config.xsrfCookieName) : undefined;
-            if (xsrfValue) requestHeaders[config.xsrfHeaderName] = xsrfValue;
-        }
-        // Add headers to the request
-        if ('setRequestHeader' in request) utils.forEach(requestHeaders, function setRequestHeader(val, key) {
-            if (typeof requestData === 'undefined' && key.toLowerCase() === 'content-type') // Remove Content-Type if data is undefined
-            delete requestHeaders[key];
-            else // Otherwise add header to the request
-            request.setRequestHeader(key, val);
-        });
-        // Add withCredentials to request if needed
-        if (!utils.isUndefined(config.withCredentials)) request.withCredentials = !!config.withCredentials;
-        // Add responseType to request if needed
-        if (responseType && responseType !== 'json') request.responseType = config.responseType;
-        // Handle progress if needed
-        if (typeof config.onDownloadProgress === 'function') request.addEventListener('progress', config.onDownloadProgress);
-        // Not all browsers support upload events
-        if (typeof config.onUploadProgress === 'function' && request.upload) request.upload.addEventListener('progress', config.onUploadProgress);
-        if (config.cancelToken || config.signal) {
-            // Handle cancellation
-            // eslint-disable-next-line func-names
-            onCanceled = function(cancel) {
-                if (!request) return;
-                reject(!cancel || cancel && cancel.type ? new Cancel('canceled') : cancel);
-                request.abort();
-                request = null;
-            };
-            config.cancelToken && config.cancelToken.subscribe(onCanceled);
-            if (config.signal) config.signal.aborted ? onCanceled() : config.signal.addEventListener('abort', onCanceled);
-        }
-        if (!requestData) requestData = null;
-        // Send the request
-        request.send(requestData);
-    });
-};
-
-},{"./../utils":"hOPY0","./../core/settle":"ehRY8","./../helpers/cookies":"dRE5q","./../helpers/buildURL":"3Jodf","../core/buildFullPath":"1RLcm","./../helpers/parseHeaders":"9TT83","./../helpers/isURLSameOrigin":"2SCwc","../core/createError":"cfxXs","../defaults":"g96L2","../cancel/Cancel":"iGO1D"}],"ehRY8":[function(require,module,exports) {
-'use strict';
-var createError = require('./createError');
-/**
- * Resolve or reject a Promise based on response status.
- *
- * @param {Function} resolve A function that resolves the promise.
- * @param {Function} reject A function that rejects the promise.
- * @param {object} response The response.
- */ module.exports = function settle(resolve, reject, response) {
-    var validateStatus = response.config.validateStatus;
-    if (!response.status || !validateStatus || validateStatus(response.status)) resolve(response);
-    else reject(createError('Request failed with status code ' + response.status, response.config, null, response.request, response));
-};
-
-},{"./createError":"cfxXs"}],"cfxXs":[function(require,module,exports) {
-'use strict';
-var enhanceError = require('./enhanceError');
-/**
- * Create an Error with the specified message, config, error code, request and response.
- *
- * @param {string} message The error message.
- * @param {Object} config The config.
- * @param {string} [code] The error code (for example, 'ECONNABORTED').
- * @param {Object} [request] The request.
- * @param {Object} [response] The response.
- * @returns {Error} The created error.
- */ module.exports = function createError(message, config, code, request, response) {
-    var error = new Error(message);
-    return enhanceError(error, config, code, request, response);
-};
-
-},{"./enhanceError":"3f4N4"}],"dRE5q":[function(require,module,exports) {
-'use strict';
-var utils = require('./../utils');
-module.exports = utils.isStandardBrowserEnv() ? // Standard browser envs support document.cookie
-(function standardBrowserEnv() {
-    return {
-        write: function write(name, value, expires, path, domain, secure) {
-            var cookie = [];
-            cookie.push(name + '=' + encodeURIComponent(value));
-            if (utils.isNumber(expires)) cookie.push('expires=' + new Date(expires).toGMTString());
-            if (utils.isString(path)) cookie.push('path=' + path);
-            if (utils.isString(domain)) cookie.push('domain=' + domain);
-            if (secure === true) cookie.push('secure');
-            document.cookie = cookie.join('; ');
-        },
-        read: function read(name) {
-            var match = document.cookie.match(new RegExp('(^|;\\s*)(' + name + ')=([^;]*)'));
-            return match ? decodeURIComponent(match[3]) : null;
-        },
-        remove: function remove(name) {
-            this.write(name, '', Date.now() - 86400000);
-        }
-    };
-})() : // Non standard browser env (web workers, react-native) lack needed support.
-(function nonStandardBrowserEnv() {
-    return {
-        write: function write() {
-        },
-        read: function read() {
-            return null;
-        },
-        remove: function remove() {
-        }
-    };
-})();
-
-},{"./../utils":"hOPY0"}],"1RLcm":[function(require,module,exports) {
-'use strict';
-var isAbsoluteURL = require('../helpers/isAbsoluteURL');
-var combineURLs = require('../helpers/combineURLs');
-/**
- * Creates a new URL by combining the baseURL with the requestedURL,
- * only when the requestedURL is not already an absolute URL.
- * If the requestURL is absolute, this function returns the requestedURL untouched.
- *
- * @param {string} baseURL The base URL
- * @param {string} requestedURL Absolute or relative URL to combine
- * @returns {string} The combined full path
- */ module.exports = function buildFullPath(baseURL, requestedURL) {
-    if (baseURL && !isAbsoluteURL(requestedURL)) return combineURLs(baseURL, requestedURL);
-    return requestedURL;
-};
-
-},{"../helpers/isAbsoluteURL":"8E1N1","../helpers/combineURLs":"e9OEH"}],"8E1N1":[function(require,module,exports) {
-'use strict';
-/**
- * Determines whether the specified URL is absolute
- *
- * @param {string} url The URL to test
- * @returns {boolean} True if the specified URL is absolute, otherwise false
- */ module.exports = function isAbsoluteURL(url) {
-    // A URL is considered absolute if it begins with "<scheme>://" or "//" (protocol-relative URL).
-    // RFC 3986 defines scheme name as a sequence of characters beginning with a letter and followed
-    // by any combination of letters, digits, plus, period, or hyphen.
-    return /^([a-z][a-z\d\+\-\.]*:)?\/\//i.test(url);
-};
-
-},{}],"e9OEH":[function(require,module,exports) {
-'use strict';
-/**
- * Creates a new URL by combining the specified URLs
- *
- * @param {string} baseURL The base URL
- * @param {string} relativeURL The relative URL
- * @returns {string} The combined URL
- */ module.exports = function combineURLs(baseURL, relativeURL) {
-    return relativeURL ? baseURL.replace(/\/+$/, '') + '/' + relativeURL.replace(/^\/+/, '') : baseURL;
-};
-
-},{}],"9TT83":[function(require,module,exports) {
-'use strict';
-var utils = require('./../utils');
-// Headers whose duplicates are ignored by node
-// c.f. https://nodejs.org/api/http.html#http_message_headers
-var ignoreDuplicateOf = [
-    'age',
-    'authorization',
-    'content-length',
-    'content-type',
-    'etag',
-    'expires',
-    'from',
-    'host',
-    'if-modified-since',
-    'if-unmodified-since',
-    'last-modified',
-    'location',
-    'max-forwards',
-    'proxy-authorization',
-    'referer',
-    'retry-after',
-    'user-agent'
-];
-/**
- * Parse headers into an object
- *
- * ```
- * Date: Wed, 27 Aug 2014 08:58:49 GMT
- * Content-Type: application/json
- * Connection: keep-alive
- * Transfer-Encoding: chunked
- * ```
- *
- * @param {String} headers Headers needing to be parsed
- * @returns {Object} Headers parsed into an object
- */ module.exports = function parseHeaders(headers) {
-    var parsed = {
-    };
-    var key;
-    var val;
-    var i;
-    if (!headers) return parsed;
-    utils.forEach(headers.split('\n'), function parser(line) {
-        i = line.indexOf(':');
-        key = utils.trim(line.substr(0, i)).toLowerCase();
-        val = utils.trim(line.substr(i + 1));
-        if (key) {
-            if (parsed[key] && ignoreDuplicateOf.indexOf(key) >= 0) return;
-            if (key === 'set-cookie') parsed[key] = (parsed[key] ? parsed[key] : []).concat([
-                val
-            ]);
-            else parsed[key] = parsed[key] ? parsed[key] + ', ' + val : val;
-        }
-    });
-    return parsed;
-};
-
-},{"./../utils":"hOPY0"}],"2SCwc":[function(require,module,exports) {
-'use strict';
-var utils = require('./../utils');
-module.exports = utils.isStandardBrowserEnv() ? // Standard browser envs have full support of the APIs needed to test
-// whether the request URL is of the same origin as current location.
-(function standardBrowserEnv() {
-    var msie = /(msie|trident)/i.test(navigator.userAgent);
-    var urlParsingNode = document.createElement('a');
-    var originURL;
-    /**
-    * Parse a URL to discover it's components
-    *
-    * @param {String} url The URL to be parsed
-    * @returns {Object}
-    */ function resolveURL(url) {
-        var href = url;
-        if (msie) {
-            // IE needs attribute set twice to normalize properties
-            urlParsingNode.setAttribute('href', href);
-            href = urlParsingNode.href;
-        }
-        urlParsingNode.setAttribute('href', href);
-        // urlParsingNode provides the UrlUtils interface - http://url.spec.whatwg.org/#urlutils
-        return {
-            href: urlParsingNode.href,
-            protocol: urlParsingNode.protocol ? urlParsingNode.protocol.replace(/:$/, '') : '',
-            host: urlParsingNode.host,
-            search: urlParsingNode.search ? urlParsingNode.search.replace(/^\?/, '') : '',
-            hash: urlParsingNode.hash ? urlParsingNode.hash.replace(/^#/, '') : '',
-            hostname: urlParsingNode.hostname,
-            port: urlParsingNode.port,
-            pathname: urlParsingNode.pathname.charAt(0) === '/' ? urlParsingNode.pathname : '/' + urlParsingNode.pathname
-        };
-    }
-    originURL = resolveURL(window.location.href);
-    /**
-    * Determine if a URL shares the same origin as the current location
-    *
-    * @param {String} requestURL The URL to test
-    * @returns {boolean} True if URL shares the same origin, otherwise false
-    */ return function isURLSameOrigin(requestURL) {
-        var parsed = utils.isString(requestURL) ? resolveURL(requestURL) : requestURL;
-        return parsed.protocol === originURL.protocol && parsed.host === originURL.host;
-    };
-})() : // Non standard browser envs (web workers, react-native) lack needed support.
-(function nonStandardBrowserEnv() {
-    return function isURLSameOrigin() {
-        return true;
-    };
-})();
-
-},{"./../utils":"hOPY0"}],"iGO1D":[function(require,module,exports) {
-'use strict';
-/**
- * A `Cancel` is an object that is thrown when an operation is canceled.
- *
- * @class
- * @param {string=} message The message.
- */ function Cancel(message) {
-    this.message = message;
-}
-Cancel.prototype.toString = function toString() {
-    return 'Cancel' + (this.message ? ': ' + this.message : '');
-};
-Cancel.prototype.__CANCEL__ = true;
-module.exports = Cancel;
-
-},{}],"6KzET":[function(require,module,exports) {
-'use strict';
-module.exports = function isCancel(value) {
-    return !!(value && value.__CANCEL__);
-};
-
-},{}],"8vb7m":[function(require,module,exports) {
-'use strict';
-var utils = require('../utils');
-/**
- * Config-specific merge-function which creates a new config-object
- * by merging two configuration objects together.
- *
- * @param {Object} config1
- * @param {Object} config2
- * @returns {Object} New object resulting from merging config2 to config1
- */ module.exports = function mergeConfig(config1, config2) {
-    // eslint-disable-next-line no-param-reassign
-    config2 = config2 || {
-    };
-    var config = {
-    };
-    function getMergedValue(target, source) {
-        if (utils.isPlainObject(target) && utils.isPlainObject(source)) return utils.merge(target, source);
-        else if (utils.isPlainObject(source)) return utils.merge({
-        }, source);
-        else if (utils.isArray(source)) return source.slice();
-        return source;
-    }
-    // eslint-disable-next-line consistent-return
-    function mergeDeepProperties(prop) {
-        if (!utils.isUndefined(config2[prop])) return getMergedValue(config1[prop], config2[prop]);
-        else if (!utils.isUndefined(config1[prop])) return getMergedValue(undefined, config1[prop]);
-    }
-    // eslint-disable-next-line consistent-return
-    function valueFromConfig2(prop) {
-        if (!utils.isUndefined(config2[prop])) return getMergedValue(undefined, config2[prop]);
-    }
-    // eslint-disable-next-line consistent-return
-    function defaultToConfig2(prop) {
-        if (!utils.isUndefined(config2[prop])) return getMergedValue(undefined, config2[prop]);
-        else if (!utils.isUndefined(config1[prop])) return getMergedValue(undefined, config1[prop]);
-    }
-    // eslint-disable-next-line consistent-return
-    function mergeDirectKeys(prop) {
-        if (prop in config2) return getMergedValue(config1[prop], config2[prop]);
-        else if (prop in config1) return getMergedValue(undefined, config1[prop]);
-    }
-    var mergeMap = {
-        'url': valueFromConfig2,
-        'method': valueFromConfig2,
-        'data': valueFromConfig2,
-        'baseURL': defaultToConfig2,
-        'transformRequest': defaultToConfig2,
-        'transformResponse': defaultToConfig2,
-        'paramsSerializer': defaultToConfig2,
-        'timeout': defaultToConfig2,
-        'timeoutMessage': defaultToConfig2,
-        'withCredentials': defaultToConfig2,
-        'adapter': defaultToConfig2,
-        'responseType': defaultToConfig2,
-        'xsrfCookieName': defaultToConfig2,
-        'xsrfHeaderName': defaultToConfig2,
-        'onUploadProgress': defaultToConfig2,
-        'onDownloadProgress': defaultToConfig2,
-        'decompress': defaultToConfig2,
-        'maxContentLength': defaultToConfig2,
-        'maxBodyLength': defaultToConfig2,
-        'transport': defaultToConfig2,
-        'httpAgent': defaultToConfig2,
-        'httpsAgent': defaultToConfig2,
-        'cancelToken': defaultToConfig2,
-        'socketPath': defaultToConfig2,
-        'responseEncoding': defaultToConfig2,
-        'validateStatus': mergeDirectKeys
-    };
-    utils.forEach(Object.keys(config1).concat(Object.keys(config2)), function computeConfigValue(prop) {
-        var merge = mergeMap[prop] || mergeDeepProperties;
-        var configValue = merge(prop);
-        utils.isUndefined(configValue) && merge !== mergeDirectKeys || (config[prop] = configValue);
-    });
-    return config;
-};
-
-},{"../utils":"hOPY0"}],"4sigL":[function(require,module,exports) {
-'use strict';
-var VERSION = require('../env/data').version;
-var validators = {
-};
-// eslint-disable-next-line func-names
-[
-    'object',
-    'boolean',
-    'number',
-    'function',
-    'string',
-    'symbol'
-].forEach(function(type, i) {
-    validators[type] = function validator(thing) {
-        return typeof thing === type || 'a' + (i < 1 ? 'n ' : ' ') + type;
-    };
-});
-var deprecatedWarnings = {
-};
-/**
- * Transitional option validator
- * @param {function|boolean?} validator - set to false if the transitional option has been removed
- * @param {string?} version - deprecated version / removed since version
- * @param {string?} message - some message with additional info
- * @returns {function}
- */ validators.transitional = function transitional(validator, version, message) {
-    function formatMessage(opt, desc) {
-        return '[Axios v' + VERSION + '] Transitional option \'' + opt + '\'' + desc + (message ? '. ' + message : '');
-    }
-    // eslint-disable-next-line func-names
-    return function(value, opt, opts) {
-        if (validator === false) throw new Error(formatMessage(opt, ' has been removed' + (version ? ' in ' + version : '')));
-        if (version && !deprecatedWarnings[opt]) {
-            deprecatedWarnings[opt] = true;
-            // eslint-disable-next-line no-console
-            console.warn(formatMessage(opt, ' has been deprecated since v' + version + ' and will be removed in the near future'));
-        }
-        return validator ? validator(value, opt, opts) : true;
-    };
-};
-/**
- * Assert object's properties type
- * @param {object} options
- * @param {object} schema
- * @param {boolean?} allowUnknown
- */ function assertOptions(options, schema, allowUnknown) {
-    if (typeof options !== 'object') throw new TypeError('options must be an object');
-    var keys = Object.keys(options);
-    var i = keys.length;
-    while((i--) > 0){
-        var opt = keys[i];
-        var validator = schema[opt];
-        if (validator) {
-            var value = options[opt];
-            var result = value === undefined || validator(value, opt, options);
-            if (result !== true) throw new TypeError('option ' + opt + ' must be ' + result);
-            continue;
-        }
-        if (allowUnknown !== true) throw Error('Unknown option ' + opt);
-    }
-}
-module.exports = {
-    assertOptions: assertOptions,
-    validators: validators
-};
-
-},{"../env/data":"7dluA"}],"7dluA":[function(require,module,exports) {
-module.exports = {
-    "version": "0.24.0"
-};
-
-},{}],"6kJtU":[function(require,module,exports) {
-'use strict';
-var Cancel = require('./Cancel');
-/**
- * A `CancelToken` is an object that can be used to request cancellation of an operation.
- *
- * @class
- * @param {Function} executor The executor function.
- */ function CancelToken(executor) {
-    if (typeof executor !== 'function') throw new TypeError('executor must be a function.');
-    var resolvePromise;
-    this.promise = new Promise(function promiseExecutor(resolve) {
-        resolvePromise = resolve;
-    });
-    var token = this;
-    // eslint-disable-next-line func-names
-    this.promise.then(function(cancel) {
-        if (!token._listeners) return;
-        var i;
-        var l = token._listeners.length;
-        for(i = 0; i < l; i++)token._listeners[i](cancel);
-        token._listeners = null;
-    });
-    // eslint-disable-next-line func-names
-    this.promise.then = function(onfulfilled) {
-        var _resolve;
-        // eslint-disable-next-line func-names
-        var promise = new Promise(function(resolve) {
-            token.subscribe(resolve);
-            _resolve = resolve;
-        }).then(onfulfilled);
-        promise.cancel = function reject() {
-            token.unsubscribe(_resolve);
-        };
-        return promise;
-    };
-    executor(function cancel(message) {
-        if (token.reason) // Cancellation has already been requested
-        return;
-        token.reason = new Cancel(message);
-        resolvePromise(token.reason);
-    });
-}
-/**
- * Throws a `Cancel` if cancellation has been requested.
- */ CancelToken.prototype.throwIfRequested = function throwIfRequested() {
-    if (this.reason) throw this.reason;
-};
-/**
- * Subscribe to the cancel signal
- */ CancelToken.prototype.subscribe = function subscribe(listener) {
-    if (this.reason) {
-        listener(this.reason);
-        return;
-    }
-    if (this._listeners) this._listeners.push(listener);
-    else this._listeners = [
-        listener
-    ];
-};
-/**
- * Unsubscribe from the cancel signal
- */ CancelToken.prototype.unsubscribe = function unsubscribe(listener) {
-    if (!this._listeners) return;
-    var index = this._listeners.indexOf(listener);
-    if (index !== -1) this._listeners.splice(index, 1);
-};
-/**
- * Returns an object that contains a new `CancelToken` and a function that, when called,
- * cancels the `CancelToken`.
- */ CancelToken.source = function source() {
-    var cancel;
-    var token = new CancelToken(function executor(c) {
-        cancel = c;
-    });
-    return {
-        token: token,
-        cancel: cancel
-    };
-};
-module.exports = CancelToken;
-
-},{"./Cancel":"iGO1D"}],"3fmMu":[function(require,module,exports) {
-'use strict';
-/**
- * Syntactic sugar for invoking a function and expanding an array for arguments.
- *
- * Common use case would be to use `Function.prototype.apply`.
- *
- *  ```js
- *  function f(x, y, z) {}
- *  var args = [1, 2, 3];
- *  f.apply(null, args);
- *  ```
- *
- * With `spread` this example can be re-written.
- *
- *  ```js
- *  spread(function(x, y, z) {})([1, 2, 3]);
- *  ```
- *
- * @param {Function} callback
- * @returns {Function}
- */ module.exports = function spread(callback) {
-    return function wrap(arr) {
-        return callback.apply(null, arr);
-    };
-};
-
-},{}],"1NqDP":[function(require,module,exports) {
-'use strict';
-/**
- * Determines whether the payload is an error thrown by Axios
- *
- * @param {*} payload The value to test
- * @returns {boolean} True if the payload is an error thrown by Axios, otherwise false
- */ module.exports = function isAxiosError(payload) {
-    return typeof payload === 'object' && payload.isAxiosError === true;
-};
-
-},{}],"e87sn":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "Easing", ()=>Easing
-);
-parcelHelpers.export(exports, "Group", ()=>Group
-);
-parcelHelpers.export(exports, "Interpolation", ()=>Interpolation
-);
-parcelHelpers.export(exports, "Sequence", ()=>Sequence
-);
-parcelHelpers.export(exports, "Tween", ()=>Tween
-);
-parcelHelpers.export(exports, "VERSION", ()=>VERSION
-);
-parcelHelpers.export(exports, "add", ()=>add
-);
-parcelHelpers.export(exports, "getAll", ()=>getAll
-);
-parcelHelpers.export(exports, "nextId", ()=>nextId
-);
-parcelHelpers.export(exports, "now", ()=>now$1
-);
-parcelHelpers.export(exports, "remove", ()=>remove
-);
-parcelHelpers.export(exports, "removeAll", ()=>removeAll
-);
-parcelHelpers.export(exports, "update", ()=>update
-);
-var process = require("process");
-/**
- * The Ease class provides a collection of easing functions for use with tween.js.
- */ var Easing = {
-    Linear: {
-        None: function(amount) {
-            return amount;
-        }
-    },
-    Quadratic: {
-        In: function(amount) {
-            return amount * amount;
-        },
-        Out: function(amount) {
-            return amount * (2 - amount);
-        },
-        InOut: function(amount) {
-            if ((amount *= 2) < 1) return 0.5 * amount * amount;
-            return -0.5 * ((--amount) * (amount - 2) - 1);
-        }
-    },
-    Cubic: {
-        In: function(amount) {
-            return amount * amount * amount;
-        },
-        Out: function(amount) {
-            return (--amount) * amount * amount + 1;
-        },
-        InOut: function(amount) {
-            if ((amount *= 2) < 1) return 0.5 * amount * amount * amount;
-            return 0.5 * ((amount -= 2) * amount * amount + 2);
-        }
-    },
-    Quartic: {
-        In: function(amount) {
-            return amount * amount * amount * amount;
-        },
-        Out: function(amount) {
-            return 1 - (--amount) * amount * amount * amount;
-        },
-        InOut: function(amount) {
-            if ((amount *= 2) < 1) return 0.5 * amount * amount * amount * amount;
-            return -0.5 * ((amount -= 2) * amount * amount * amount - 2);
-        }
-    },
-    Quintic: {
-        In: function(amount) {
-            return amount * amount * amount * amount * amount;
-        },
-        Out: function(amount) {
-            return (--amount) * amount * amount * amount * amount + 1;
-        },
-        InOut: function(amount) {
-            if ((amount *= 2) < 1) return 0.5 * amount * amount * amount * amount * amount;
-            return 0.5 * ((amount -= 2) * amount * amount * amount * amount + 2);
-        }
-    },
-    Sinusoidal: {
-        In: function(amount) {
-            return 1 - Math.cos(amount * Math.PI / 2);
-        },
-        Out: function(amount) {
-            return Math.sin(amount * Math.PI / 2);
-        },
-        InOut: function(amount) {
-            return 0.5 * (1 - Math.cos(Math.PI * amount));
-        }
-    },
-    Exponential: {
-        In: function(amount) {
-            return amount === 0 ? 0 : Math.pow(1024, amount - 1);
-        },
-        Out: function(amount) {
-            return amount === 1 ? 1 : 1 - Math.pow(2, -10 * amount);
-        },
-        InOut: function(amount) {
-            if (amount === 0) return 0;
-            if (amount === 1) return 1;
-            if ((amount *= 2) < 1) return 0.5 * Math.pow(1024, amount - 1);
-            return 0.5 * (-Math.pow(2, -10 * (amount - 1)) + 2);
-        }
-    },
-    Circular: {
-        In: function(amount) {
-            return 1 - Math.sqrt(1 - amount * amount);
-        },
-        Out: function(amount) {
-            return Math.sqrt(1 - (--amount) * amount);
-        },
-        InOut: function(amount) {
-            if ((amount *= 2) < 1) return -0.5 * (Math.sqrt(1 - amount * amount) - 1);
-            return 0.5 * (Math.sqrt(1 - (amount -= 2) * amount) + 1);
-        }
-    },
-    Elastic: {
-        In: function(amount) {
-            if (amount === 0) return 0;
-            if (amount === 1) return 1;
-            return -Math.pow(2, 10 * (amount - 1)) * Math.sin((amount - 1.1) * 5 * Math.PI);
-        },
-        Out: function(amount) {
-            if (amount === 0) return 0;
-            if (amount === 1) return 1;
-            return Math.pow(2, -10 * amount) * Math.sin((amount - 0.1) * 5 * Math.PI) + 1;
-        },
-        InOut: function(amount) {
-            if (amount === 0) return 0;
-            if (amount === 1) return 1;
-            amount *= 2;
-            if (amount < 1) return -0.5 * Math.pow(2, 10 * (amount - 1)) * Math.sin((amount - 1.1) * 5 * Math.PI);
-            return 0.5 * Math.pow(2, -10 * (amount - 1)) * Math.sin((amount - 1.1) * 5 * Math.PI) + 1;
-        }
-    },
-    Back: {
-        In: function(amount) {
-            var s = 1.70158;
-            return amount * amount * ((s + 1) * amount - s);
-        },
-        Out: function(amount) {
-            var s = 1.70158;
-            return (--amount) * amount * ((s + 1) * amount + s) + 1;
-        },
-        InOut: function(amount) {
-            var s = 2.5949095;
-            if ((amount *= 2) < 1) return 0.5 * (amount * amount * ((s + 1) * amount - s));
-            return 0.5 * ((amount -= 2) * amount * ((s + 1) * amount + s) + 2);
-        }
-    },
-    Bounce: {
-        In: function(amount) {
-            return 1 - Easing.Bounce.Out(1 - amount);
-        },
-        Out: function(amount) {
-            if (amount < 1 / 2.75) return 7.5625 * amount * amount;
-            else if (amount < 2 / 2.75) return 7.5625 * (amount -= 1.5 / 2.75) * amount + 0.75;
-            else if (amount < 2.5 / 2.75) return 7.5625 * (amount -= 2.25 / 2.75) * amount + 0.9375;
-            else return 7.5625 * (amount -= 2.625 / 2.75) * amount + 0.984375;
-        },
-        InOut: function(amount) {
-            if (amount < 0.5) return Easing.Bounce.In(amount * 2) * 0.5;
-            return Easing.Bounce.Out(amount * 2 - 1) * 0.5 + 0.5;
-        }
-    }
-};
-var now;
-// Include a performance.now polyfill.
-// In node.js, use process.hrtime.
-// eslint-disable-next-line
-// @ts-ignore
-if (typeof self === 'undefined' && typeof process !== 'undefined' && process.hrtime) now = function() {
-    // eslint-disable-next-line
-    // @ts-ignore
-    var time = process.hrtime();
-    // Convert [seconds, nanoseconds] to milliseconds.
-    return time[0] * 1000 + time[1] / 1000000;
-};
-else if (typeof self !== 'undefined' && self.performance !== undefined && self.performance.now !== undefined) // This must be bound, because directly assigning this function
-// leads to an invocation exception in Chrome.
-now = self.performance.now.bind(self.performance);
-else if (Date.now !== undefined) now = Date.now;
-else now = function() {
-    return new Date().getTime();
-};
-var now$1 = now;
-/**
- * Controlling groups of tweens
- *
- * Using the TWEEN singleton to manage your tweens can cause issues in large apps with many components.
- * In these cases, you may want to create your own smaller groups of tween
- */ var Group = function() {
-    function Group1() {
-        this._tweens = {
-        };
-        this._tweensAddedDuringUpdate = {
-        };
-    }
-    Group1.prototype.getAll = function() {
-        var _this = this;
-        return Object.keys(this._tweens).map(function(tweenId) {
-            return _this._tweens[tweenId];
-        });
-    };
-    Group1.prototype.removeAll = function() {
-        this._tweens = {
-        };
-    };
-    Group1.prototype.add = function(tween) {
-        this._tweens[tween.getId()] = tween;
-        this._tweensAddedDuringUpdate[tween.getId()] = tween;
-    };
-    Group1.prototype.remove = function(tween) {
-        delete this._tweens[tween.getId()];
-        delete this._tweensAddedDuringUpdate[tween.getId()];
-    };
-    Group1.prototype.update = function(time, preserve) {
-        if (time === void 0) time = now$1();
-        if (preserve === void 0) preserve = false;
-        var tweenIds = Object.keys(this._tweens);
-        if (tweenIds.length === 0) return false;
-        // Tweens are updated in "batches". If you add a new tween during an
-        // update, then the new tween will be updated in the next batch.
-        // If you remove a tween during an update, it may or may not be updated.
-        // However, if the removed tween was added during the current batch,
-        // then it will not be updated.
-        while(tweenIds.length > 0){
-            this._tweensAddedDuringUpdate = {
-            };
-            for(var i = 0; i < tweenIds.length; i++){
-                var tween = this._tweens[tweenIds[i]];
-                var autoStart = !preserve;
-                if (tween && tween.update(time, autoStart) === false && !preserve) delete this._tweens[tweenIds[i]];
-            }
-            tweenIds = Object.keys(this._tweensAddedDuringUpdate);
-        }
-        return true;
-    };
-    return Group1;
-}();
-/**
- *
- */ var Interpolation = {
-    Linear: function(v, k) {
-        var m = v.length - 1;
-        var f = m * k;
-        var i = Math.floor(f);
-        var fn = Interpolation.Utils.Linear;
-        if (k < 0) return fn(v[0], v[1], f);
-        if (k > 1) return fn(v[m], v[m - 1], m - f);
-        return fn(v[i], v[i + 1 > m ? m : i + 1], f - i);
-    },
-    Bezier: function(v, k) {
-        var b = 0;
-        var n = v.length - 1;
-        var pw = Math.pow;
-        var bn = Interpolation.Utils.Bernstein;
-        for(var i = 0; i <= n; i++)b += pw(1 - k, n - i) * pw(k, i) * v[i] * bn(n, i);
-        return b;
-    },
-    CatmullRom: function(v, k) {
-        var m = v.length - 1;
-        var f = m * k;
-        var i = Math.floor(f);
-        var fn = Interpolation.Utils.CatmullRom;
-        if (v[0] === v[m]) {
-            if (k < 0) i = Math.floor(f = m * (1 + k));
-            return fn(v[(i - 1 + m) % m], v[i], v[(i + 1) % m], v[(i + 2) % m], f - i);
-        } else {
-            if (k < 0) return v[0] - (fn(v[0], v[0], v[1], v[1], -f) - v[0]);
-            if (k > 1) return v[m] - (fn(v[m], v[m], v[m - 1], v[m - 1], f - m) - v[m]);
-            return fn(v[i ? i - 1 : 0], v[i], v[m < i + 1 ? m : i + 1], v[m < i + 2 ? m : i + 2], f - i);
-        }
-    },
-    Utils: {
-        Linear: function(p0, p1, t) {
-            return (p1 - p0) * t + p0;
-        },
-        Bernstein: function(n, i) {
-            var fc = Interpolation.Utils.Factorial;
-            return fc(n) / fc(i) / fc(n - i);
-        },
-        Factorial: function() {
-            var a = [
-                1
-            ];
-            return function(n) {
-                var s = 1;
-                if (a[n]) return a[n];
-                for(var i = n; i > 1; i--)s *= i;
-                a[n] = s;
-                return s;
-            };
-        }(),
-        CatmullRom: function(p0, p1, p2, p3, t) {
-            var v0 = (p2 - p0) * 0.5;
-            var v1 = (p3 - p1) * 0.5;
-            var t2 = t * t;
-            var t3 = t * t2;
-            return (2 * p1 - 2 * p2 + v0 + v1) * t3 + (-3 * p1 + 3 * p2 - 2 * v0 - v1) * t2 + v0 * t + p1;
-        }
-    }
-};
-/**
- * Utils
- */ var Sequence = function() {
-    function Sequence1() {
-    }
-    Sequence1.nextId = function() {
-        return Sequence1._nextId++;
-    };
-    Sequence1._nextId = 0;
-    return Sequence1;
-}();
-var mainGroup = new Group();
-/**
- * Tween.js - Licensed under the MIT license
- * https://github.com/tweenjs/tween.js
- * ----------------------------------------------
- *
- * See https://github.com/tweenjs/tween.js/graphs/contributors for the full list of contributors.
- * Thank you all, you're awesome!
- */ var Tween = function() {
-    function Tween1(_object, _group) {
-        if (_group === void 0) _group = mainGroup;
-        this._object = _object;
-        this._group = _group;
-        this._isPaused = false;
-        this._pauseStart = 0;
-        this._valuesStart = {
-        };
-        this._valuesEnd = {
-        };
-        this._valuesStartRepeat = {
-        };
-        this._duration = 1000;
-        this._initialRepeat = 0;
-        this._repeat = 0;
-        this._yoyo = false;
-        this._isPlaying = false;
-        this._reversed = false;
-        this._delayTime = 0;
-        this._startTime = 0;
-        this._easingFunction = Easing.Linear.None;
-        this._interpolationFunction = Interpolation.Linear;
-        this._chainedTweens = [];
-        this._onStartCallbackFired = false;
-        this._id = Sequence.nextId();
-        this._isChainStopped = false;
-        this._goToEnd = false;
-    }
-    Tween1.prototype.getId = function() {
-        return this._id;
-    };
-    Tween1.prototype.isPlaying = function() {
-        return this._isPlaying;
-    };
-    Tween1.prototype.isPaused = function() {
-        return this._isPaused;
-    };
-    Tween1.prototype.to = function(properties, duration) {
-        // TODO? restore this, then update the 07_dynamic_to example to set fox
-        // tween's to on each update. That way the behavior is opt-in (there's
-        // currently no opt-out).
-        // for (const prop in properties) this._valuesEnd[prop] = properties[prop]
-        this._valuesEnd = Object.create(properties);
-        if (duration !== undefined) this._duration = duration;
-        return this;
-    };
-    Tween1.prototype.duration = function(d) {
-        this._duration = d;
-        return this;
-    };
-    Tween1.prototype.start = function(time) {
-        if (this._isPlaying) return this;
-        // eslint-disable-next-line
-        this._group && this._group.add(this);
-        this._repeat = this._initialRepeat;
-        if (this._reversed) {
-            // If we were reversed (f.e. using the yoyo feature) then we need to
-            // flip the tween direction back to forward.
-            this._reversed = false;
-            for(var property in this._valuesStartRepeat){
-                this._swapEndStartRepeatValues(property);
-                this._valuesStart[property] = this._valuesStartRepeat[property];
-            }
-        }
-        this._isPlaying = true;
-        this._isPaused = false;
-        this._onStartCallbackFired = false;
-        this._isChainStopped = false;
-        this._startTime = time !== undefined ? typeof time === 'string' ? now$1() + parseFloat(time) : time : now$1();
-        this._startTime += this._delayTime;
-        this._setupProperties(this._object, this._valuesStart, this._valuesEnd, this._valuesStartRepeat);
-        return this;
-    };
-    Tween1.prototype._setupProperties = function(_object, _valuesStart, _valuesEnd, _valuesStartRepeat) {
-        for(var property in _valuesEnd){
-            var startValue = _object[property];
-            var startValueIsArray = Array.isArray(startValue);
-            var propType = startValueIsArray ? 'array' : typeof startValue;
-            var isInterpolationList = !startValueIsArray && Array.isArray(_valuesEnd[property]);
-            // If `to()` specifies a property that doesn't exist in the source object,
-            // we should not set that property in the object
-            if (propType === 'undefined' || propType === 'function') continue;
-            // Check if an Array was provided as property value
-            if (isInterpolationList) {
-                var endValues = _valuesEnd[property];
-                if (endValues.length === 0) continue;
-                // handle an array of relative values
-                endValues = endValues.map(this._handleRelativeValue.bind(this, startValue));
-                // Create a local copy of the Array with the start value at the front
-                _valuesEnd[property] = [
-                    startValue
-                ].concat(endValues);
-            }
-            // handle the deepness of the values
-            if ((propType === 'object' || startValueIsArray) && startValue && !isInterpolationList) {
-                _valuesStart[property] = startValueIsArray ? [] : {
-                };
-                // eslint-disable-next-line
-                for(var prop in startValue)// eslint-disable-next-line
-                // @ts-ignore FIXME?
-                _valuesStart[property][prop] = startValue[prop];
-                _valuesStartRepeat[property] = startValueIsArray ? [] : {
-                }; // TODO? repeat nested values? And yoyo? And array values?
-                // eslint-disable-next-line
-                // @ts-ignore FIXME?
-                this._setupProperties(startValue, _valuesStart[property], _valuesEnd[property], _valuesStartRepeat[property]);
-            } else {
-                // Save the starting value, but only once.
-                if (typeof _valuesStart[property] === 'undefined') _valuesStart[property] = startValue;
-                if (!startValueIsArray) // eslint-disable-next-line
-                // @ts-ignore FIXME?
-                _valuesStart[property] *= 1; // Ensures we're using numbers, not strings
-                if (isInterpolationList) // eslint-disable-next-line
-                // @ts-ignore FIXME?
-                _valuesStartRepeat[property] = _valuesEnd[property].slice().reverse();
-                else _valuesStartRepeat[property] = _valuesStart[property] || 0;
-            }
-        }
-    };
-    Tween1.prototype.stop = function() {
-        if (!this._isChainStopped) {
-            this._isChainStopped = true;
-            this.stopChainedTweens();
-        }
-        if (!this._isPlaying) return this;
-        // eslint-disable-next-line
-        this._group && this._group.remove(this);
-        this._isPlaying = false;
-        this._isPaused = false;
-        if (this._onStopCallback) this._onStopCallback(this._object);
-        return this;
-    };
-    Tween1.prototype.end = function() {
-        this._goToEnd = true;
-        this.update(Infinity);
-        return this;
-    };
-    Tween1.prototype.pause = function(time) {
-        if (time === void 0) time = now$1();
-        if (this._isPaused || !this._isPlaying) return this;
-        this._isPaused = true;
-        this._pauseStart = time;
-        // eslint-disable-next-line
-        this._group && this._group.remove(this);
-        return this;
-    };
-    Tween1.prototype.resume = function(time) {
-        if (time === void 0) time = now$1();
-        if (!this._isPaused || !this._isPlaying) return this;
-        this._isPaused = false;
-        this._startTime += time - this._pauseStart;
-        this._pauseStart = 0;
-        // eslint-disable-next-line
-        this._group && this._group.add(this);
-        return this;
-    };
-    Tween1.prototype.stopChainedTweens = function() {
-        for(var i = 0, numChainedTweens = this._chainedTweens.length; i < numChainedTweens; i++)this._chainedTweens[i].stop();
-        return this;
-    };
-    Tween1.prototype.group = function(group) {
-        this._group = group;
-        return this;
-    };
-    Tween1.prototype.delay = function(amount) {
-        this._delayTime = amount;
-        return this;
-    };
-    Tween1.prototype.repeat = function(times) {
-        this._initialRepeat = times;
-        this._repeat = times;
-        return this;
-    };
-    Tween1.prototype.repeatDelay = function(amount) {
-        this._repeatDelayTime = amount;
-        return this;
-    };
-    Tween1.prototype.yoyo = function(yoyo) {
-        this._yoyo = yoyo;
-        return this;
-    };
-    Tween1.prototype.easing = function(easingFunction) {
-        this._easingFunction = easingFunction;
-        return this;
-    };
-    Tween1.prototype.interpolation = function(interpolationFunction) {
-        this._interpolationFunction = interpolationFunction;
-        return this;
-    };
-    Tween1.prototype.chain = function() {
-        var tweens = [];
-        for(var _i = 0; _i < arguments.length; _i++)tweens[_i] = arguments[_i];
-        this._chainedTweens = tweens;
-        return this;
-    };
-    Tween1.prototype.onStart = function(callback) {
-        this._onStartCallback = callback;
-        return this;
-    };
-    Tween1.prototype.onUpdate = function(callback) {
-        this._onUpdateCallback = callback;
-        return this;
-    };
-    Tween1.prototype.onRepeat = function(callback) {
-        this._onRepeatCallback = callback;
-        return this;
-    };
-    Tween1.prototype.onComplete = function(callback) {
-        this._onCompleteCallback = callback;
-        return this;
-    };
-    Tween1.prototype.onStop = function(callback) {
-        this._onStopCallback = callback;
-        return this;
-    };
-    /**
-     * @returns true if the tween is still playing after the update, false
-     * otherwise (calling update on a paused tween still returns true because
-     * it is still playing, just paused).
-     */ Tween1.prototype.update = function(time, autoStart) {
-        if (time === void 0) time = now$1();
-        if (autoStart === void 0) autoStart = true;
-        if (this._isPaused) return true;
-        var property;
-        var elapsed;
-        var endTime = this._startTime + this._duration;
-        if (!this._goToEnd && !this._isPlaying) {
-            if (time > endTime) return false;
-            if (autoStart) this.start(time);
-        }
-        this._goToEnd = false;
-        if (time < this._startTime) return true;
-        if (this._onStartCallbackFired === false) {
-            if (this._onStartCallback) this._onStartCallback(this._object);
-            this._onStartCallbackFired = true;
-        }
-        elapsed = (time - this._startTime) / this._duration;
-        elapsed = this._duration === 0 || elapsed > 1 ? 1 : elapsed;
-        var value = this._easingFunction(elapsed);
-        // properties transformations
-        this._updateProperties(this._object, this._valuesStart, this._valuesEnd, value);
-        if (this._onUpdateCallback) this._onUpdateCallback(this._object, elapsed);
-        if (elapsed === 1) {
-            if (this._repeat > 0) {
-                if (isFinite(this._repeat)) this._repeat--;
-                // Reassign starting values, restart by making startTime = now
-                for(property in this._valuesStartRepeat){
-                    if (!this._yoyo && typeof this._valuesEnd[property] === 'string') this._valuesStartRepeat[property] = // eslint-disable-next-line
-                    // @ts-ignore FIXME?
-                    this._valuesStartRepeat[property] + parseFloat(this._valuesEnd[property]);
-                    if (this._yoyo) this._swapEndStartRepeatValues(property);
-                    this._valuesStart[property] = this._valuesStartRepeat[property];
-                }
-                if (this._yoyo) this._reversed = !this._reversed;
-                if (this._repeatDelayTime !== undefined) this._startTime = time + this._repeatDelayTime;
-                else this._startTime = time + this._delayTime;
-                if (this._onRepeatCallback) this._onRepeatCallback(this._object);
-                return true;
-            } else {
-                if (this._onCompleteCallback) this._onCompleteCallback(this._object);
-                for(var i = 0, numChainedTweens = this._chainedTweens.length; i < numChainedTweens; i++)// Make the chained tweens start exactly at the time they should,
-                // even if the `update()` method was called way past the duration of the tween
-                this._chainedTweens[i].start(this._startTime + this._duration);
-                this._isPlaying = false;
-                return false;
-            }
-        }
-        return true;
-    };
-    Tween1.prototype._updateProperties = function(_object, _valuesStart, _valuesEnd, value) {
-        for(var property in _valuesEnd){
-            // Don't update properties that do not exist in the source object
-            if (_valuesStart[property] === undefined) continue;
-            var start = _valuesStart[property] || 0;
-            var end = _valuesEnd[property];
-            var startIsArray = Array.isArray(_object[property]);
-            var endIsArray = Array.isArray(end);
-            var isInterpolationList = !startIsArray && endIsArray;
-            if (isInterpolationList) _object[property] = this._interpolationFunction(end, value);
-            else if (typeof end === 'object' && end) // eslint-disable-next-line
-            // @ts-ignore FIXME?
-            this._updateProperties(_object[property], start, end, value);
-            else {
-                // Parses relative end values with start as base (e.g.: +10, -3)
-                end = this._handleRelativeValue(start, end);
-                // Protect against non numeric properties.
-                if (typeof end === 'number') // eslint-disable-next-line
-                // @ts-ignore FIXME?
-                _object[property] = start + (end - start) * value;
-            }
-        }
-    };
-    Tween1.prototype._handleRelativeValue = function(start, end) {
-        if (typeof end !== 'string') return end;
-        if (end.charAt(0) === '+' || end.charAt(0) === '-') return start + parseFloat(end);
-        else return parseFloat(end);
-    };
-    Tween1.prototype._swapEndStartRepeatValues = function(property) {
-        var tmp = this._valuesStartRepeat[property];
-        var endValue = this._valuesEnd[property];
-        if (typeof endValue === 'string') this._valuesStartRepeat[property] = this._valuesStartRepeat[property] + parseFloat(endValue);
-        else this._valuesStartRepeat[property] = this._valuesEnd[property];
-        this._valuesEnd[property] = tmp;
-    };
-    return Tween1;
-}();
-var VERSION = '18.6.4';
-/**
- * Tween.js - Licensed under the MIT license
- * https://github.com/tweenjs/tween.js
- * ----------------------------------------------
- *
- * See https://github.com/tweenjs/tween.js/graphs/contributors for the full list of contributors.
- * Thank you all, you're awesome!
- */ var nextId = Sequence.nextId;
-/**
- * Controlling groups of tweens
- *
- * Using the TWEEN singleton to manage your tweens can cause issues in large apps with many components.
- * In these cases, you may want to create your own smaller groups of tweens.
- */ var TWEEN = mainGroup;
-// This is the best way to export things in a way that's compatible with both ES
-// Modules and CommonJS, without build hacks, and so as not to break the
-// existing API.
-// https://github.com/rollup/rollup/issues/1961#issuecomment-423037881
-var getAll = TWEEN.getAll.bind(TWEEN);
-var removeAll = TWEEN.removeAll.bind(TWEEN);
-var add = TWEEN.add.bind(TWEEN);
-var remove = TWEEN.remove.bind(TWEEN);
-var update = TWEEN.update.bind(TWEEN);
-var exports1 = {
-    Easing: Easing,
-    Group: Group,
-    Interpolation: Interpolation,
-    now: now$1,
-    Sequence: Sequence,
-    nextId: nextId,
-    Tween: Tween,
-    VERSION: VERSION,
-    getAll: getAll,
-    removeAll: removeAll,
-    add: add,
-    remove: remove,
-    update: update
-};
-exports.default = exports1;
-
-},{"process":"6Upk8","@parcel/transformer-js/src/esmodule-helpers.js":"JacNc"}],"jFuxO":[function(require,module,exports) {
+},{"three":"1AKvZ","@parcel/transformer-js/src/esmodule-helpers.js":"JacNc"}],"jFuxO":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "Handy", ()=>Handy
@@ -78219,6 +76786,1415 @@ const poses = [
     }
 ];
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"JacNc"}]},["5MabY","g1M29"], "g1M29", "parcelRequirea5b0")
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"JacNc"}],"iYoWk":[function(require,module,exports) {
+module.exports = require('./lib/axios');
+
+},{"./lib/axios":"3QmO2"}],"3QmO2":[function(require,module,exports) {
+'use strict';
+var utils = require('./utils');
+var bind = require('./helpers/bind');
+var Axios = require('./core/Axios');
+var mergeConfig = require('./core/mergeConfig');
+var defaults = require('./defaults');
+/**
+ * Create an instance of Axios
+ *
+ * @param {Object} defaultConfig The default config for the instance
+ * @return {Axios} A new instance of Axios
+ */ function createInstance(defaultConfig) {
+    var context = new Axios(defaultConfig);
+    var instance = bind(Axios.prototype.request, context);
+    // Copy axios.prototype to instance
+    utils.extend(instance, Axios.prototype, context);
+    // Copy context to instance
+    utils.extend(instance, context);
+    // Factory for creating new instances
+    instance.create = function create(instanceConfig) {
+        return createInstance(mergeConfig(defaultConfig, instanceConfig));
+    };
+    return instance;
+}
+// Create the default instance to be exported
+var axios = createInstance(defaults);
+// Expose Axios class to allow class inheritance
+axios.Axios = Axios;
+// Expose Cancel & CancelToken
+axios.Cancel = require('./cancel/Cancel');
+axios.CancelToken = require('./cancel/CancelToken');
+axios.isCancel = require('./cancel/isCancel');
+axios.VERSION = require('./env/data').version;
+// Expose all/spread
+axios.all = function all(promises) {
+    return Promise.all(promises);
+};
+axios.spread = require('./helpers/spread');
+// Expose isAxiosError
+axios.isAxiosError = require('./helpers/isAxiosError');
+module.exports = axios;
+// Allow use of default import syntax in TypeScript
+module.exports.default = axios;
+
+},{"./utils":"hOPY0","./helpers/bind":"4bHkG","./core/Axios":"KVzea","./core/mergeConfig":"8vb7m","./defaults":"g96L2","./cancel/Cancel":"iGO1D","./cancel/CancelToken":"6kJtU","./cancel/isCancel":"6KzET","./env/data":"7dluA","./helpers/spread":"3fmMu","./helpers/isAxiosError":"1NqDP"}],"hOPY0":[function(require,module,exports) {
+'use strict';
+var bind = require('./helpers/bind');
+// utils is a library of generic helper functions non-specific to axios
+var toString = Object.prototype.toString;
+/**
+ * Determine if a value is an Array
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an Array, otherwise false
+ */ function isArray(val) {
+    return toString.call(val) === '[object Array]';
+}
+/**
+ * Determine if a value is undefined
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if the value is undefined, otherwise false
+ */ function isUndefined(val) {
+    return typeof val === 'undefined';
+}
+/**
+ * Determine if a value is a Buffer
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Buffer, otherwise false
+ */ function isBuffer(val) {
+    return val !== null && !isUndefined(val) && val.constructor !== null && !isUndefined(val.constructor) && typeof val.constructor.isBuffer === 'function' && val.constructor.isBuffer(val);
+}
+/**
+ * Determine if a value is an ArrayBuffer
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an ArrayBuffer, otherwise false
+ */ function isArrayBuffer(val) {
+    return toString.call(val) === '[object ArrayBuffer]';
+}
+/**
+ * Determine if a value is a FormData
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an FormData, otherwise false
+ */ function isFormData(val) {
+    return typeof FormData !== 'undefined' && val instanceof FormData;
+}
+/**
+ * Determine if a value is a view on an ArrayBuffer
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a view on an ArrayBuffer, otherwise false
+ */ function isArrayBufferView(val) {
+    var result;
+    if (typeof ArrayBuffer !== 'undefined' && ArrayBuffer.isView) result = ArrayBuffer.isView(val);
+    else result = val && val.buffer && val.buffer instanceof ArrayBuffer;
+    return result;
+}
+/**
+ * Determine if a value is a String
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a String, otherwise false
+ */ function isString(val) {
+    return typeof val === 'string';
+}
+/**
+ * Determine if a value is a Number
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Number, otherwise false
+ */ function isNumber(val) {
+    return typeof val === 'number';
+}
+/**
+ * Determine if a value is an Object
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an Object, otherwise false
+ */ function isObject(val) {
+    return val !== null && typeof val === 'object';
+}
+/**
+ * Determine if a value is a plain Object
+ *
+ * @param {Object} val The value to test
+ * @return {boolean} True if value is a plain Object, otherwise false
+ */ function isPlainObject(val) {
+    if (toString.call(val) !== '[object Object]') return false;
+    var prototype = Object.getPrototypeOf(val);
+    return prototype === null || prototype === Object.prototype;
+}
+/**
+ * Determine if a value is a Date
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Date, otherwise false
+ */ function isDate(val) {
+    return toString.call(val) === '[object Date]';
+}
+/**
+ * Determine if a value is a File
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a File, otherwise false
+ */ function isFile(val) {
+    return toString.call(val) === '[object File]';
+}
+/**
+ * Determine if a value is a Blob
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Blob, otherwise false
+ */ function isBlob(val) {
+    return toString.call(val) === '[object Blob]';
+}
+/**
+ * Determine if a value is a Function
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Function, otherwise false
+ */ function isFunction(val) {
+    return toString.call(val) === '[object Function]';
+}
+/**
+ * Determine if a value is a Stream
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Stream, otherwise false
+ */ function isStream(val) {
+    return isObject(val) && isFunction(val.pipe);
+}
+/**
+ * Determine if a value is a URLSearchParams object
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a URLSearchParams object, otherwise false
+ */ function isURLSearchParams(val) {
+    return typeof URLSearchParams !== 'undefined' && val instanceof URLSearchParams;
+}
+/**
+ * Trim excess whitespace off the beginning and end of a string
+ *
+ * @param {String} str The String to trim
+ * @returns {String} The String freed of excess whitespace
+ */ function trim(str) {
+    return str.trim ? str.trim() : str.replace(/^\s+|\s+$/g, '');
+}
+/**
+ * Determine if we're running in a standard browser environment
+ *
+ * This allows axios to run in a web worker, and react-native.
+ * Both environments support XMLHttpRequest, but not fully standard globals.
+ *
+ * web workers:
+ *  typeof window -> undefined
+ *  typeof document -> undefined
+ *
+ * react-native:
+ *  navigator.product -> 'ReactNative'
+ * nativescript
+ *  navigator.product -> 'NativeScript' or 'NS'
+ */ function isStandardBrowserEnv() {
+    if (typeof navigator !== 'undefined' && (navigator.product === 'ReactNative' || navigator.product === 'NativeScript' || navigator.product === 'NS')) return false;
+    return typeof window !== 'undefined' && typeof document !== 'undefined';
+}
+/**
+ * Iterate over an Array or an Object invoking a function for each item.
+ *
+ * If `obj` is an Array callback will be called passing
+ * the value, index, and complete array for each item.
+ *
+ * If 'obj' is an Object callback will be called passing
+ * the value, key, and complete object for each property.
+ *
+ * @param {Object|Array} obj The object to iterate
+ * @param {Function} fn The callback to invoke for each item
+ */ function forEach(obj, fn) {
+    // Don't bother if no value provided
+    if (obj === null || typeof obj === 'undefined') return;
+    // Force an array if not already something iterable
+    if (typeof obj !== 'object') /*eslint no-param-reassign:0*/ obj = [
+        obj
+    ];
+    if (isArray(obj)) // Iterate over array values
+    for(var i = 0, l = obj.length; i < l; i++)fn.call(null, obj[i], i, obj);
+    else {
+        // Iterate over object keys
+        for(var key in obj)if (Object.prototype.hasOwnProperty.call(obj, key)) fn.call(null, obj[key], key, obj);
+    }
+}
+/**
+ * Accepts varargs expecting each argument to be an object, then
+ * immutably merges the properties of each object and returns result.
+ *
+ * When multiple objects contain the same key the later object in
+ * the arguments list will take precedence.
+ *
+ * Example:
+ *
+ * ```js
+ * var result = merge({foo: 123}, {foo: 456});
+ * console.log(result.foo); // outputs 456
+ * ```
+ *
+ * @param {Object} obj1 Object to merge
+ * @returns {Object} Result of all merge properties
+ */ function merge() {
+    var result = {
+    };
+    function assignValue(val, key) {
+        if (isPlainObject(result[key]) && isPlainObject(val)) result[key] = merge(result[key], val);
+        else if (isPlainObject(val)) result[key] = merge({
+        }, val);
+        else if (isArray(val)) result[key] = val.slice();
+        else result[key] = val;
+    }
+    for(var i = 0, l = arguments.length; i < l; i++)forEach(arguments[i], assignValue);
+    return result;
+}
+/**
+ * Extends object a by mutably adding to it the properties of object b.
+ *
+ * @param {Object} a The object to be extended
+ * @param {Object} b The object to copy properties from
+ * @param {Object} thisArg The object to bind function to
+ * @return {Object} The resulting value of object a
+ */ function extend(a, b, thisArg) {
+    forEach(b, function assignValue(val, key) {
+        if (thisArg && typeof val === 'function') a[key] = bind(val, thisArg);
+        else a[key] = val;
+    });
+    return a;
+}
+/**
+ * Remove byte order marker. This catches EF BB BF (the UTF-8 BOM)
+ *
+ * @param {string} content with BOM
+ * @return {string} content value without BOM
+ */ function stripBOM(content) {
+    if (content.charCodeAt(0) === 65279) content = content.slice(1);
+    return content;
+}
+module.exports = {
+    isArray: isArray,
+    isArrayBuffer: isArrayBuffer,
+    isBuffer: isBuffer,
+    isFormData: isFormData,
+    isArrayBufferView: isArrayBufferView,
+    isString: isString,
+    isNumber: isNumber,
+    isObject: isObject,
+    isPlainObject: isPlainObject,
+    isUndefined: isUndefined,
+    isDate: isDate,
+    isFile: isFile,
+    isBlob: isBlob,
+    isFunction: isFunction,
+    isStream: isStream,
+    isURLSearchParams: isURLSearchParams,
+    isStandardBrowserEnv: isStandardBrowserEnv,
+    forEach: forEach,
+    merge: merge,
+    extend: extend,
+    trim: trim,
+    stripBOM: stripBOM
+};
+
+},{"./helpers/bind":"4bHkG"}],"4bHkG":[function(require,module,exports) {
+'use strict';
+module.exports = function bind(fn, thisArg) {
+    return function wrap() {
+        var args = new Array(arguments.length);
+        for(var i = 0; i < args.length; i++)args[i] = arguments[i];
+        return fn.apply(thisArg, args);
+    };
+};
+
+},{}],"KVzea":[function(require,module,exports) {
+'use strict';
+var utils = require('./../utils');
+var buildURL = require('../helpers/buildURL');
+var InterceptorManager = require('./InterceptorManager');
+var dispatchRequest = require('./dispatchRequest');
+var mergeConfig = require('./mergeConfig');
+var validator = require('../helpers/validator');
+var validators = validator.validators;
+/**
+ * Create a new instance of Axios
+ *
+ * @param {Object} instanceConfig The default config for the instance
+ */ function Axios(instanceConfig) {
+    this.defaults = instanceConfig;
+    this.interceptors = {
+        request: new InterceptorManager(),
+        response: new InterceptorManager()
+    };
+}
+/**
+ * Dispatch a request
+ *
+ * @param {Object} config The config specific for this request (merged with this.defaults)
+ */ Axios.prototype.request = function request(config) {
+    /*eslint no-param-reassign:0*/ // Allow for axios('example/url'[, config]) a la fetch API
+    if (typeof config === 'string') {
+        config = arguments[1] || {
+        };
+        config.url = arguments[0];
+    } else config = config || {
+    };
+    config = mergeConfig(this.defaults, config);
+    // Set config.method
+    if (config.method) config.method = config.method.toLowerCase();
+    else if (this.defaults.method) config.method = this.defaults.method.toLowerCase();
+    else config.method = 'get';
+    var transitional = config.transitional;
+    if (transitional !== undefined) validator.assertOptions(transitional, {
+        silentJSONParsing: validators.transitional(validators.boolean),
+        forcedJSONParsing: validators.transitional(validators.boolean),
+        clarifyTimeoutError: validators.transitional(validators.boolean)
+    }, false);
+    // filter out skipped interceptors
+    var requestInterceptorChain = [];
+    var synchronousRequestInterceptors = true;
+    this.interceptors.request.forEach(function unshiftRequestInterceptors(interceptor) {
+        if (typeof interceptor.runWhen === 'function' && interceptor.runWhen(config) === false) return;
+        synchronousRequestInterceptors = synchronousRequestInterceptors && interceptor.synchronous;
+        requestInterceptorChain.unshift(interceptor.fulfilled, interceptor.rejected);
+    });
+    var responseInterceptorChain = [];
+    this.interceptors.response.forEach(function pushResponseInterceptors(interceptor) {
+        responseInterceptorChain.push(interceptor.fulfilled, interceptor.rejected);
+    });
+    var promise;
+    if (!synchronousRequestInterceptors) {
+        var chain = [
+            dispatchRequest,
+            undefined
+        ];
+        Array.prototype.unshift.apply(chain, requestInterceptorChain);
+        chain = chain.concat(responseInterceptorChain);
+        promise = Promise.resolve(config);
+        while(chain.length)promise = promise.then(chain.shift(), chain.shift());
+        return promise;
+    }
+    var newConfig = config;
+    while(requestInterceptorChain.length){
+        var onFulfilled = requestInterceptorChain.shift();
+        var onRejected = requestInterceptorChain.shift();
+        try {
+            newConfig = onFulfilled(newConfig);
+        } catch (error) {
+            onRejected(error);
+            break;
+        }
+    }
+    try {
+        promise = dispatchRequest(newConfig);
+    } catch (error) {
+        return Promise.reject(error);
+    }
+    while(responseInterceptorChain.length)promise = promise.then(responseInterceptorChain.shift(), responseInterceptorChain.shift());
+    return promise;
+};
+Axios.prototype.getUri = function getUri(config) {
+    config = mergeConfig(this.defaults, config);
+    return buildURL(config.url, config.params, config.paramsSerializer).replace(/^\?/, '');
+};
+// Provide aliases for supported request methods
+utils.forEach([
+    'delete',
+    'get',
+    'head',
+    'options'
+], function forEachMethodNoData(method) {
+    /*eslint func-names:0*/ Axios.prototype[method] = function(url, config) {
+        return this.request(mergeConfig(config || {
+        }, {
+            method: method,
+            url: url,
+            data: (config || {
+            }).data
+        }));
+    };
+});
+utils.forEach([
+    'post',
+    'put',
+    'patch'
+], function forEachMethodWithData(method) {
+    /*eslint func-names:0*/ Axios.prototype[method] = function(url, data, config) {
+        return this.request(mergeConfig(config || {
+        }, {
+            method: method,
+            url: url,
+            data: data
+        }));
+    };
+});
+module.exports = Axios;
+
+},{"./../utils":"hOPY0","../helpers/buildURL":"3Jodf","./InterceptorManager":"9kkIC","./dispatchRequest":"dmFav","./mergeConfig":"8vb7m","../helpers/validator":"4sigL"}],"3Jodf":[function(require,module,exports) {
+'use strict';
+var utils = require('./../utils');
+function encode(val) {
+    return encodeURIComponent(val).replace(/%3A/gi, ':').replace(/%24/g, '$').replace(/%2C/gi, ',').replace(/%20/g, '+').replace(/%5B/gi, '[').replace(/%5D/gi, ']');
+}
+/**
+ * Build a URL by appending params to the end
+ *
+ * @param {string} url The base of the url (e.g., http://www.google.com)
+ * @param {object} [params] The params to be appended
+ * @returns {string} The formatted url
+ */ module.exports = function buildURL(url, params, paramsSerializer) {
+    /*eslint no-param-reassign:0*/ if (!params) return url;
+    var serializedParams;
+    if (paramsSerializer) serializedParams = paramsSerializer(params);
+    else if (utils.isURLSearchParams(params)) serializedParams = params.toString();
+    else {
+        var parts = [];
+        utils.forEach(params, function serialize(val, key) {
+            if (val === null || typeof val === 'undefined') return;
+            if (utils.isArray(val)) key = key + '[]';
+            else val = [
+                val
+            ];
+            utils.forEach(val, function parseValue(v) {
+                if (utils.isDate(v)) v = v.toISOString();
+                else if (utils.isObject(v)) v = JSON.stringify(v);
+                parts.push(encode(key) + '=' + encode(v));
+            });
+        });
+        serializedParams = parts.join('&');
+    }
+    if (serializedParams) {
+        var hashmarkIndex = url.indexOf('#');
+        if (hashmarkIndex !== -1) url = url.slice(0, hashmarkIndex);
+        url += (url.indexOf('?') === -1 ? '?' : '&') + serializedParams;
+    }
+    return url;
+};
+
+},{"./../utils":"hOPY0"}],"9kkIC":[function(require,module,exports) {
+'use strict';
+var utils = require('./../utils');
+function InterceptorManager() {
+    this.handlers = [];
+}
+/**
+ * Add a new interceptor to the stack
+ *
+ * @param {Function} fulfilled The function to handle `then` for a `Promise`
+ * @param {Function} rejected The function to handle `reject` for a `Promise`
+ *
+ * @return {Number} An ID used to remove interceptor later
+ */ InterceptorManager.prototype.use = function use(fulfilled, rejected, options) {
+    this.handlers.push({
+        fulfilled: fulfilled,
+        rejected: rejected,
+        synchronous: options ? options.synchronous : false,
+        runWhen: options ? options.runWhen : null
+    });
+    return this.handlers.length - 1;
+};
+/**
+ * Remove an interceptor from the stack
+ *
+ * @param {Number} id The ID that was returned by `use`
+ */ InterceptorManager.prototype.eject = function eject(id) {
+    if (this.handlers[id]) this.handlers[id] = null;
+};
+/**
+ * Iterate over all the registered interceptors
+ *
+ * This method is particularly useful for skipping over any
+ * interceptors that may have become `null` calling `eject`.
+ *
+ * @param {Function} fn The function to call for each interceptor
+ */ InterceptorManager.prototype.forEach = function forEach(fn) {
+    utils.forEach(this.handlers, function forEachHandler(h) {
+        if (h !== null) fn(h);
+    });
+};
+module.exports = InterceptorManager;
+
+},{"./../utils":"hOPY0"}],"dmFav":[function(require,module,exports) {
+'use strict';
+var utils = require('./../utils');
+var transformData = require('./transformData');
+var isCancel = require('../cancel/isCancel');
+var defaults = require('../defaults');
+var Cancel = require('../cancel/Cancel');
+/**
+ * Throws a `Cancel` if cancellation has been requested.
+ */ function throwIfCancellationRequested(config) {
+    if (config.cancelToken) config.cancelToken.throwIfRequested();
+    if (config.signal && config.signal.aborted) throw new Cancel('canceled');
+}
+/**
+ * Dispatch a request to the server using the configured adapter.
+ *
+ * @param {object} config The config that is to be used for the request
+ * @returns {Promise} The Promise to be fulfilled
+ */ module.exports = function dispatchRequest(config) {
+    throwIfCancellationRequested(config);
+    // Ensure headers exist
+    config.headers = config.headers || {
+    };
+    // Transform request data
+    config.data = transformData.call(config, config.data, config.headers, config.transformRequest);
+    // Flatten headers
+    config.headers = utils.merge(config.headers.common || {
+    }, config.headers[config.method] || {
+    }, config.headers);
+    utils.forEach([
+        'delete',
+        'get',
+        'head',
+        'post',
+        'put',
+        'patch',
+        'common'
+    ], function cleanHeaderConfig(method) {
+        delete config.headers[method];
+    });
+    var adapter = config.adapter || defaults.adapter;
+    return adapter(config).then(function onAdapterResolution(response) {
+        throwIfCancellationRequested(config);
+        // Transform response data
+        response.data = transformData.call(config, response.data, response.headers, config.transformResponse);
+        return response;
+    }, function onAdapterRejection(reason) {
+        if (!isCancel(reason)) {
+            throwIfCancellationRequested(config);
+            // Transform response data
+            if (reason && reason.response) reason.response.data = transformData.call(config, reason.response.data, reason.response.headers, config.transformResponse);
+        }
+        return Promise.reject(reason);
+    });
+};
+
+},{"./../utils":"hOPY0","./transformData":"57wgh","../cancel/isCancel":"6KzET","../defaults":"g96L2","../cancel/Cancel":"iGO1D"}],"57wgh":[function(require,module,exports) {
+'use strict';
+var utils = require('./../utils');
+var defaults = require('./../defaults');
+/**
+ * Transform the data for a request or a response
+ *
+ * @param {Object|String} data The data to be transformed
+ * @param {Array} headers The headers for the request or response
+ * @param {Array|Function} fns A single function or Array of functions
+ * @returns {*} The resulting transformed data
+ */ module.exports = function transformData(data, headers, fns) {
+    var context = this || defaults;
+    /*eslint no-param-reassign:0*/ utils.forEach(fns, function transform(fn) {
+        data = fn.call(context, data, headers);
+    });
+    return data;
+};
+
+},{"./../utils":"hOPY0","./../defaults":"g96L2"}],"g96L2":[function(require,module,exports) {
+var process = require("process");
+'use strict';
+var utils = require('./utils');
+var normalizeHeaderName = require('./helpers/normalizeHeaderName');
+var enhanceError = require('./core/enhanceError');
+var DEFAULT_CONTENT_TYPE = {
+    'Content-Type': 'application/x-www-form-urlencoded'
+};
+function setContentTypeIfUnset(headers, value) {
+    if (!utils.isUndefined(headers) && utils.isUndefined(headers['Content-Type'])) headers['Content-Type'] = value;
+}
+function getDefaultAdapter() {
+    var adapter;
+    if (typeof XMLHttpRequest !== 'undefined') // For browsers use XHR adapter
+    adapter = require('./adapters/xhr');
+    else if (typeof process !== 'undefined' && Object.prototype.toString.call(process) === '[object process]') // For node use HTTP adapter
+    adapter = require('./adapters/http');
+    return adapter;
+}
+function stringifySafely(rawValue, parser, encoder) {
+    if (utils.isString(rawValue)) try {
+        (parser || JSON.parse)(rawValue);
+        return utils.trim(rawValue);
+    } catch (e) {
+        if (e.name !== 'SyntaxError') throw e;
+    }
+    return (encoder || JSON.stringify)(rawValue);
+}
+var defaults = {
+    transitional: {
+        silentJSONParsing: true,
+        forcedJSONParsing: true,
+        clarifyTimeoutError: false
+    },
+    adapter: getDefaultAdapter(),
+    transformRequest: [
+        function transformRequest(data, headers) {
+            normalizeHeaderName(headers, 'Accept');
+            normalizeHeaderName(headers, 'Content-Type');
+            if (utils.isFormData(data) || utils.isArrayBuffer(data) || utils.isBuffer(data) || utils.isStream(data) || utils.isFile(data) || utils.isBlob(data)) return data;
+            if (utils.isArrayBufferView(data)) return data.buffer;
+            if (utils.isURLSearchParams(data)) {
+                setContentTypeIfUnset(headers, 'application/x-www-form-urlencoded;charset=utf-8');
+                return data.toString();
+            }
+            if (utils.isObject(data) || headers && headers['Content-Type'] === 'application/json') {
+                setContentTypeIfUnset(headers, 'application/json');
+                return stringifySafely(data);
+            }
+            return data;
+        }
+    ],
+    transformResponse: [
+        function transformResponse(data) {
+            var transitional = this.transitional || defaults.transitional;
+            var silentJSONParsing = transitional && transitional.silentJSONParsing;
+            var forcedJSONParsing = transitional && transitional.forcedJSONParsing;
+            var strictJSONParsing = !silentJSONParsing && this.responseType === 'json';
+            if (strictJSONParsing || forcedJSONParsing && utils.isString(data) && data.length) try {
+                return JSON.parse(data);
+            } catch (e) {
+                if (strictJSONParsing) {
+                    if (e.name === 'SyntaxError') throw enhanceError(e, this, 'E_JSON_PARSE');
+                    throw e;
+                }
+            }
+            return data;
+        }
+    ],
+    /**
+   * A timeout in milliseconds to abort a request. If set to 0 (default) a
+   * timeout is not created.
+   */ timeout: 0,
+    xsrfCookieName: 'XSRF-TOKEN',
+    xsrfHeaderName: 'X-XSRF-TOKEN',
+    maxContentLength: -1,
+    maxBodyLength: -1,
+    validateStatus: function validateStatus(status) {
+        return status >= 200 && status < 300;
+    },
+    headers: {
+        common: {
+            'Accept': 'application/json, text/plain, */*'
+        }
+    }
+};
+utils.forEach([
+    'delete',
+    'get',
+    'head'
+], function forEachMethodNoData(method) {
+    defaults.headers[method] = {
+    };
+});
+utils.forEach([
+    'post',
+    'put',
+    'patch'
+], function forEachMethodWithData(method) {
+    defaults.headers[method] = utils.merge(DEFAULT_CONTENT_TYPE);
+});
+module.exports = defaults;
+
+},{"process":"6Upk8","./utils":"hOPY0","./helpers/normalizeHeaderName":"6GUF5","./core/enhanceError":"3f4N4","./adapters/xhr":"4uZQD","./adapters/http":"4uZQD"}],"6GUF5":[function(require,module,exports) {
+'use strict';
+var utils = require('../utils');
+module.exports = function normalizeHeaderName(headers, normalizedName) {
+    utils.forEach(headers, function processHeader(value, name) {
+        if (name !== normalizedName && name.toUpperCase() === normalizedName.toUpperCase()) {
+            headers[normalizedName] = value;
+            delete headers[name];
+        }
+    });
+};
+
+},{"../utils":"hOPY0"}],"3f4N4":[function(require,module,exports) {
+'use strict';
+/**
+ * Update an Error with the specified config, error code, and response.
+ *
+ * @param {Error} error The error to update.
+ * @param {Object} config The config.
+ * @param {string} [code] The error code (for example, 'ECONNABORTED').
+ * @param {Object} [request] The request.
+ * @param {Object} [response] The response.
+ * @returns {Error} The error.
+ */ module.exports = function enhanceError(error, config, code, request, response) {
+    error.config = config;
+    if (code) error.code = code;
+    error.request = request;
+    error.response = response;
+    error.isAxiosError = true;
+    error.toJSON = function toJSON() {
+        return {
+            // Standard
+            message: this.message,
+            name: this.name,
+            // Microsoft
+            description: this.description,
+            number: this.number,
+            // Mozilla
+            fileName: this.fileName,
+            lineNumber: this.lineNumber,
+            columnNumber: this.columnNumber,
+            stack: this.stack,
+            // Axios
+            config: this.config,
+            code: this.code,
+            status: this.response && this.response.status ? this.response.status : null
+        };
+    };
+    return error;
+};
+
+},{}],"4uZQD":[function(require,module,exports) {
+'use strict';
+var utils = require('./../utils');
+var settle = require('./../core/settle');
+var cookies = require('./../helpers/cookies');
+var buildURL = require('./../helpers/buildURL');
+var buildFullPath = require('../core/buildFullPath');
+var parseHeaders = require('./../helpers/parseHeaders');
+var isURLSameOrigin = require('./../helpers/isURLSameOrigin');
+var createError = require('../core/createError');
+var defaults = require('../defaults');
+var Cancel = require('../cancel/Cancel');
+module.exports = function xhrAdapter(config) {
+    return new Promise(function dispatchXhrRequest(resolve, reject) {
+        var requestData = config.data;
+        var requestHeaders = config.headers;
+        var responseType = config.responseType;
+        var onCanceled;
+        function done() {
+            if (config.cancelToken) config.cancelToken.unsubscribe(onCanceled);
+            if (config.signal) config.signal.removeEventListener('abort', onCanceled);
+        }
+        if (utils.isFormData(requestData)) delete requestHeaders['Content-Type']; // Let the browser set it
+        var request = new XMLHttpRequest();
+        // HTTP basic authentication
+        if (config.auth) {
+            var username = config.auth.username || '';
+            var password = config.auth.password ? unescape(encodeURIComponent(config.auth.password)) : '';
+            requestHeaders.Authorization = 'Basic ' + btoa(username + ':' + password);
+        }
+        var fullPath = buildFullPath(config.baseURL, config.url);
+        request.open(config.method.toUpperCase(), buildURL(fullPath, config.params, config.paramsSerializer), true);
+        // Set the request timeout in MS
+        request.timeout = config.timeout;
+        function onloadend() {
+            if (!request) return;
+            // Prepare the response
+            var responseHeaders = 'getAllResponseHeaders' in request ? parseHeaders(request.getAllResponseHeaders()) : null;
+            var responseData = !responseType || responseType === 'text' || responseType === 'json' ? request.responseText : request.response;
+            var response = {
+                data: responseData,
+                status: request.status,
+                statusText: request.statusText,
+                headers: responseHeaders,
+                config: config,
+                request: request
+            };
+            settle(function _resolve(value) {
+                resolve(value);
+                done();
+            }, function _reject(err) {
+                reject(err);
+                done();
+            }, response);
+            // Clean up request
+            request = null;
+        }
+        if ('onloadend' in request) // Use onloadend if available
+        request.onloadend = onloadend;
+        else // Listen for ready state to emulate onloadend
+        request.onreadystatechange = function handleLoad() {
+            if (!request || request.readyState !== 4) return;
+            // The request errored out and we didn't get a response, this will be
+            // handled by onerror instead
+            // With one exception: request that using file: protocol, most browsers
+            // will return status as 0 even though it's a successful request
+            if (request.status === 0 && !(request.responseURL && request.responseURL.indexOf('file:') === 0)) return;
+            // readystate handler is calling before onerror or ontimeout handlers,
+            // so we should call onloadend on the next 'tick'
+            setTimeout(onloadend);
+        };
+        // Handle browser request cancellation (as opposed to a manual cancellation)
+        request.onabort = function handleAbort() {
+            if (!request) return;
+            reject(createError('Request aborted', config, 'ECONNABORTED', request));
+            // Clean up request
+            request = null;
+        };
+        // Handle low level network errors
+        request.onerror = function handleError() {
+            // Real errors are hidden from us by the browser
+            // onerror should only fire if it's a network error
+            reject(createError('Network Error', config, null, request));
+            // Clean up request
+            request = null;
+        };
+        // Handle timeout
+        request.ontimeout = function handleTimeout() {
+            var timeoutErrorMessage = config.timeout ? 'timeout of ' + config.timeout + 'ms exceeded' : 'timeout exceeded';
+            var transitional = config.transitional || defaults.transitional;
+            if (config.timeoutErrorMessage) timeoutErrorMessage = config.timeoutErrorMessage;
+            reject(createError(timeoutErrorMessage, config, transitional.clarifyTimeoutError ? 'ETIMEDOUT' : 'ECONNABORTED', request));
+            // Clean up request
+            request = null;
+        };
+        // Add xsrf header
+        // This is only done if running in a standard browser environment.
+        // Specifically not if we're in a web worker, or react-native.
+        if (utils.isStandardBrowserEnv()) {
+            // Add xsrf header
+            var xsrfValue = (config.withCredentials || isURLSameOrigin(fullPath)) && config.xsrfCookieName ? cookies.read(config.xsrfCookieName) : undefined;
+            if (xsrfValue) requestHeaders[config.xsrfHeaderName] = xsrfValue;
+        }
+        // Add headers to the request
+        if ('setRequestHeader' in request) utils.forEach(requestHeaders, function setRequestHeader(val, key) {
+            if (typeof requestData === 'undefined' && key.toLowerCase() === 'content-type') // Remove Content-Type if data is undefined
+            delete requestHeaders[key];
+            else // Otherwise add header to the request
+            request.setRequestHeader(key, val);
+        });
+        // Add withCredentials to request if needed
+        if (!utils.isUndefined(config.withCredentials)) request.withCredentials = !!config.withCredentials;
+        // Add responseType to request if needed
+        if (responseType && responseType !== 'json') request.responseType = config.responseType;
+        // Handle progress if needed
+        if (typeof config.onDownloadProgress === 'function') request.addEventListener('progress', config.onDownloadProgress);
+        // Not all browsers support upload events
+        if (typeof config.onUploadProgress === 'function' && request.upload) request.upload.addEventListener('progress', config.onUploadProgress);
+        if (config.cancelToken || config.signal) {
+            // Handle cancellation
+            // eslint-disable-next-line func-names
+            onCanceled = function(cancel) {
+                if (!request) return;
+                reject(!cancel || cancel && cancel.type ? new Cancel('canceled') : cancel);
+                request.abort();
+                request = null;
+            };
+            config.cancelToken && config.cancelToken.subscribe(onCanceled);
+            if (config.signal) config.signal.aborted ? onCanceled() : config.signal.addEventListener('abort', onCanceled);
+        }
+        if (!requestData) requestData = null;
+        // Send the request
+        request.send(requestData);
+    });
+};
+
+},{"./../utils":"hOPY0","./../core/settle":"ehRY8","./../helpers/cookies":"dRE5q","./../helpers/buildURL":"3Jodf","../core/buildFullPath":"1RLcm","./../helpers/parseHeaders":"9TT83","./../helpers/isURLSameOrigin":"2SCwc","../core/createError":"cfxXs","../defaults":"g96L2","../cancel/Cancel":"iGO1D"}],"ehRY8":[function(require,module,exports) {
+'use strict';
+var createError = require('./createError');
+/**
+ * Resolve or reject a Promise based on response status.
+ *
+ * @param {Function} resolve A function that resolves the promise.
+ * @param {Function} reject A function that rejects the promise.
+ * @param {object} response The response.
+ */ module.exports = function settle(resolve, reject, response) {
+    var validateStatus = response.config.validateStatus;
+    if (!response.status || !validateStatus || validateStatus(response.status)) resolve(response);
+    else reject(createError('Request failed with status code ' + response.status, response.config, null, response.request, response));
+};
+
+},{"./createError":"cfxXs"}],"cfxXs":[function(require,module,exports) {
+'use strict';
+var enhanceError = require('./enhanceError');
+/**
+ * Create an Error with the specified message, config, error code, request and response.
+ *
+ * @param {string} message The error message.
+ * @param {Object} config The config.
+ * @param {string} [code] The error code (for example, 'ECONNABORTED').
+ * @param {Object} [request] The request.
+ * @param {Object} [response] The response.
+ * @returns {Error} The created error.
+ */ module.exports = function createError(message, config, code, request, response) {
+    var error = new Error(message);
+    return enhanceError(error, config, code, request, response);
+};
+
+},{"./enhanceError":"3f4N4"}],"dRE5q":[function(require,module,exports) {
+'use strict';
+var utils = require('./../utils');
+module.exports = utils.isStandardBrowserEnv() ? // Standard browser envs support document.cookie
+(function standardBrowserEnv() {
+    return {
+        write: function write(name, value, expires, path, domain, secure) {
+            var cookie = [];
+            cookie.push(name + '=' + encodeURIComponent(value));
+            if (utils.isNumber(expires)) cookie.push('expires=' + new Date(expires).toGMTString());
+            if (utils.isString(path)) cookie.push('path=' + path);
+            if (utils.isString(domain)) cookie.push('domain=' + domain);
+            if (secure === true) cookie.push('secure');
+            document.cookie = cookie.join('; ');
+        },
+        read: function read(name) {
+            var match = document.cookie.match(new RegExp('(^|;\\s*)(' + name + ')=([^;]*)'));
+            return match ? decodeURIComponent(match[3]) : null;
+        },
+        remove: function remove(name) {
+            this.write(name, '', Date.now() - 86400000);
+        }
+    };
+})() : // Non standard browser env (web workers, react-native) lack needed support.
+(function nonStandardBrowserEnv() {
+    return {
+        write: function write() {
+        },
+        read: function read() {
+            return null;
+        },
+        remove: function remove() {
+        }
+    };
+})();
+
+},{"./../utils":"hOPY0"}],"1RLcm":[function(require,module,exports) {
+'use strict';
+var isAbsoluteURL = require('../helpers/isAbsoluteURL');
+var combineURLs = require('../helpers/combineURLs');
+/**
+ * Creates a new URL by combining the baseURL with the requestedURL,
+ * only when the requestedURL is not already an absolute URL.
+ * If the requestURL is absolute, this function returns the requestedURL untouched.
+ *
+ * @param {string} baseURL The base URL
+ * @param {string} requestedURL Absolute or relative URL to combine
+ * @returns {string} The combined full path
+ */ module.exports = function buildFullPath(baseURL, requestedURL) {
+    if (baseURL && !isAbsoluteURL(requestedURL)) return combineURLs(baseURL, requestedURL);
+    return requestedURL;
+};
+
+},{"../helpers/isAbsoluteURL":"8E1N1","../helpers/combineURLs":"e9OEH"}],"8E1N1":[function(require,module,exports) {
+'use strict';
+/**
+ * Determines whether the specified URL is absolute
+ *
+ * @param {string} url The URL to test
+ * @returns {boolean} True if the specified URL is absolute, otherwise false
+ */ module.exports = function isAbsoluteURL(url) {
+    // A URL is considered absolute if it begins with "<scheme>://" or "//" (protocol-relative URL).
+    // RFC 3986 defines scheme name as a sequence of characters beginning with a letter and followed
+    // by any combination of letters, digits, plus, period, or hyphen.
+    return /^([a-z][a-z\d\+\-\.]*:)?\/\//i.test(url);
+};
+
+},{}],"e9OEH":[function(require,module,exports) {
+'use strict';
+/**
+ * Creates a new URL by combining the specified URLs
+ *
+ * @param {string} baseURL The base URL
+ * @param {string} relativeURL The relative URL
+ * @returns {string} The combined URL
+ */ module.exports = function combineURLs(baseURL, relativeURL) {
+    return relativeURL ? baseURL.replace(/\/+$/, '') + '/' + relativeURL.replace(/^\/+/, '') : baseURL;
+};
+
+},{}],"9TT83":[function(require,module,exports) {
+'use strict';
+var utils = require('./../utils');
+// Headers whose duplicates are ignored by node
+// c.f. https://nodejs.org/api/http.html#http_message_headers
+var ignoreDuplicateOf = [
+    'age',
+    'authorization',
+    'content-length',
+    'content-type',
+    'etag',
+    'expires',
+    'from',
+    'host',
+    'if-modified-since',
+    'if-unmodified-since',
+    'last-modified',
+    'location',
+    'max-forwards',
+    'proxy-authorization',
+    'referer',
+    'retry-after',
+    'user-agent'
+];
+/**
+ * Parse headers into an object
+ *
+ * ```
+ * Date: Wed, 27 Aug 2014 08:58:49 GMT
+ * Content-Type: application/json
+ * Connection: keep-alive
+ * Transfer-Encoding: chunked
+ * ```
+ *
+ * @param {String} headers Headers needing to be parsed
+ * @returns {Object} Headers parsed into an object
+ */ module.exports = function parseHeaders(headers) {
+    var parsed = {
+    };
+    var key;
+    var val;
+    var i;
+    if (!headers) return parsed;
+    utils.forEach(headers.split('\n'), function parser(line) {
+        i = line.indexOf(':');
+        key = utils.trim(line.substr(0, i)).toLowerCase();
+        val = utils.trim(line.substr(i + 1));
+        if (key) {
+            if (parsed[key] && ignoreDuplicateOf.indexOf(key) >= 0) return;
+            if (key === 'set-cookie') parsed[key] = (parsed[key] ? parsed[key] : []).concat([
+                val
+            ]);
+            else parsed[key] = parsed[key] ? parsed[key] + ', ' + val : val;
+        }
+    });
+    return parsed;
+};
+
+},{"./../utils":"hOPY0"}],"2SCwc":[function(require,module,exports) {
+'use strict';
+var utils = require('./../utils');
+module.exports = utils.isStandardBrowserEnv() ? // Standard browser envs have full support of the APIs needed to test
+// whether the request URL is of the same origin as current location.
+(function standardBrowserEnv() {
+    var msie = /(msie|trident)/i.test(navigator.userAgent);
+    var urlParsingNode = document.createElement('a');
+    var originURL;
+    /**
+    * Parse a URL to discover it's components
+    *
+    * @param {String} url The URL to be parsed
+    * @returns {Object}
+    */ function resolveURL(url) {
+        var href = url;
+        if (msie) {
+            // IE needs attribute set twice to normalize properties
+            urlParsingNode.setAttribute('href', href);
+            href = urlParsingNode.href;
+        }
+        urlParsingNode.setAttribute('href', href);
+        // urlParsingNode provides the UrlUtils interface - http://url.spec.whatwg.org/#urlutils
+        return {
+            href: urlParsingNode.href,
+            protocol: urlParsingNode.protocol ? urlParsingNode.protocol.replace(/:$/, '') : '',
+            host: urlParsingNode.host,
+            search: urlParsingNode.search ? urlParsingNode.search.replace(/^\?/, '') : '',
+            hash: urlParsingNode.hash ? urlParsingNode.hash.replace(/^#/, '') : '',
+            hostname: urlParsingNode.hostname,
+            port: urlParsingNode.port,
+            pathname: urlParsingNode.pathname.charAt(0) === '/' ? urlParsingNode.pathname : '/' + urlParsingNode.pathname
+        };
+    }
+    originURL = resolveURL(window.location.href);
+    /**
+    * Determine if a URL shares the same origin as the current location
+    *
+    * @param {String} requestURL The URL to test
+    * @returns {boolean} True if URL shares the same origin, otherwise false
+    */ return function isURLSameOrigin(requestURL) {
+        var parsed = utils.isString(requestURL) ? resolveURL(requestURL) : requestURL;
+        return parsed.protocol === originURL.protocol && parsed.host === originURL.host;
+    };
+})() : // Non standard browser envs (web workers, react-native) lack needed support.
+(function nonStandardBrowserEnv() {
+    return function isURLSameOrigin() {
+        return true;
+    };
+})();
+
+},{"./../utils":"hOPY0"}],"iGO1D":[function(require,module,exports) {
+'use strict';
+/**
+ * A `Cancel` is an object that is thrown when an operation is canceled.
+ *
+ * @class
+ * @param {string=} message The message.
+ */ function Cancel(message) {
+    this.message = message;
+}
+Cancel.prototype.toString = function toString() {
+    return 'Cancel' + (this.message ? ': ' + this.message : '');
+};
+Cancel.prototype.__CANCEL__ = true;
+module.exports = Cancel;
+
+},{}],"6KzET":[function(require,module,exports) {
+'use strict';
+module.exports = function isCancel(value) {
+    return !!(value && value.__CANCEL__);
+};
+
+},{}],"8vb7m":[function(require,module,exports) {
+'use strict';
+var utils = require('../utils');
+/**
+ * Config-specific merge-function which creates a new config-object
+ * by merging two configuration objects together.
+ *
+ * @param {Object} config1
+ * @param {Object} config2
+ * @returns {Object} New object resulting from merging config2 to config1
+ */ module.exports = function mergeConfig(config1, config2) {
+    // eslint-disable-next-line no-param-reassign
+    config2 = config2 || {
+    };
+    var config = {
+    };
+    function getMergedValue(target, source) {
+        if (utils.isPlainObject(target) && utils.isPlainObject(source)) return utils.merge(target, source);
+        else if (utils.isPlainObject(source)) return utils.merge({
+        }, source);
+        else if (utils.isArray(source)) return source.slice();
+        return source;
+    }
+    // eslint-disable-next-line consistent-return
+    function mergeDeepProperties(prop) {
+        if (!utils.isUndefined(config2[prop])) return getMergedValue(config1[prop], config2[prop]);
+        else if (!utils.isUndefined(config1[prop])) return getMergedValue(undefined, config1[prop]);
+    }
+    // eslint-disable-next-line consistent-return
+    function valueFromConfig2(prop) {
+        if (!utils.isUndefined(config2[prop])) return getMergedValue(undefined, config2[prop]);
+    }
+    // eslint-disable-next-line consistent-return
+    function defaultToConfig2(prop) {
+        if (!utils.isUndefined(config2[prop])) return getMergedValue(undefined, config2[prop]);
+        else if (!utils.isUndefined(config1[prop])) return getMergedValue(undefined, config1[prop]);
+    }
+    // eslint-disable-next-line consistent-return
+    function mergeDirectKeys(prop) {
+        if (prop in config2) return getMergedValue(config1[prop], config2[prop]);
+        else if (prop in config1) return getMergedValue(undefined, config1[prop]);
+    }
+    var mergeMap = {
+        'url': valueFromConfig2,
+        'method': valueFromConfig2,
+        'data': valueFromConfig2,
+        'baseURL': defaultToConfig2,
+        'transformRequest': defaultToConfig2,
+        'transformResponse': defaultToConfig2,
+        'paramsSerializer': defaultToConfig2,
+        'timeout': defaultToConfig2,
+        'timeoutMessage': defaultToConfig2,
+        'withCredentials': defaultToConfig2,
+        'adapter': defaultToConfig2,
+        'responseType': defaultToConfig2,
+        'xsrfCookieName': defaultToConfig2,
+        'xsrfHeaderName': defaultToConfig2,
+        'onUploadProgress': defaultToConfig2,
+        'onDownloadProgress': defaultToConfig2,
+        'decompress': defaultToConfig2,
+        'maxContentLength': defaultToConfig2,
+        'maxBodyLength': defaultToConfig2,
+        'transport': defaultToConfig2,
+        'httpAgent': defaultToConfig2,
+        'httpsAgent': defaultToConfig2,
+        'cancelToken': defaultToConfig2,
+        'socketPath': defaultToConfig2,
+        'responseEncoding': defaultToConfig2,
+        'validateStatus': mergeDirectKeys
+    };
+    utils.forEach(Object.keys(config1).concat(Object.keys(config2)), function computeConfigValue(prop) {
+        var merge = mergeMap[prop] || mergeDeepProperties;
+        var configValue = merge(prop);
+        utils.isUndefined(configValue) && merge !== mergeDirectKeys || (config[prop] = configValue);
+    });
+    return config;
+};
+
+},{"../utils":"hOPY0"}],"4sigL":[function(require,module,exports) {
+'use strict';
+var VERSION = require('../env/data').version;
+var validators = {
+};
+// eslint-disable-next-line func-names
+[
+    'object',
+    'boolean',
+    'number',
+    'function',
+    'string',
+    'symbol'
+].forEach(function(type, i) {
+    validators[type] = function validator(thing) {
+        return typeof thing === type || 'a' + (i < 1 ? 'n ' : ' ') + type;
+    };
+});
+var deprecatedWarnings = {
+};
+/**
+ * Transitional option validator
+ * @param {function|boolean?} validator - set to false if the transitional option has been removed
+ * @param {string?} version - deprecated version / removed since version
+ * @param {string?} message - some message with additional info
+ * @returns {function}
+ */ validators.transitional = function transitional(validator, version, message) {
+    function formatMessage(opt, desc) {
+        return '[Axios v' + VERSION + '] Transitional option \'' + opt + '\'' + desc + (message ? '. ' + message : '');
+    }
+    // eslint-disable-next-line func-names
+    return function(value, opt, opts) {
+        if (validator === false) throw new Error(formatMessage(opt, ' has been removed' + (version ? ' in ' + version : '')));
+        if (version && !deprecatedWarnings[opt]) {
+            deprecatedWarnings[opt] = true;
+            // eslint-disable-next-line no-console
+            console.warn(formatMessage(opt, ' has been deprecated since v' + version + ' and will be removed in the near future'));
+        }
+        return validator ? validator(value, opt, opts) : true;
+    };
+};
+/**
+ * Assert object's properties type
+ * @param {object} options
+ * @param {object} schema
+ * @param {boolean?} allowUnknown
+ */ function assertOptions(options, schema, allowUnknown) {
+    if (typeof options !== 'object') throw new TypeError('options must be an object');
+    var keys = Object.keys(options);
+    var i = keys.length;
+    while((i--) > 0){
+        var opt = keys[i];
+        var validator = schema[opt];
+        if (validator) {
+            var value = options[opt];
+            var result = value === undefined || validator(value, opt, options);
+            if (result !== true) throw new TypeError('option ' + opt + ' must be ' + result);
+            continue;
+        }
+        if (allowUnknown !== true) throw Error('Unknown option ' + opt);
+    }
+}
+module.exports = {
+    assertOptions: assertOptions,
+    validators: validators
+};
+
+},{"../env/data":"7dluA"}],"7dluA":[function(require,module,exports) {
+module.exports = {
+    "version": "0.24.0"
+};
+
+},{}],"6kJtU":[function(require,module,exports) {
+'use strict';
+var Cancel = require('./Cancel');
+/**
+ * A `CancelToken` is an object that can be used to request cancellation of an operation.
+ *
+ * @class
+ * @param {Function} executor The executor function.
+ */ function CancelToken(executor) {
+    if (typeof executor !== 'function') throw new TypeError('executor must be a function.');
+    var resolvePromise;
+    this.promise = new Promise(function promiseExecutor(resolve) {
+        resolvePromise = resolve;
+    });
+    var token = this;
+    // eslint-disable-next-line func-names
+    this.promise.then(function(cancel) {
+        if (!token._listeners) return;
+        var i;
+        var l = token._listeners.length;
+        for(i = 0; i < l; i++)token._listeners[i](cancel);
+        token._listeners = null;
+    });
+    // eslint-disable-next-line func-names
+    this.promise.then = function(onfulfilled) {
+        var _resolve;
+        // eslint-disable-next-line func-names
+        var promise = new Promise(function(resolve) {
+            token.subscribe(resolve);
+            _resolve = resolve;
+        }).then(onfulfilled);
+        promise.cancel = function reject() {
+            token.unsubscribe(_resolve);
+        };
+        return promise;
+    };
+    executor(function cancel(message) {
+        if (token.reason) // Cancellation has already been requested
+        return;
+        token.reason = new Cancel(message);
+        resolvePromise(token.reason);
+    });
+}
+/**
+ * Throws a `Cancel` if cancellation has been requested.
+ */ CancelToken.prototype.throwIfRequested = function throwIfRequested() {
+    if (this.reason) throw this.reason;
+};
+/**
+ * Subscribe to the cancel signal
+ */ CancelToken.prototype.subscribe = function subscribe(listener) {
+    if (this.reason) {
+        listener(this.reason);
+        return;
+    }
+    if (this._listeners) this._listeners.push(listener);
+    else this._listeners = [
+        listener
+    ];
+};
+/**
+ * Unsubscribe from the cancel signal
+ */ CancelToken.prototype.unsubscribe = function unsubscribe(listener) {
+    if (!this._listeners) return;
+    var index = this._listeners.indexOf(listener);
+    if (index !== -1) this._listeners.splice(index, 1);
+};
+/**
+ * Returns an object that contains a new `CancelToken` and a function that, when called,
+ * cancels the `CancelToken`.
+ */ CancelToken.source = function source() {
+    var cancel;
+    var token = new CancelToken(function executor(c) {
+        cancel = c;
+    });
+    return {
+        token: token,
+        cancel: cancel
+    };
+};
+module.exports = CancelToken;
+
+},{"./Cancel":"iGO1D"}],"3fmMu":[function(require,module,exports) {
+'use strict';
+/**
+ * Syntactic sugar for invoking a function and expanding an array for arguments.
+ *
+ * Common use case would be to use `Function.prototype.apply`.
+ *
+ *  ```js
+ *  function f(x, y, z) {}
+ *  var args = [1, 2, 3];
+ *  f.apply(null, args);
+ *  ```
+ *
+ * With `spread` this example can be re-written.
+ *
+ *  ```js
+ *  spread(function(x, y, z) {})([1, 2, 3]);
+ *  ```
+ *
+ * @param {Function} callback
+ * @returns {Function}
+ */ module.exports = function spread(callback) {
+    return function wrap(arr) {
+        return callback.apply(null, arr);
+    };
+};
+
+},{}],"1NqDP":[function(require,module,exports) {
+'use strict';
+/**
+ * Determines whether the payload is an error thrown by Axios
+ *
+ * @param {*} payload The value to test
+ * @returns {boolean} True if the payload is an error thrown by Axios, otherwise false
+ */ module.exports = function isAxiosError(payload) {
+    return typeof payload === 'object' && payload.isAxiosError === true;
+};
+
+},{}]},["5MabY","g1M29"], "g1M29", "parcelRequirea5b0")
 
 //# sourceMappingURL=index.10fa75bc.js.map

@@ -28,12 +28,6 @@ window.IO = IO
 window.Interpolation = Interpolation
 window.PoseUtils = PoseUtils
 window.ObjectUtils = ObjectUtils
-window.testObj = {a:"Hello", b:[1,2,3], c:{c1: [1,2,3], c2: {c21: "on9"}}}
-
-function inspect(object) {
-    console.log(object)
-    return object
-}
 
 class App {
     constructor(upload_endpoint) {
@@ -173,10 +167,7 @@ class App {
         this.renderer.xr.addEventListener("sessionend", (event) => {
             console.log("Exited XR")
         })
-    
-        this.left_hand = null
-        this.right_hand = null
-
+        
         // Setup three.js scene elements
 
         this.ambient_light = new THREE.AmbientLight()
