@@ -37,4 +37,4 @@ def fetch_file(path):
     return send_from_directory('../client/dist', path)
 
 if __name__ == "__main__":
-    app.run(debug=True, ssl_context="adhoc", threaded=True, host="192.168.1.103")
+    app.run(ssl_context="adhoc", threaded=True, host="0.0.0.0")
