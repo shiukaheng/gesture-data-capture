@@ -1,7 +1,8 @@
 import * as THREE from "three"
 import { serializeJoints, applySerializedJoints } from "./PoseUtils"
-import { interpObj } from "./Interpolation"
+// import { interpObj } from "./Interpolation"
 import * as ObjectUtils from "./ObjectUtils"
+
 
 /**
  * Function for initiating hand motion recording
@@ -37,6 +38,8 @@ function recordHandMotion(scene_modifiers, duration, left_hand, right_hand, came
         })
     })
 }
+
+// Unmaintained
 
 /**
  * Function for playing back recorded hand motion data
@@ -153,4 +156,4 @@ function playbackTemplate(data) {
 
 }
 
-export {recordHandMotion, playbackHandMotion, echoHands, recordTemplate, playbackTemplate}
+export {recordHandMotion}
