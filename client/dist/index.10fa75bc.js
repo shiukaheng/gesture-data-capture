@@ -140,10 +140,10 @@
       this[globalName] = mainExports;
     }
   }
-})({"9kZaB":[function(require,module,exports) {
-var HMR_HOST = "127.0.0.1";
+})({"5MabY":[function(require,module,exports) {
+var HMR_HOST = null;
 var HMR_PORT = null;
-var HMR_SECURE = true;
+var HMR_SECURE = false;
 var HMR_ENV_HASH = "69f74e7f31319ffd";
 module.bundle.HMR_BUNDLE_ID = "d839e75310fa75bc";
 "use strict";
@@ -470,6 +470,7 @@ var _interpolation = require("./lib/Interpolation");
 var _poseUtils = require("./lib/PoseUtils");
 var _objectUtils = require("./lib/ObjectUtils");
 var _interactiveElements = require("./lib/InteractiveElements");
+var _handyJs = require("handy.js");
 var _axios = require("axios");
 var _axiosDefault = parcelHelpers.interopDefault(_axios);
 // Boilerplate
@@ -517,6 +518,7 @@ class App {
         this.audioLoader = new _three.AudioLoader();
         this.music_player = new _three.Audio(this.listener);
         this.upload_endpoint = upload_endpoint;
+        this.Handy = _handyJs.Handy;
         // Setup viewport canvas and renderer
         document.getElementsByClassName("viewport-div")[0].appendChild(this.renderer.domElement);
         var on_window_resize = ()=>{
@@ -536,6 +538,9 @@ class App {
                     });
                 // console.log("Modifier terminated.")
                 });
+            });
+            _handyJs.Handy.update((hand)=>{
+            // console.log(hand.searchResults)
             });
         });
         // Setup controllers and hand tracking
@@ -591,6 +596,7 @@ class App {
         this.scene.add(hand1);
         preprocess_hand(hand1);
         hand1.add(handModelFactory.createHandModel(hand1, 'mesh'));
+        _handyJs.Handy.makeHandy(hand1);
         // Hand 2
         var controllerGrip2 = this.renderer.xr.getControllerGrip(1);
         controllerGrip2.add(controllerModelFactory.createControllerModel(controllerGrip2));
@@ -599,6 +605,7 @@ class App {
         this.scene.add(hand2);
         preprocess_hand(hand2);
         hand2.add(handModelFactory.createHandModel(hand2, 'mesh'));
+        _handyJs.Handy.makeHandy(hand2);
         // Create dummy hands pre-requisites
         this.dummy_factory = new _dummyXRHandModel.DummyXRHandModelFactory();
         this.dummyHands = new _three.Group();
@@ -861,7 +868,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
     once: true
 });
 
-},{"three":"1AKvZ","color-convert":"g3Be4","three/examples/jsm/webxr/XRControllerModelFactory.js":"lQjc0","three/examples/jsm/webxr/XRHandModelFactory.js":"dKTS4","./lib/DummyXRHandModel":"dCmjv","@tweenjs/tween.js":"e87sn","troika-three-text":"jZx5N","./lib/DataCapture":"3qqgc","./lib/IO":"hiq5a","./lib/Interpolation":"3PyXB","./lib/PoseUtils":"6XW1O","./lib/ObjectUtils":"4q0XH","./lib/InteractiveElements":"ENSer","axios":"iYoWk","@parcel/transformer-js/src/esmodule-helpers.js":"JacNc"}],"1AKvZ":[function(require,module,exports) {
+},{"three":"1AKvZ","color-convert":"g3Be4","three/examples/jsm/webxr/XRControllerModelFactory.js":"lQjc0","three/examples/jsm/webxr/XRHandModelFactory.js":"dKTS4","./lib/DummyXRHandModel":"dCmjv","troika-three-text":"jZx5N","./lib/DataCapture":"3qqgc","./lib/IO":"hiq5a","./lib/Interpolation":"3PyXB","./lib/PoseUtils":"6XW1O","./lib/ObjectUtils":"4q0XH","./lib/InteractiveElements":"ENSer","axios":"iYoWk","@parcel/transformer-js/src/esmodule-helpers.js":"JacNc","@tweenjs/tween.js":"e87sn","handy.js":"jFuxO"}],"1AKvZ":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "ACESFilmicToneMapping", ()=>ACESFilmicToneMapping
@@ -35332,833 +35339,7 @@ class DummyXRHandModelFactory {
     }
 }
 
-},{"three":"1AKvZ","three/examples/jsm/webxr/XRHandPrimitiveModel.js":"aMXgY","three/examples/jsm/webxr/XRHandMeshModel.js":"kWKvy","three/examples/jsm/loaders/GLTFLoader.js":"jzUEM","@parcel/transformer-js/src/esmodule-helpers.js":"JacNc"}],"e87sn":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "Easing", ()=>Easing
-);
-parcelHelpers.export(exports, "Group", ()=>Group
-);
-parcelHelpers.export(exports, "Interpolation", ()=>Interpolation
-);
-parcelHelpers.export(exports, "Sequence", ()=>Sequence
-);
-parcelHelpers.export(exports, "Tween", ()=>Tween
-);
-parcelHelpers.export(exports, "VERSION", ()=>VERSION
-);
-parcelHelpers.export(exports, "add", ()=>add
-);
-parcelHelpers.export(exports, "getAll", ()=>getAll
-);
-parcelHelpers.export(exports, "nextId", ()=>nextId
-);
-parcelHelpers.export(exports, "now", ()=>now$1
-);
-parcelHelpers.export(exports, "remove", ()=>remove
-);
-parcelHelpers.export(exports, "removeAll", ()=>removeAll
-);
-parcelHelpers.export(exports, "update", ()=>update
-);
-var process = require("process");
-/**
- * The Ease class provides a collection of easing functions for use with tween.js.
- */ var Easing = {
-    Linear: {
-        None: function(amount) {
-            return amount;
-        }
-    },
-    Quadratic: {
-        In: function(amount) {
-            return amount * amount;
-        },
-        Out: function(amount) {
-            return amount * (2 - amount);
-        },
-        InOut: function(amount) {
-            if ((amount *= 2) < 1) return 0.5 * amount * amount;
-            return -0.5 * ((--amount) * (amount - 2) - 1);
-        }
-    },
-    Cubic: {
-        In: function(amount) {
-            return amount * amount * amount;
-        },
-        Out: function(amount) {
-            return (--amount) * amount * amount + 1;
-        },
-        InOut: function(amount) {
-            if ((amount *= 2) < 1) return 0.5 * amount * amount * amount;
-            return 0.5 * ((amount -= 2) * amount * amount + 2);
-        }
-    },
-    Quartic: {
-        In: function(amount) {
-            return amount * amount * amount * amount;
-        },
-        Out: function(amount) {
-            return 1 - (--amount) * amount * amount * amount;
-        },
-        InOut: function(amount) {
-            if ((amount *= 2) < 1) return 0.5 * amount * amount * amount * amount;
-            return -0.5 * ((amount -= 2) * amount * amount * amount - 2);
-        }
-    },
-    Quintic: {
-        In: function(amount) {
-            return amount * amount * amount * amount * amount;
-        },
-        Out: function(amount) {
-            return (--amount) * amount * amount * amount * amount + 1;
-        },
-        InOut: function(amount) {
-            if ((amount *= 2) < 1) return 0.5 * amount * amount * amount * amount * amount;
-            return 0.5 * ((amount -= 2) * amount * amount * amount * amount + 2);
-        }
-    },
-    Sinusoidal: {
-        In: function(amount) {
-            return 1 - Math.cos(amount * Math.PI / 2);
-        },
-        Out: function(amount) {
-            return Math.sin(amount * Math.PI / 2);
-        },
-        InOut: function(amount) {
-            return 0.5 * (1 - Math.cos(Math.PI * amount));
-        }
-    },
-    Exponential: {
-        In: function(amount) {
-            return amount === 0 ? 0 : Math.pow(1024, amount - 1);
-        },
-        Out: function(amount) {
-            return amount === 1 ? 1 : 1 - Math.pow(2, -10 * amount);
-        },
-        InOut: function(amount) {
-            if (amount === 0) return 0;
-            if (amount === 1) return 1;
-            if ((amount *= 2) < 1) return 0.5 * Math.pow(1024, amount - 1);
-            return 0.5 * (-Math.pow(2, -10 * (amount - 1)) + 2);
-        }
-    },
-    Circular: {
-        In: function(amount) {
-            return 1 - Math.sqrt(1 - amount * amount);
-        },
-        Out: function(amount) {
-            return Math.sqrt(1 - (--amount) * amount);
-        },
-        InOut: function(amount) {
-            if ((amount *= 2) < 1) return -0.5 * (Math.sqrt(1 - amount * amount) - 1);
-            return 0.5 * (Math.sqrt(1 - (amount -= 2) * amount) + 1);
-        }
-    },
-    Elastic: {
-        In: function(amount) {
-            if (amount === 0) return 0;
-            if (amount === 1) return 1;
-            return -Math.pow(2, 10 * (amount - 1)) * Math.sin((amount - 1.1) * 5 * Math.PI);
-        },
-        Out: function(amount) {
-            if (amount === 0) return 0;
-            if (amount === 1) return 1;
-            return Math.pow(2, -10 * amount) * Math.sin((amount - 0.1) * 5 * Math.PI) + 1;
-        },
-        InOut: function(amount) {
-            if (amount === 0) return 0;
-            if (amount === 1) return 1;
-            amount *= 2;
-            if (amount < 1) return -0.5 * Math.pow(2, 10 * (amount - 1)) * Math.sin((amount - 1.1) * 5 * Math.PI);
-            return 0.5 * Math.pow(2, -10 * (amount - 1)) * Math.sin((amount - 1.1) * 5 * Math.PI) + 1;
-        }
-    },
-    Back: {
-        In: function(amount) {
-            var s = 1.70158;
-            return amount * amount * ((s + 1) * amount - s);
-        },
-        Out: function(amount) {
-            var s = 1.70158;
-            return (--amount) * amount * ((s + 1) * amount + s) + 1;
-        },
-        InOut: function(amount) {
-            var s = 2.5949095;
-            if ((amount *= 2) < 1) return 0.5 * (amount * amount * ((s + 1) * amount - s));
-            return 0.5 * ((amount -= 2) * amount * ((s + 1) * amount + s) + 2);
-        }
-    },
-    Bounce: {
-        In: function(amount) {
-            return 1 - Easing.Bounce.Out(1 - amount);
-        },
-        Out: function(amount) {
-            if (amount < 1 / 2.75) return 7.5625 * amount * amount;
-            else if (amount < 2 / 2.75) return 7.5625 * (amount -= 1.5 / 2.75) * amount + 0.75;
-            else if (amount < 2.5 / 2.75) return 7.5625 * (amount -= 2.25 / 2.75) * amount + 0.9375;
-            else return 7.5625 * (amount -= 2.625 / 2.75) * amount + 0.984375;
-        },
-        InOut: function(amount) {
-            if (amount < 0.5) return Easing.Bounce.In(amount * 2) * 0.5;
-            return Easing.Bounce.Out(amount * 2 - 1) * 0.5 + 0.5;
-        }
-    }
-};
-var now;
-// Include a performance.now polyfill.
-// In node.js, use process.hrtime.
-// eslint-disable-next-line
-// @ts-ignore
-if (typeof self === 'undefined' && typeof process !== 'undefined' && process.hrtime) now = function() {
-    // eslint-disable-next-line
-    // @ts-ignore
-    var time = process.hrtime();
-    // Convert [seconds, nanoseconds] to milliseconds.
-    return time[0] * 1000 + time[1] / 1000000;
-};
-else if (typeof self !== 'undefined' && self.performance !== undefined && self.performance.now !== undefined) // This must be bound, because directly assigning this function
-// leads to an invocation exception in Chrome.
-now = self.performance.now.bind(self.performance);
-else if (Date.now !== undefined) now = Date.now;
-else now = function() {
-    return new Date().getTime();
-};
-var now$1 = now;
-/**
- * Controlling groups of tweens
- *
- * Using the TWEEN singleton to manage your tweens can cause issues in large apps with many components.
- * In these cases, you may want to create your own smaller groups of tween
- */ var Group = function() {
-    function Group1() {
-        this._tweens = {
-        };
-        this._tweensAddedDuringUpdate = {
-        };
-    }
-    Group1.prototype.getAll = function() {
-        var _this = this;
-        return Object.keys(this._tweens).map(function(tweenId) {
-            return _this._tweens[tweenId];
-        });
-    };
-    Group1.prototype.removeAll = function() {
-        this._tweens = {
-        };
-    };
-    Group1.prototype.add = function(tween) {
-        this._tweens[tween.getId()] = tween;
-        this._tweensAddedDuringUpdate[tween.getId()] = tween;
-    };
-    Group1.prototype.remove = function(tween) {
-        delete this._tweens[tween.getId()];
-        delete this._tweensAddedDuringUpdate[tween.getId()];
-    };
-    Group1.prototype.update = function(time, preserve) {
-        if (time === void 0) time = now$1();
-        if (preserve === void 0) preserve = false;
-        var tweenIds = Object.keys(this._tweens);
-        if (tweenIds.length === 0) return false;
-        // Tweens are updated in "batches". If you add a new tween during an
-        // update, then the new tween will be updated in the next batch.
-        // If you remove a tween during an update, it may or may not be updated.
-        // However, if the removed tween was added during the current batch,
-        // then it will not be updated.
-        while(tweenIds.length > 0){
-            this._tweensAddedDuringUpdate = {
-            };
-            for(var i = 0; i < tweenIds.length; i++){
-                var tween = this._tweens[tweenIds[i]];
-                var autoStart = !preserve;
-                if (tween && tween.update(time, autoStart) === false && !preserve) delete this._tweens[tweenIds[i]];
-            }
-            tweenIds = Object.keys(this._tweensAddedDuringUpdate);
-        }
-        return true;
-    };
-    return Group1;
-}();
-/**
- *
- */ var Interpolation = {
-    Linear: function(v, k) {
-        var m = v.length - 1;
-        var f = m * k;
-        var i = Math.floor(f);
-        var fn = Interpolation.Utils.Linear;
-        if (k < 0) return fn(v[0], v[1], f);
-        if (k > 1) return fn(v[m], v[m - 1], m - f);
-        return fn(v[i], v[i + 1 > m ? m : i + 1], f - i);
-    },
-    Bezier: function(v, k) {
-        var b = 0;
-        var n = v.length - 1;
-        var pw = Math.pow;
-        var bn = Interpolation.Utils.Bernstein;
-        for(var i = 0; i <= n; i++)b += pw(1 - k, n - i) * pw(k, i) * v[i] * bn(n, i);
-        return b;
-    },
-    CatmullRom: function(v, k) {
-        var m = v.length - 1;
-        var f = m * k;
-        var i = Math.floor(f);
-        var fn = Interpolation.Utils.CatmullRom;
-        if (v[0] === v[m]) {
-            if (k < 0) i = Math.floor(f = m * (1 + k));
-            return fn(v[(i - 1 + m) % m], v[i], v[(i + 1) % m], v[(i + 2) % m], f - i);
-        } else {
-            if (k < 0) return v[0] - (fn(v[0], v[0], v[1], v[1], -f) - v[0]);
-            if (k > 1) return v[m] - (fn(v[m], v[m], v[m - 1], v[m - 1], f - m) - v[m]);
-            return fn(v[i ? i - 1 : 0], v[i], v[m < i + 1 ? m : i + 1], v[m < i + 2 ? m : i + 2], f - i);
-        }
-    },
-    Utils: {
-        Linear: function(p0, p1, t) {
-            return (p1 - p0) * t + p0;
-        },
-        Bernstein: function(n, i) {
-            var fc = Interpolation.Utils.Factorial;
-            return fc(n) / fc(i) / fc(n - i);
-        },
-        Factorial: function() {
-            var a = [
-                1
-            ];
-            return function(n) {
-                var s = 1;
-                if (a[n]) return a[n];
-                for(var i = n; i > 1; i--)s *= i;
-                a[n] = s;
-                return s;
-            };
-        }(),
-        CatmullRom: function(p0, p1, p2, p3, t) {
-            var v0 = (p2 - p0) * 0.5;
-            var v1 = (p3 - p1) * 0.5;
-            var t2 = t * t;
-            var t3 = t * t2;
-            return (2 * p1 - 2 * p2 + v0 + v1) * t3 + (-3 * p1 + 3 * p2 - 2 * v0 - v1) * t2 + v0 * t + p1;
-        }
-    }
-};
-/**
- * Utils
- */ var Sequence = function() {
-    function Sequence1() {
-    }
-    Sequence1.nextId = function() {
-        return Sequence1._nextId++;
-    };
-    Sequence1._nextId = 0;
-    return Sequence1;
-}();
-var mainGroup = new Group();
-/**
- * Tween.js - Licensed under the MIT license
- * https://github.com/tweenjs/tween.js
- * ----------------------------------------------
- *
- * See https://github.com/tweenjs/tween.js/graphs/contributors for the full list of contributors.
- * Thank you all, you're awesome!
- */ var Tween = function() {
-    function Tween1(_object, _group) {
-        if (_group === void 0) _group = mainGroup;
-        this._object = _object;
-        this._group = _group;
-        this._isPaused = false;
-        this._pauseStart = 0;
-        this._valuesStart = {
-        };
-        this._valuesEnd = {
-        };
-        this._valuesStartRepeat = {
-        };
-        this._duration = 1000;
-        this._initialRepeat = 0;
-        this._repeat = 0;
-        this._yoyo = false;
-        this._isPlaying = false;
-        this._reversed = false;
-        this._delayTime = 0;
-        this._startTime = 0;
-        this._easingFunction = Easing.Linear.None;
-        this._interpolationFunction = Interpolation.Linear;
-        this._chainedTweens = [];
-        this._onStartCallbackFired = false;
-        this._id = Sequence.nextId();
-        this._isChainStopped = false;
-        this._goToEnd = false;
-    }
-    Tween1.prototype.getId = function() {
-        return this._id;
-    };
-    Tween1.prototype.isPlaying = function() {
-        return this._isPlaying;
-    };
-    Tween1.prototype.isPaused = function() {
-        return this._isPaused;
-    };
-    Tween1.prototype.to = function(properties, duration) {
-        // TODO? restore this, then update the 07_dynamic_to example to set fox
-        // tween's to on each update. That way the behavior is opt-in (there's
-        // currently no opt-out).
-        // for (const prop in properties) this._valuesEnd[prop] = properties[prop]
-        this._valuesEnd = Object.create(properties);
-        if (duration !== undefined) this._duration = duration;
-        return this;
-    };
-    Tween1.prototype.duration = function(d) {
-        this._duration = d;
-        return this;
-    };
-    Tween1.prototype.start = function(time) {
-        if (this._isPlaying) return this;
-        // eslint-disable-next-line
-        this._group && this._group.add(this);
-        this._repeat = this._initialRepeat;
-        if (this._reversed) {
-            // If we were reversed (f.e. using the yoyo feature) then we need to
-            // flip the tween direction back to forward.
-            this._reversed = false;
-            for(var property in this._valuesStartRepeat){
-                this._swapEndStartRepeatValues(property);
-                this._valuesStart[property] = this._valuesStartRepeat[property];
-            }
-        }
-        this._isPlaying = true;
-        this._isPaused = false;
-        this._onStartCallbackFired = false;
-        this._isChainStopped = false;
-        this._startTime = time !== undefined ? typeof time === 'string' ? now$1() + parseFloat(time) : time : now$1();
-        this._startTime += this._delayTime;
-        this._setupProperties(this._object, this._valuesStart, this._valuesEnd, this._valuesStartRepeat);
-        return this;
-    };
-    Tween1.prototype._setupProperties = function(_object, _valuesStart, _valuesEnd, _valuesStartRepeat) {
-        for(var property in _valuesEnd){
-            var startValue = _object[property];
-            var startValueIsArray = Array.isArray(startValue);
-            var propType = startValueIsArray ? 'array' : typeof startValue;
-            var isInterpolationList = !startValueIsArray && Array.isArray(_valuesEnd[property]);
-            // If `to()` specifies a property that doesn't exist in the source object,
-            // we should not set that property in the object
-            if (propType === 'undefined' || propType === 'function') continue;
-            // Check if an Array was provided as property value
-            if (isInterpolationList) {
-                var endValues = _valuesEnd[property];
-                if (endValues.length === 0) continue;
-                // handle an array of relative values
-                endValues = endValues.map(this._handleRelativeValue.bind(this, startValue));
-                // Create a local copy of the Array with the start value at the front
-                _valuesEnd[property] = [
-                    startValue
-                ].concat(endValues);
-            }
-            // handle the deepness of the values
-            if ((propType === 'object' || startValueIsArray) && startValue && !isInterpolationList) {
-                _valuesStart[property] = startValueIsArray ? [] : {
-                };
-                // eslint-disable-next-line
-                for(var prop in startValue)// eslint-disable-next-line
-                // @ts-ignore FIXME?
-                _valuesStart[property][prop] = startValue[prop];
-                _valuesStartRepeat[property] = startValueIsArray ? [] : {
-                }; // TODO? repeat nested values? And yoyo? And array values?
-                // eslint-disable-next-line
-                // @ts-ignore FIXME?
-                this._setupProperties(startValue, _valuesStart[property], _valuesEnd[property], _valuesStartRepeat[property]);
-            } else {
-                // Save the starting value, but only once.
-                if (typeof _valuesStart[property] === 'undefined') _valuesStart[property] = startValue;
-                if (!startValueIsArray) // eslint-disable-next-line
-                // @ts-ignore FIXME?
-                _valuesStart[property] *= 1; // Ensures we're using numbers, not strings
-                if (isInterpolationList) // eslint-disable-next-line
-                // @ts-ignore FIXME?
-                _valuesStartRepeat[property] = _valuesEnd[property].slice().reverse();
-                else _valuesStartRepeat[property] = _valuesStart[property] || 0;
-            }
-        }
-    };
-    Tween1.prototype.stop = function() {
-        if (!this._isChainStopped) {
-            this._isChainStopped = true;
-            this.stopChainedTweens();
-        }
-        if (!this._isPlaying) return this;
-        // eslint-disable-next-line
-        this._group && this._group.remove(this);
-        this._isPlaying = false;
-        this._isPaused = false;
-        if (this._onStopCallback) this._onStopCallback(this._object);
-        return this;
-    };
-    Tween1.prototype.end = function() {
-        this._goToEnd = true;
-        this.update(Infinity);
-        return this;
-    };
-    Tween1.prototype.pause = function(time) {
-        if (time === void 0) time = now$1();
-        if (this._isPaused || !this._isPlaying) return this;
-        this._isPaused = true;
-        this._pauseStart = time;
-        // eslint-disable-next-line
-        this._group && this._group.remove(this);
-        return this;
-    };
-    Tween1.prototype.resume = function(time) {
-        if (time === void 0) time = now$1();
-        if (!this._isPaused || !this._isPlaying) return this;
-        this._isPaused = false;
-        this._startTime += time - this._pauseStart;
-        this._pauseStart = 0;
-        // eslint-disable-next-line
-        this._group && this._group.add(this);
-        return this;
-    };
-    Tween1.prototype.stopChainedTweens = function() {
-        for(var i = 0, numChainedTweens = this._chainedTweens.length; i < numChainedTweens; i++)this._chainedTweens[i].stop();
-        return this;
-    };
-    Tween1.prototype.group = function(group) {
-        this._group = group;
-        return this;
-    };
-    Tween1.prototype.delay = function(amount) {
-        this._delayTime = amount;
-        return this;
-    };
-    Tween1.prototype.repeat = function(times) {
-        this._initialRepeat = times;
-        this._repeat = times;
-        return this;
-    };
-    Tween1.prototype.repeatDelay = function(amount) {
-        this._repeatDelayTime = amount;
-        return this;
-    };
-    Tween1.prototype.yoyo = function(yoyo) {
-        this._yoyo = yoyo;
-        return this;
-    };
-    Tween1.prototype.easing = function(easingFunction) {
-        this._easingFunction = easingFunction;
-        return this;
-    };
-    Tween1.prototype.interpolation = function(interpolationFunction) {
-        this._interpolationFunction = interpolationFunction;
-        return this;
-    };
-    Tween1.prototype.chain = function() {
-        var tweens = [];
-        for(var _i = 0; _i < arguments.length; _i++)tweens[_i] = arguments[_i];
-        this._chainedTweens = tweens;
-        return this;
-    };
-    Tween1.prototype.onStart = function(callback) {
-        this._onStartCallback = callback;
-        return this;
-    };
-    Tween1.prototype.onUpdate = function(callback) {
-        this._onUpdateCallback = callback;
-        return this;
-    };
-    Tween1.prototype.onRepeat = function(callback) {
-        this._onRepeatCallback = callback;
-        return this;
-    };
-    Tween1.prototype.onComplete = function(callback) {
-        this._onCompleteCallback = callback;
-        return this;
-    };
-    Tween1.prototype.onStop = function(callback) {
-        this._onStopCallback = callback;
-        return this;
-    };
-    /**
-     * @returns true if the tween is still playing after the update, false
-     * otherwise (calling update on a paused tween still returns true because
-     * it is still playing, just paused).
-     */ Tween1.prototype.update = function(time, autoStart) {
-        if (time === void 0) time = now$1();
-        if (autoStart === void 0) autoStart = true;
-        if (this._isPaused) return true;
-        var property;
-        var elapsed;
-        var endTime = this._startTime + this._duration;
-        if (!this._goToEnd && !this._isPlaying) {
-            if (time > endTime) return false;
-            if (autoStart) this.start(time);
-        }
-        this._goToEnd = false;
-        if (time < this._startTime) return true;
-        if (this._onStartCallbackFired === false) {
-            if (this._onStartCallback) this._onStartCallback(this._object);
-            this._onStartCallbackFired = true;
-        }
-        elapsed = (time - this._startTime) / this._duration;
-        elapsed = this._duration === 0 || elapsed > 1 ? 1 : elapsed;
-        var value = this._easingFunction(elapsed);
-        // properties transformations
-        this._updateProperties(this._object, this._valuesStart, this._valuesEnd, value);
-        if (this._onUpdateCallback) this._onUpdateCallback(this._object, elapsed);
-        if (elapsed === 1) {
-            if (this._repeat > 0) {
-                if (isFinite(this._repeat)) this._repeat--;
-                // Reassign starting values, restart by making startTime = now
-                for(property in this._valuesStartRepeat){
-                    if (!this._yoyo && typeof this._valuesEnd[property] === 'string') this._valuesStartRepeat[property] = // eslint-disable-next-line
-                    // @ts-ignore FIXME?
-                    this._valuesStartRepeat[property] + parseFloat(this._valuesEnd[property]);
-                    if (this._yoyo) this._swapEndStartRepeatValues(property);
-                    this._valuesStart[property] = this._valuesStartRepeat[property];
-                }
-                if (this._yoyo) this._reversed = !this._reversed;
-                if (this._repeatDelayTime !== undefined) this._startTime = time + this._repeatDelayTime;
-                else this._startTime = time + this._delayTime;
-                if (this._onRepeatCallback) this._onRepeatCallback(this._object);
-                return true;
-            } else {
-                if (this._onCompleteCallback) this._onCompleteCallback(this._object);
-                for(var i = 0, numChainedTweens = this._chainedTweens.length; i < numChainedTweens; i++)// Make the chained tweens start exactly at the time they should,
-                // even if the `update()` method was called way past the duration of the tween
-                this._chainedTweens[i].start(this._startTime + this._duration);
-                this._isPlaying = false;
-                return false;
-            }
-        }
-        return true;
-    };
-    Tween1.prototype._updateProperties = function(_object, _valuesStart, _valuesEnd, value) {
-        for(var property in _valuesEnd){
-            // Don't update properties that do not exist in the source object
-            if (_valuesStart[property] === undefined) continue;
-            var start = _valuesStart[property] || 0;
-            var end = _valuesEnd[property];
-            var startIsArray = Array.isArray(_object[property]);
-            var endIsArray = Array.isArray(end);
-            var isInterpolationList = !startIsArray && endIsArray;
-            if (isInterpolationList) _object[property] = this._interpolationFunction(end, value);
-            else if (typeof end === 'object' && end) // eslint-disable-next-line
-            // @ts-ignore FIXME?
-            this._updateProperties(_object[property], start, end, value);
-            else {
-                // Parses relative end values with start as base (e.g.: +10, -3)
-                end = this._handleRelativeValue(start, end);
-                // Protect against non numeric properties.
-                if (typeof end === 'number') // eslint-disable-next-line
-                // @ts-ignore FIXME?
-                _object[property] = start + (end - start) * value;
-            }
-        }
-    };
-    Tween1.prototype._handleRelativeValue = function(start, end) {
-        if (typeof end !== 'string') return end;
-        if (end.charAt(0) === '+' || end.charAt(0) === '-') return start + parseFloat(end);
-        else return parseFloat(end);
-    };
-    Tween1.prototype._swapEndStartRepeatValues = function(property) {
-        var tmp = this._valuesStartRepeat[property];
-        var endValue = this._valuesEnd[property];
-        if (typeof endValue === 'string') this._valuesStartRepeat[property] = this._valuesStartRepeat[property] + parseFloat(endValue);
-        else this._valuesStartRepeat[property] = this._valuesEnd[property];
-        this._valuesEnd[property] = tmp;
-    };
-    return Tween1;
-}();
-var VERSION = '18.6.4';
-/**
- * Tween.js - Licensed under the MIT license
- * https://github.com/tweenjs/tween.js
- * ----------------------------------------------
- *
- * See https://github.com/tweenjs/tween.js/graphs/contributors for the full list of contributors.
- * Thank you all, you're awesome!
- */ var nextId = Sequence.nextId;
-/**
- * Controlling groups of tweens
- *
- * Using the TWEEN singleton to manage your tweens can cause issues in large apps with many components.
- * In these cases, you may want to create your own smaller groups of tweens.
- */ var TWEEN = mainGroup;
-// This is the best way to export things in a way that's compatible with both ES
-// Modules and CommonJS, without build hacks, and so as not to break the
-// existing API.
-// https://github.com/rollup/rollup/issues/1961#issuecomment-423037881
-var getAll = TWEEN.getAll.bind(TWEEN);
-var removeAll = TWEEN.removeAll.bind(TWEEN);
-var add = TWEEN.add.bind(TWEEN);
-var remove = TWEEN.remove.bind(TWEEN);
-var update = TWEEN.update.bind(TWEEN);
-var exports1 = {
-    Easing: Easing,
-    Group: Group,
-    Interpolation: Interpolation,
-    now: now$1,
-    Sequence: Sequence,
-    nextId: nextId,
-    Tween: Tween,
-    VERSION: VERSION,
-    getAll: getAll,
-    removeAll: removeAll,
-    add: add,
-    remove: remove,
-    update: update
-};
-exports.default = exports1;
-
-},{"process":"6Upk8","@parcel/transformer-js/src/esmodule-helpers.js":"JacNc"}],"6Upk8":[function(require,module,exports) {
-// shim for using process in browser
-var process = module.exports = {
-};
-// cached from whatever global is present so that test runners that stub it
-// don't break things.  But we need to wrap it in a try catch in case it is
-// wrapped in strict mode code which doesn't define any globals.  It's inside a
-// function because try/catches deoptimize in certain engines.
-var cachedSetTimeout;
-var cachedClearTimeout;
-function defaultSetTimout() {
-    throw new Error('setTimeout has not been defined');
-}
-function defaultClearTimeout() {
-    throw new Error('clearTimeout has not been defined');
-}
-(function() {
-    try {
-        if (typeof setTimeout === 'function') cachedSetTimeout = setTimeout;
-        else cachedSetTimeout = defaultSetTimout;
-    } catch (e) {
-        cachedSetTimeout = defaultSetTimout;
-    }
-    try {
-        if (typeof clearTimeout === 'function') cachedClearTimeout = clearTimeout;
-        else cachedClearTimeout = defaultClearTimeout;
-    } catch (e) {
-        cachedClearTimeout = defaultClearTimeout;
-    }
-})();
-function runTimeout(fun) {
-    if (cachedSetTimeout === setTimeout) //normal enviroments in sane situations
-    return setTimeout(fun, 0);
-    // if setTimeout wasn't available but was latter defined
-    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
-        cachedSetTimeout = setTimeout;
-        return setTimeout(fun, 0);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedSetTimeout(fun, 0);
-    } catch (e) {
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
-            return cachedSetTimeout.call(null, fun, 0);
-        } catch (e1) {
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
-            return cachedSetTimeout.call(this, fun, 0);
-        }
-    }
-}
-function runClearTimeout(marker) {
-    if (cachedClearTimeout === clearTimeout) //normal enviroments in sane situations
-    return clearTimeout(marker);
-    // if clearTimeout wasn't available but was latter defined
-    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
-        cachedClearTimeout = clearTimeout;
-        return clearTimeout(marker);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedClearTimeout(marker);
-    } catch (e) {
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
-            return cachedClearTimeout.call(null, marker);
-        } catch (e1) {
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
-            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
-            return cachedClearTimeout.call(this, marker);
-        }
-    }
-}
-var queue = [];
-var draining = false;
-var currentQueue;
-var queueIndex = -1;
-function cleanUpNextTick() {
-    if (!draining || !currentQueue) return;
-    draining = false;
-    if (currentQueue.length) queue = currentQueue.concat(queue);
-    else queueIndex = -1;
-    if (queue.length) drainQueue();
-}
-function drainQueue() {
-    if (draining) return;
-    var timeout = runTimeout(cleanUpNextTick);
-    draining = true;
-    var len = queue.length;
-    while(len){
-        currentQueue = queue;
-        queue = [];
-        while((++queueIndex) < len)if (currentQueue) currentQueue[queueIndex].run();
-        queueIndex = -1;
-        len = queue.length;
-    }
-    currentQueue = null;
-    draining = false;
-    runClearTimeout(timeout);
-}
-process.nextTick = function(fun) {
-    var args = new Array(arguments.length - 1);
-    if (arguments.length > 1) for(var i = 1; i < arguments.length; i++)args[i - 1] = arguments[i];
-    queue.push(new Item(fun, args));
-    if (queue.length === 1 && !draining) runTimeout(drainQueue);
-};
-// v8 likes predictible objects
-function Item(fun, array) {
-    this.fun = fun;
-    this.array = array;
-}
-Item.prototype.run = function() {
-    this.fun.apply(null, this.array);
-};
-process.title = 'browser';
-process.browser = true;
-process.env = {
-};
-process.argv = [];
-process.version = ''; // empty string to avoid regexp issues
-process.versions = {
-};
-function noop() {
-}
-process.on = noop;
-process.addListener = noop;
-process.once = noop;
-process.off = noop;
-process.removeListener = noop;
-process.removeAllListeners = noop;
-process.emit = noop;
-process.prependListener = noop;
-process.prependOnceListener = noop;
-process.listeners = function(name) {
-    return [];
-};
-process.binding = function(name) {
-    throw new Error('process.binding is not supported');
-};
-process.cwd = function() {
-    return '/';
-};
-process.chdir = function(dir) {
-    throw new Error('process.chdir is not supported');
-};
-process.umask = function() {
-    return 0;
-};
-
-},{}],"jZx5N":[function(require,module,exports) {
+},{"three":"1AKvZ","three/examples/jsm/webxr/XRHandPrimitiveModel.js":"aMXgY","three/examples/jsm/webxr/XRHandMeshModel.js":"kWKvy","three/examples/jsm/loaders/GLTFLoader.js":"jzUEM","@parcel/transformer-js/src/esmodule-helpers.js":"JacNc"}],"jZx5N":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "GlyphsGeometry", ()=>GlyphsGeometry
@@ -42218,17 +41399,9 @@ var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "recordHandMotion", ()=>recordHandMotion
 );
-parcelHelpers.export(exports, "playbackHandMotion", ()=>playbackHandMotion
-);
-parcelHelpers.export(exports, "echoHands", ()=>echoHands
-);
-parcelHelpers.export(exports, "recordTemplate", ()=>recordTemplate
-);
-parcelHelpers.export(exports, "playbackTemplate", ()=>playbackTemplate
-);
 var _three = require("three");
 var _poseUtils = require("./PoseUtils");
-var _interpolation = require("./Interpolation");
+// import { interpObj } from "./Interpolation"
 var _objectUtils = require("./ObjectUtils");
 /**
  * Function for initiating hand motion recording
@@ -42261,6 +41434,7 @@ var _objectUtils = require("./ObjectUtils");
         });
     });
 }
+// Unmaintained
 /**
  * Function for playing back recorded hand motion data
  * @param {array} data - Recorded data for playback 
@@ -42292,7 +41466,7 @@ var _objectUtils = require("./ObjectUtils");
                 dummy_left_hand.visible = false;
                 dummy_right_hand.visible = false;
                 resolve();
-            } else resultFrame = _interpolation.interpObj(data[frame], data[frame + 1], (getTimeElapsed() - getVideoTimeElapsed(frame)) / (data[frame + 1]["time"] - data[frame]["time"]));
+            } else resultFrame = interpObj(data[frame], data[frame + 1], (getTimeElapsed() - getVideoTimeElapsed(frame)) / (data[frame + 1]["time"] - data[frame]["time"]));
             _poseUtils.applySerializedJoints(dummy_left_hand, resultFrame["left_hand_pose"]);
             _poseUtils.applySerializedJoints(dummy_right_hand, resultFrame["right_hand_pose"]);
         });
@@ -42356,7 +41530,7 @@ function recordTemplate(scene_modifiers, left_hand, right_hand, camera, music_ur
 function playbackTemplate(data) {
 }
 
-},{"three":"1AKvZ","./PoseUtils":"6XW1O","./Interpolation":"3PyXB","@parcel/transformer-js/src/esmodule-helpers.js":"JacNc","./ObjectUtils":"4q0XH"}],"6XW1O":[function(require,module,exports) {
+},{"three":"1AKvZ","./PoseUtils":"6XW1O","@parcel/transformer-js/src/esmodule-helpers.js":"JacNc","./ObjectUtils":"4q0XH"}],"6XW1O":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "serializeJoints", ()=>serializeJoints
@@ -56711,62 +55885,7 @@ var global = arguments[3];
     root._ = _;
 }).call(this);
 
-},{}],"3PyXB":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-// Could be improved, taking inspiration from ObjectUtils recursion, treating all objects equally, and converting arrays back into arrays when needed
-parcelHelpers.export(exports, "interpNumbers", ()=>interpNumbers
-);
-parcelHelpers.export(exports, "interpNumericArray", ()=>interpNumericArray
-);
-parcelHelpers.export(exports, "interpObj", ()=>interpObj
-);
-// Functions for hand joint interpolation
-/**
- * Function for interpolating between two numerical values
- * @param {number} num1 - First number
- * @param {number} num2 - Second number
- * @param {number} value - Value that determines mix between first and second number: being all from num1, 1 being all from num 2
- * @returns {number} Interpolated number
- */ function interpNumbers(num1, num2, value) {
-    return num1 * (1 - value) + num2 * value;
-}
-/**
- * Function for interpolating between two numerical arrays, assuming same length
- * @param {number[]} arr1 - First array
- * @param {number[]} arr2 - Second array
- * @param {number} value - Value that determines mix between first and second number: being all from arr1, 1 being all from arr2
- * @returns {number[]} Interpolated number array
- */ function interpNumericArray(arr1, arr2, value) {
-    var newArr = [];
-    arr1.forEach((n, i)=>{
-        newArr.push(interpNumbers(n, arr2[i], value));
-    });
-    return newArr;
-}
-function isObject(obj) {
-    return typeof obj === 'object' && !Array.isArray(obj) && obj !== null;
-}
-/**
- * Function for recursively interpolating between two objects, assuming they have the same fields, and that all contents are composed of numbers, array of numbers, or objects filled up by numbers
- * @param {object} obj1 - First object 
- * @param {object} obj2 - Second object
- * @param {number} value - Value that determines mix between first and second number: being all from obj1, 1 being all from obj2
- * @returns {object} Interpolated object
- */ function interpObj(obj1, obj2, value) {
-    var newObj = {
-    };
-    for (const [key, keyVal] of Object.entries(obj1)){
-        // Works with assumption that the arrays always only contain numbers
-        if (Array.isArray(keyVal)) newObj[key] = interpNumericArray(obj1[key], obj2[key], value);
-        else if (typeof keyVal === 'number') newObj[key] = interpNumbers(obj1[key], obj2[key], value);
-        else if (isObject(keyVal)) newObj[key] = interpObj(obj1[key], obj2[key], value);
-        else throw "Unexpected type";
-    }
-    return newObj;
-}
-
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"JacNc"}],"4q0XH":[function(require,module,exports) {
+},{}],"4q0XH":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "createObjectDescriptor", ()=>createObjectDescriptor
@@ -56857,6 +55976,61 @@ parcelHelpers.export(exports, "download", ()=>download
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
+}
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"JacNc"}],"3PyXB":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+// Could be improved, taking inspiration from ObjectUtils recursion, treating all objects equally, and converting arrays back into arrays when needed
+parcelHelpers.export(exports, "interpNumbers", ()=>interpNumbers
+);
+parcelHelpers.export(exports, "interpNumericArray", ()=>interpNumericArray
+);
+parcelHelpers.export(exports, "interpObj", ()=>interpObj
+);
+// Functions for hand joint interpolation
+/**
+ * Function for interpolating between two numerical values
+ * @param {number} num1 - First number
+ * @param {number} num2 - Second number
+ * @param {number} value - Value that determines mix between first and second number: being all from num1, 1 being all from num 2
+ * @returns {number} Interpolated number
+ */ function interpNumbers(num1, num2, value) {
+    return num1 * (1 - value) + num2 * value;
+}
+/**
+ * Function for interpolating between two numerical arrays, assuming same length
+ * @param {number[]} arr1 - First array
+ * @param {number[]} arr2 - Second array
+ * @param {number} value - Value that determines mix between first and second number: being all from arr1, 1 being all from arr2
+ * @returns {number[]} Interpolated number array
+ */ function interpNumericArray(arr1, arr2, value) {
+    var newArr = [];
+    arr1.forEach((n, i)=>{
+        newArr.push(interpNumbers(n, arr2[i], value));
+    });
+    return newArr;
+}
+function isObject(obj) {
+    return typeof obj === 'object' && !Array.isArray(obj) && obj !== null;
+}
+/**
+ * Function for recursively interpolating between two objects, assuming they have the same fields, and that all contents are composed of numbers, array of numbers, or objects filled up by numbers
+ * @param {object} obj1 - First object 
+ * @param {object} obj2 - Second object
+ * @param {number} value - Value that determines mix between first and second number: being all from obj1, 1 being all from obj2
+ * @returns {object} Interpolated object
+ */ function interpObj(obj1, obj2, value) {
+    var newObj = {
+    };
+    for (const [key, keyVal] of Object.entries(obj1)){
+        // Works with assumption that the arrays always only contain numbers
+        if (Array.isArray(keyVal)) newObj[key] = interpNumericArray(obj1[key], obj2[key], value);
+        else if (typeof keyVal === 'number') newObj[key] = interpNumbers(obj1[key], obj2[key], value);
+        else if (isObject(keyVal)) newObj[key] = interpObj(obj1[key], obj2[key], value);
+        else throw "Unexpected type";
+    }
+    return newObj;
 }
 
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"JacNc"}],"ENSer":[function(require,module,exports) {
@@ -57679,7 +56853,156 @@ utils.forEach([
 });
 module.exports = defaults;
 
-},{"process":"6Upk8","./utils":"hOPY0","./helpers/normalizeHeaderName":"6GUF5","./core/enhanceError":"3f4N4","./adapters/xhr":"4uZQD","./adapters/http":"4uZQD"}],"6GUF5":[function(require,module,exports) {
+},{"process":"6Upk8","./utils":"hOPY0","./helpers/normalizeHeaderName":"6GUF5","./core/enhanceError":"3f4N4","./adapters/xhr":"4uZQD","./adapters/http":"4uZQD"}],"6Upk8":[function(require,module,exports) {
+// shim for using process in browser
+var process = module.exports = {
+};
+// cached from whatever global is present so that test runners that stub it
+// don't break things.  But we need to wrap it in a try catch in case it is
+// wrapped in strict mode code which doesn't define any globals.  It's inside a
+// function because try/catches deoptimize in certain engines.
+var cachedSetTimeout;
+var cachedClearTimeout;
+function defaultSetTimout() {
+    throw new Error('setTimeout has not been defined');
+}
+function defaultClearTimeout() {
+    throw new Error('clearTimeout has not been defined');
+}
+(function() {
+    try {
+        if (typeof setTimeout === 'function') cachedSetTimeout = setTimeout;
+        else cachedSetTimeout = defaultSetTimout;
+    } catch (e) {
+        cachedSetTimeout = defaultSetTimout;
+    }
+    try {
+        if (typeof clearTimeout === 'function') cachedClearTimeout = clearTimeout;
+        else cachedClearTimeout = defaultClearTimeout;
+    } catch (e) {
+        cachedClearTimeout = defaultClearTimeout;
+    }
+})();
+function runTimeout(fun) {
+    if (cachedSetTimeout === setTimeout) //normal enviroments in sane situations
+    return setTimeout(fun, 0);
+    // if setTimeout wasn't available but was latter defined
+    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+        cachedSetTimeout = setTimeout;
+        return setTimeout(fun, 0);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedSetTimeout(fun, 0);
+    } catch (e) {
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
+            return cachedSetTimeout.call(null, fun, 0);
+        } catch (e1) {
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
+            return cachedSetTimeout.call(this, fun, 0);
+        }
+    }
+}
+function runClearTimeout(marker) {
+    if (cachedClearTimeout === clearTimeout) //normal enviroments in sane situations
+    return clearTimeout(marker);
+    // if clearTimeout wasn't available but was latter defined
+    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+        cachedClearTimeout = clearTimeout;
+        return clearTimeout(marker);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedClearTimeout(marker);
+    } catch (e) {
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
+            return cachedClearTimeout.call(null, marker);
+        } catch (e1) {
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
+            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
+            return cachedClearTimeout.call(this, marker);
+        }
+    }
+}
+var queue = [];
+var draining = false;
+var currentQueue;
+var queueIndex = -1;
+function cleanUpNextTick() {
+    if (!draining || !currentQueue) return;
+    draining = false;
+    if (currentQueue.length) queue = currentQueue.concat(queue);
+    else queueIndex = -1;
+    if (queue.length) drainQueue();
+}
+function drainQueue() {
+    if (draining) return;
+    var timeout = runTimeout(cleanUpNextTick);
+    draining = true;
+    var len = queue.length;
+    while(len){
+        currentQueue = queue;
+        queue = [];
+        while((++queueIndex) < len)if (currentQueue) currentQueue[queueIndex].run();
+        queueIndex = -1;
+        len = queue.length;
+    }
+    currentQueue = null;
+    draining = false;
+    runClearTimeout(timeout);
+}
+process.nextTick = function(fun) {
+    var args = new Array(arguments.length - 1);
+    if (arguments.length > 1) for(var i = 1; i < arguments.length; i++)args[i - 1] = arguments[i];
+    queue.push(new Item(fun, args));
+    if (queue.length === 1 && !draining) runTimeout(drainQueue);
+};
+// v8 likes predictible objects
+function Item(fun, array) {
+    this.fun = fun;
+    this.array = array;
+}
+Item.prototype.run = function() {
+    this.fun.apply(null, this.array);
+};
+process.title = 'browser';
+process.browser = true;
+process.env = {
+};
+process.argv = [];
+process.version = ''; // empty string to avoid regexp issues
+process.versions = {
+};
+function noop() {
+}
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+process.prependListener = noop;
+process.prependOnceListener = noop;
+process.listeners = function(name) {
+    return [];
+};
+process.binding = function(name) {
+    throw new Error('process.binding is not supported');
+};
+process.cwd = function() {
+    return '/';
+};
+process.chdir = function(dir) {
+    throw new Error('process.chdir is not supported');
+};
+process.umask = function() {
+    return 0;
+};
+
+},{}],"6GUF5":[function(require,module,exports) {
 'use strict';
 var utils = require('../utils');
 module.exports = function normalizeHeaderName(headers, normalizedName) {
@@ -58378,6 +57701,20524 @@ module.exports = CancelToken;
     return typeof payload === 'object' && payload.isAxiosError === true;
 };
 
-},{}]},["9kZaB","g1M29"], "g1M29", "parcelRequirea5b0")
+},{}],"e87sn":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "Easing", ()=>Easing
+);
+parcelHelpers.export(exports, "Group", ()=>Group
+);
+parcelHelpers.export(exports, "Interpolation", ()=>Interpolation
+);
+parcelHelpers.export(exports, "Sequence", ()=>Sequence
+);
+parcelHelpers.export(exports, "Tween", ()=>Tween
+);
+parcelHelpers.export(exports, "VERSION", ()=>VERSION
+);
+parcelHelpers.export(exports, "add", ()=>add
+);
+parcelHelpers.export(exports, "getAll", ()=>getAll
+);
+parcelHelpers.export(exports, "nextId", ()=>nextId
+);
+parcelHelpers.export(exports, "now", ()=>now$1
+);
+parcelHelpers.export(exports, "remove", ()=>remove
+);
+parcelHelpers.export(exports, "removeAll", ()=>removeAll
+);
+parcelHelpers.export(exports, "update", ()=>update
+);
+var process = require("process");
+/**
+ * The Ease class provides a collection of easing functions for use with tween.js.
+ */ var Easing = {
+    Linear: {
+        None: function(amount) {
+            return amount;
+        }
+    },
+    Quadratic: {
+        In: function(amount) {
+            return amount * amount;
+        },
+        Out: function(amount) {
+            return amount * (2 - amount);
+        },
+        InOut: function(amount) {
+            if ((amount *= 2) < 1) return 0.5 * amount * amount;
+            return -0.5 * ((--amount) * (amount - 2) - 1);
+        }
+    },
+    Cubic: {
+        In: function(amount) {
+            return amount * amount * amount;
+        },
+        Out: function(amount) {
+            return (--amount) * amount * amount + 1;
+        },
+        InOut: function(amount) {
+            if ((amount *= 2) < 1) return 0.5 * amount * amount * amount;
+            return 0.5 * ((amount -= 2) * amount * amount + 2);
+        }
+    },
+    Quartic: {
+        In: function(amount) {
+            return amount * amount * amount * amount;
+        },
+        Out: function(amount) {
+            return 1 - (--amount) * amount * amount * amount;
+        },
+        InOut: function(amount) {
+            if ((amount *= 2) < 1) return 0.5 * amount * amount * amount * amount;
+            return -0.5 * ((amount -= 2) * amount * amount * amount - 2);
+        }
+    },
+    Quintic: {
+        In: function(amount) {
+            return amount * amount * amount * amount * amount;
+        },
+        Out: function(amount) {
+            return (--amount) * amount * amount * amount * amount + 1;
+        },
+        InOut: function(amount) {
+            if ((amount *= 2) < 1) return 0.5 * amount * amount * amount * amount * amount;
+            return 0.5 * ((amount -= 2) * amount * amount * amount * amount + 2);
+        }
+    },
+    Sinusoidal: {
+        In: function(amount) {
+            return 1 - Math.cos(amount * Math.PI / 2);
+        },
+        Out: function(amount) {
+            return Math.sin(amount * Math.PI / 2);
+        },
+        InOut: function(amount) {
+            return 0.5 * (1 - Math.cos(Math.PI * amount));
+        }
+    },
+    Exponential: {
+        In: function(amount) {
+            return amount === 0 ? 0 : Math.pow(1024, amount - 1);
+        },
+        Out: function(amount) {
+            return amount === 1 ? 1 : 1 - Math.pow(2, -10 * amount);
+        },
+        InOut: function(amount) {
+            if (amount === 0) return 0;
+            if (amount === 1) return 1;
+            if ((amount *= 2) < 1) return 0.5 * Math.pow(1024, amount - 1);
+            return 0.5 * (-Math.pow(2, -10 * (amount - 1)) + 2);
+        }
+    },
+    Circular: {
+        In: function(amount) {
+            return 1 - Math.sqrt(1 - amount * amount);
+        },
+        Out: function(amount) {
+            return Math.sqrt(1 - (--amount) * amount);
+        },
+        InOut: function(amount) {
+            if ((amount *= 2) < 1) return -0.5 * (Math.sqrt(1 - amount * amount) - 1);
+            return 0.5 * (Math.sqrt(1 - (amount -= 2) * amount) + 1);
+        }
+    },
+    Elastic: {
+        In: function(amount) {
+            if (amount === 0) return 0;
+            if (amount === 1) return 1;
+            return -Math.pow(2, 10 * (amount - 1)) * Math.sin((amount - 1.1) * 5 * Math.PI);
+        },
+        Out: function(amount) {
+            if (amount === 0) return 0;
+            if (amount === 1) return 1;
+            return Math.pow(2, -10 * amount) * Math.sin((amount - 0.1) * 5 * Math.PI) + 1;
+        },
+        InOut: function(amount) {
+            if (amount === 0) return 0;
+            if (amount === 1) return 1;
+            amount *= 2;
+            if (amount < 1) return -0.5 * Math.pow(2, 10 * (amount - 1)) * Math.sin((amount - 1.1) * 5 * Math.PI);
+            return 0.5 * Math.pow(2, -10 * (amount - 1)) * Math.sin((amount - 1.1) * 5 * Math.PI) + 1;
+        }
+    },
+    Back: {
+        In: function(amount) {
+            var s = 1.70158;
+            return amount * amount * ((s + 1) * amount - s);
+        },
+        Out: function(amount) {
+            var s = 1.70158;
+            return (--amount) * amount * ((s + 1) * amount + s) + 1;
+        },
+        InOut: function(amount) {
+            var s = 2.5949095;
+            if ((amount *= 2) < 1) return 0.5 * (amount * amount * ((s + 1) * amount - s));
+            return 0.5 * ((amount -= 2) * amount * ((s + 1) * amount + s) + 2);
+        }
+    },
+    Bounce: {
+        In: function(amount) {
+            return 1 - Easing.Bounce.Out(1 - amount);
+        },
+        Out: function(amount) {
+            if (amount < 1 / 2.75) return 7.5625 * amount * amount;
+            else if (amount < 2 / 2.75) return 7.5625 * (amount -= 1.5 / 2.75) * amount + 0.75;
+            else if (amount < 2.5 / 2.75) return 7.5625 * (amount -= 2.25 / 2.75) * amount + 0.9375;
+            else return 7.5625 * (amount -= 2.625 / 2.75) * amount + 0.984375;
+        },
+        InOut: function(amount) {
+            if (amount < 0.5) return Easing.Bounce.In(amount * 2) * 0.5;
+            return Easing.Bounce.Out(amount * 2 - 1) * 0.5 + 0.5;
+        }
+    }
+};
+var now;
+// Include a performance.now polyfill.
+// In node.js, use process.hrtime.
+// eslint-disable-next-line
+// @ts-ignore
+if (typeof self === 'undefined' && typeof process !== 'undefined' && process.hrtime) now = function() {
+    // eslint-disable-next-line
+    // @ts-ignore
+    var time = process.hrtime();
+    // Convert [seconds, nanoseconds] to milliseconds.
+    return time[0] * 1000 + time[1] / 1000000;
+};
+else if (typeof self !== 'undefined' && self.performance !== undefined && self.performance.now !== undefined) // This must be bound, because directly assigning this function
+// leads to an invocation exception in Chrome.
+now = self.performance.now.bind(self.performance);
+else if (Date.now !== undefined) now = Date.now;
+else now = function() {
+    return new Date().getTime();
+};
+var now$1 = now;
+/**
+ * Controlling groups of tweens
+ *
+ * Using the TWEEN singleton to manage your tweens can cause issues in large apps with many components.
+ * In these cases, you may want to create your own smaller groups of tween
+ */ var Group = function() {
+    function Group1() {
+        this._tweens = {
+        };
+        this._tweensAddedDuringUpdate = {
+        };
+    }
+    Group1.prototype.getAll = function() {
+        var _this = this;
+        return Object.keys(this._tweens).map(function(tweenId) {
+            return _this._tweens[tweenId];
+        });
+    };
+    Group1.prototype.removeAll = function() {
+        this._tweens = {
+        };
+    };
+    Group1.prototype.add = function(tween) {
+        this._tweens[tween.getId()] = tween;
+        this._tweensAddedDuringUpdate[tween.getId()] = tween;
+    };
+    Group1.prototype.remove = function(tween) {
+        delete this._tweens[tween.getId()];
+        delete this._tweensAddedDuringUpdate[tween.getId()];
+    };
+    Group1.prototype.update = function(time, preserve) {
+        if (time === void 0) time = now$1();
+        if (preserve === void 0) preserve = false;
+        var tweenIds = Object.keys(this._tweens);
+        if (tweenIds.length === 0) return false;
+        // Tweens are updated in "batches". If you add a new tween during an
+        // update, then the new tween will be updated in the next batch.
+        // If you remove a tween during an update, it may or may not be updated.
+        // However, if the removed tween was added during the current batch,
+        // then it will not be updated.
+        while(tweenIds.length > 0){
+            this._tweensAddedDuringUpdate = {
+            };
+            for(var i = 0; i < tweenIds.length; i++){
+                var tween = this._tweens[tweenIds[i]];
+                var autoStart = !preserve;
+                if (tween && tween.update(time, autoStart) === false && !preserve) delete this._tweens[tweenIds[i]];
+            }
+            tweenIds = Object.keys(this._tweensAddedDuringUpdate);
+        }
+        return true;
+    };
+    return Group1;
+}();
+/**
+ *
+ */ var Interpolation = {
+    Linear: function(v, k) {
+        var m = v.length - 1;
+        var f = m * k;
+        var i = Math.floor(f);
+        var fn = Interpolation.Utils.Linear;
+        if (k < 0) return fn(v[0], v[1], f);
+        if (k > 1) return fn(v[m], v[m - 1], m - f);
+        return fn(v[i], v[i + 1 > m ? m : i + 1], f - i);
+    },
+    Bezier: function(v, k) {
+        var b = 0;
+        var n = v.length - 1;
+        var pw = Math.pow;
+        var bn = Interpolation.Utils.Bernstein;
+        for(var i = 0; i <= n; i++)b += pw(1 - k, n - i) * pw(k, i) * v[i] * bn(n, i);
+        return b;
+    },
+    CatmullRom: function(v, k) {
+        var m = v.length - 1;
+        var f = m * k;
+        var i = Math.floor(f);
+        var fn = Interpolation.Utils.CatmullRom;
+        if (v[0] === v[m]) {
+            if (k < 0) i = Math.floor(f = m * (1 + k));
+            return fn(v[(i - 1 + m) % m], v[i], v[(i + 1) % m], v[(i + 2) % m], f - i);
+        } else {
+            if (k < 0) return v[0] - (fn(v[0], v[0], v[1], v[1], -f) - v[0]);
+            if (k > 1) return v[m] - (fn(v[m], v[m], v[m - 1], v[m - 1], f - m) - v[m]);
+            return fn(v[i ? i - 1 : 0], v[i], v[m < i + 1 ? m : i + 1], v[m < i + 2 ? m : i + 2], f - i);
+        }
+    },
+    Utils: {
+        Linear: function(p0, p1, t) {
+            return (p1 - p0) * t + p0;
+        },
+        Bernstein: function(n, i) {
+            var fc = Interpolation.Utils.Factorial;
+            return fc(n) / fc(i) / fc(n - i);
+        },
+        Factorial: function() {
+            var a = [
+                1
+            ];
+            return function(n) {
+                var s = 1;
+                if (a[n]) return a[n];
+                for(var i = n; i > 1; i--)s *= i;
+                a[n] = s;
+                return s;
+            };
+        }(),
+        CatmullRom: function(p0, p1, p2, p3, t) {
+            var v0 = (p2 - p0) * 0.5;
+            var v1 = (p3 - p1) * 0.5;
+            var t2 = t * t;
+            var t3 = t * t2;
+            return (2 * p1 - 2 * p2 + v0 + v1) * t3 + (-3 * p1 + 3 * p2 - 2 * v0 - v1) * t2 + v0 * t + p1;
+        }
+    }
+};
+/**
+ * Utils
+ */ var Sequence = function() {
+    function Sequence1() {
+    }
+    Sequence1.nextId = function() {
+        return Sequence1._nextId++;
+    };
+    Sequence1._nextId = 0;
+    return Sequence1;
+}();
+var mainGroup = new Group();
+/**
+ * Tween.js - Licensed under the MIT license
+ * https://github.com/tweenjs/tween.js
+ * ----------------------------------------------
+ *
+ * See https://github.com/tweenjs/tween.js/graphs/contributors for the full list of contributors.
+ * Thank you all, you're awesome!
+ */ var Tween = function() {
+    function Tween1(_object, _group) {
+        if (_group === void 0) _group = mainGroup;
+        this._object = _object;
+        this._group = _group;
+        this._isPaused = false;
+        this._pauseStart = 0;
+        this._valuesStart = {
+        };
+        this._valuesEnd = {
+        };
+        this._valuesStartRepeat = {
+        };
+        this._duration = 1000;
+        this._initialRepeat = 0;
+        this._repeat = 0;
+        this._yoyo = false;
+        this._isPlaying = false;
+        this._reversed = false;
+        this._delayTime = 0;
+        this._startTime = 0;
+        this._easingFunction = Easing.Linear.None;
+        this._interpolationFunction = Interpolation.Linear;
+        this._chainedTweens = [];
+        this._onStartCallbackFired = false;
+        this._id = Sequence.nextId();
+        this._isChainStopped = false;
+        this._goToEnd = false;
+    }
+    Tween1.prototype.getId = function() {
+        return this._id;
+    };
+    Tween1.prototype.isPlaying = function() {
+        return this._isPlaying;
+    };
+    Tween1.prototype.isPaused = function() {
+        return this._isPaused;
+    };
+    Tween1.prototype.to = function(properties, duration) {
+        // TODO? restore this, then update the 07_dynamic_to example to set fox
+        // tween's to on each update. That way the behavior is opt-in (there's
+        // currently no opt-out).
+        // for (const prop in properties) this._valuesEnd[prop] = properties[prop]
+        this._valuesEnd = Object.create(properties);
+        if (duration !== undefined) this._duration = duration;
+        return this;
+    };
+    Tween1.prototype.duration = function(d) {
+        this._duration = d;
+        return this;
+    };
+    Tween1.prototype.start = function(time) {
+        if (this._isPlaying) return this;
+        // eslint-disable-next-line
+        this._group && this._group.add(this);
+        this._repeat = this._initialRepeat;
+        if (this._reversed) {
+            // If we were reversed (f.e. using the yoyo feature) then we need to
+            // flip the tween direction back to forward.
+            this._reversed = false;
+            for(var property in this._valuesStartRepeat){
+                this._swapEndStartRepeatValues(property);
+                this._valuesStart[property] = this._valuesStartRepeat[property];
+            }
+        }
+        this._isPlaying = true;
+        this._isPaused = false;
+        this._onStartCallbackFired = false;
+        this._isChainStopped = false;
+        this._startTime = time !== undefined ? typeof time === 'string' ? now$1() + parseFloat(time) : time : now$1();
+        this._startTime += this._delayTime;
+        this._setupProperties(this._object, this._valuesStart, this._valuesEnd, this._valuesStartRepeat);
+        return this;
+    };
+    Tween1.prototype._setupProperties = function(_object, _valuesStart, _valuesEnd, _valuesStartRepeat) {
+        for(var property in _valuesEnd){
+            var startValue = _object[property];
+            var startValueIsArray = Array.isArray(startValue);
+            var propType = startValueIsArray ? 'array' : typeof startValue;
+            var isInterpolationList = !startValueIsArray && Array.isArray(_valuesEnd[property]);
+            // If `to()` specifies a property that doesn't exist in the source object,
+            // we should not set that property in the object
+            if (propType === 'undefined' || propType === 'function') continue;
+            // Check if an Array was provided as property value
+            if (isInterpolationList) {
+                var endValues = _valuesEnd[property];
+                if (endValues.length === 0) continue;
+                // handle an array of relative values
+                endValues = endValues.map(this._handleRelativeValue.bind(this, startValue));
+                // Create a local copy of the Array with the start value at the front
+                _valuesEnd[property] = [
+                    startValue
+                ].concat(endValues);
+            }
+            // handle the deepness of the values
+            if ((propType === 'object' || startValueIsArray) && startValue && !isInterpolationList) {
+                _valuesStart[property] = startValueIsArray ? [] : {
+                };
+                // eslint-disable-next-line
+                for(var prop in startValue)// eslint-disable-next-line
+                // @ts-ignore FIXME?
+                _valuesStart[property][prop] = startValue[prop];
+                _valuesStartRepeat[property] = startValueIsArray ? [] : {
+                }; // TODO? repeat nested values? And yoyo? And array values?
+                // eslint-disable-next-line
+                // @ts-ignore FIXME?
+                this._setupProperties(startValue, _valuesStart[property], _valuesEnd[property], _valuesStartRepeat[property]);
+            } else {
+                // Save the starting value, but only once.
+                if (typeof _valuesStart[property] === 'undefined') _valuesStart[property] = startValue;
+                if (!startValueIsArray) // eslint-disable-next-line
+                // @ts-ignore FIXME?
+                _valuesStart[property] *= 1; // Ensures we're using numbers, not strings
+                if (isInterpolationList) // eslint-disable-next-line
+                // @ts-ignore FIXME?
+                _valuesStartRepeat[property] = _valuesEnd[property].slice().reverse();
+                else _valuesStartRepeat[property] = _valuesStart[property] || 0;
+            }
+        }
+    };
+    Tween1.prototype.stop = function() {
+        if (!this._isChainStopped) {
+            this._isChainStopped = true;
+            this.stopChainedTweens();
+        }
+        if (!this._isPlaying) return this;
+        // eslint-disable-next-line
+        this._group && this._group.remove(this);
+        this._isPlaying = false;
+        this._isPaused = false;
+        if (this._onStopCallback) this._onStopCallback(this._object);
+        return this;
+    };
+    Tween1.prototype.end = function() {
+        this._goToEnd = true;
+        this.update(Infinity);
+        return this;
+    };
+    Tween1.prototype.pause = function(time) {
+        if (time === void 0) time = now$1();
+        if (this._isPaused || !this._isPlaying) return this;
+        this._isPaused = true;
+        this._pauseStart = time;
+        // eslint-disable-next-line
+        this._group && this._group.remove(this);
+        return this;
+    };
+    Tween1.prototype.resume = function(time) {
+        if (time === void 0) time = now$1();
+        if (!this._isPaused || !this._isPlaying) return this;
+        this._isPaused = false;
+        this._startTime += time - this._pauseStart;
+        this._pauseStart = 0;
+        // eslint-disable-next-line
+        this._group && this._group.add(this);
+        return this;
+    };
+    Tween1.prototype.stopChainedTweens = function() {
+        for(var i = 0, numChainedTweens = this._chainedTweens.length; i < numChainedTweens; i++)this._chainedTweens[i].stop();
+        return this;
+    };
+    Tween1.prototype.group = function(group) {
+        this._group = group;
+        return this;
+    };
+    Tween1.prototype.delay = function(amount) {
+        this._delayTime = amount;
+        return this;
+    };
+    Tween1.prototype.repeat = function(times) {
+        this._initialRepeat = times;
+        this._repeat = times;
+        return this;
+    };
+    Tween1.prototype.repeatDelay = function(amount) {
+        this._repeatDelayTime = amount;
+        return this;
+    };
+    Tween1.prototype.yoyo = function(yoyo) {
+        this._yoyo = yoyo;
+        return this;
+    };
+    Tween1.prototype.easing = function(easingFunction) {
+        this._easingFunction = easingFunction;
+        return this;
+    };
+    Tween1.prototype.interpolation = function(interpolationFunction) {
+        this._interpolationFunction = interpolationFunction;
+        return this;
+    };
+    Tween1.prototype.chain = function() {
+        var tweens = [];
+        for(var _i = 0; _i < arguments.length; _i++)tweens[_i] = arguments[_i];
+        this._chainedTweens = tweens;
+        return this;
+    };
+    Tween1.prototype.onStart = function(callback) {
+        this._onStartCallback = callback;
+        return this;
+    };
+    Tween1.prototype.onUpdate = function(callback) {
+        this._onUpdateCallback = callback;
+        return this;
+    };
+    Tween1.prototype.onRepeat = function(callback) {
+        this._onRepeatCallback = callback;
+        return this;
+    };
+    Tween1.prototype.onComplete = function(callback) {
+        this._onCompleteCallback = callback;
+        return this;
+    };
+    Tween1.prototype.onStop = function(callback) {
+        this._onStopCallback = callback;
+        return this;
+    };
+    /**
+     * @returns true if the tween is still playing after the update, false
+     * otherwise (calling update on a paused tween still returns true because
+     * it is still playing, just paused).
+     */ Tween1.prototype.update = function(time, autoStart) {
+        if (time === void 0) time = now$1();
+        if (autoStart === void 0) autoStart = true;
+        if (this._isPaused) return true;
+        var property;
+        var elapsed;
+        var endTime = this._startTime + this._duration;
+        if (!this._goToEnd && !this._isPlaying) {
+            if (time > endTime) return false;
+            if (autoStart) this.start(time);
+        }
+        this._goToEnd = false;
+        if (time < this._startTime) return true;
+        if (this._onStartCallbackFired === false) {
+            if (this._onStartCallback) this._onStartCallback(this._object);
+            this._onStartCallbackFired = true;
+        }
+        elapsed = (time - this._startTime) / this._duration;
+        elapsed = this._duration === 0 || elapsed > 1 ? 1 : elapsed;
+        var value = this._easingFunction(elapsed);
+        // properties transformations
+        this._updateProperties(this._object, this._valuesStart, this._valuesEnd, value);
+        if (this._onUpdateCallback) this._onUpdateCallback(this._object, elapsed);
+        if (elapsed === 1) {
+            if (this._repeat > 0) {
+                if (isFinite(this._repeat)) this._repeat--;
+                // Reassign starting values, restart by making startTime = now
+                for(property in this._valuesStartRepeat){
+                    if (!this._yoyo && typeof this._valuesEnd[property] === 'string') this._valuesStartRepeat[property] = // eslint-disable-next-line
+                    // @ts-ignore FIXME?
+                    this._valuesStartRepeat[property] + parseFloat(this._valuesEnd[property]);
+                    if (this._yoyo) this._swapEndStartRepeatValues(property);
+                    this._valuesStart[property] = this._valuesStartRepeat[property];
+                }
+                if (this._yoyo) this._reversed = !this._reversed;
+                if (this._repeatDelayTime !== undefined) this._startTime = time + this._repeatDelayTime;
+                else this._startTime = time + this._delayTime;
+                if (this._onRepeatCallback) this._onRepeatCallback(this._object);
+                return true;
+            } else {
+                if (this._onCompleteCallback) this._onCompleteCallback(this._object);
+                for(var i = 0, numChainedTweens = this._chainedTweens.length; i < numChainedTweens; i++)// Make the chained tweens start exactly at the time they should,
+                // even if the `update()` method was called way past the duration of the tween
+                this._chainedTweens[i].start(this._startTime + this._duration);
+                this._isPlaying = false;
+                return false;
+            }
+        }
+        return true;
+    };
+    Tween1.prototype._updateProperties = function(_object, _valuesStart, _valuesEnd, value) {
+        for(var property in _valuesEnd){
+            // Don't update properties that do not exist in the source object
+            if (_valuesStart[property] === undefined) continue;
+            var start = _valuesStart[property] || 0;
+            var end = _valuesEnd[property];
+            var startIsArray = Array.isArray(_object[property]);
+            var endIsArray = Array.isArray(end);
+            var isInterpolationList = !startIsArray && endIsArray;
+            if (isInterpolationList) _object[property] = this._interpolationFunction(end, value);
+            else if (typeof end === 'object' && end) // eslint-disable-next-line
+            // @ts-ignore FIXME?
+            this._updateProperties(_object[property], start, end, value);
+            else {
+                // Parses relative end values with start as base (e.g.: +10, -3)
+                end = this._handleRelativeValue(start, end);
+                // Protect against non numeric properties.
+                if (typeof end === 'number') // eslint-disable-next-line
+                // @ts-ignore FIXME?
+                _object[property] = start + (end - start) * value;
+            }
+        }
+    };
+    Tween1.prototype._handleRelativeValue = function(start, end) {
+        if (typeof end !== 'string') return end;
+        if (end.charAt(0) === '+' || end.charAt(0) === '-') return start + parseFloat(end);
+        else return parseFloat(end);
+    };
+    Tween1.prototype._swapEndStartRepeatValues = function(property) {
+        var tmp = this._valuesStartRepeat[property];
+        var endValue = this._valuesEnd[property];
+        if (typeof endValue === 'string') this._valuesStartRepeat[property] = this._valuesStartRepeat[property] + parseFloat(endValue);
+        else this._valuesStartRepeat[property] = this._valuesEnd[property];
+        this._valuesEnd[property] = tmp;
+    };
+    return Tween1;
+}();
+var VERSION = '18.6.4';
+/**
+ * Tween.js - Licensed under the MIT license
+ * https://github.com/tweenjs/tween.js
+ * ----------------------------------------------
+ *
+ * See https://github.com/tweenjs/tween.js/graphs/contributors for the full list of contributors.
+ * Thank you all, you're awesome!
+ */ var nextId = Sequence.nextId;
+/**
+ * Controlling groups of tweens
+ *
+ * Using the TWEEN singleton to manage your tweens can cause issues in large apps with many components.
+ * In these cases, you may want to create your own smaller groups of tweens.
+ */ var TWEEN = mainGroup;
+// This is the best way to export things in a way that's compatible with both ES
+// Modules and CommonJS, without build hacks, and so as not to break the
+// existing API.
+// https://github.com/rollup/rollup/issues/1961#issuecomment-423037881
+var getAll = TWEEN.getAll.bind(TWEEN);
+var removeAll = TWEEN.removeAll.bind(TWEEN);
+var add = TWEEN.add.bind(TWEEN);
+var remove = TWEEN.remove.bind(TWEEN);
+var update = TWEEN.update.bind(TWEEN);
+var exports1 = {
+    Easing: Easing,
+    Group: Group,
+    Interpolation: Interpolation,
+    now: now$1,
+    Sequence: Sequence,
+    nextId: nextId,
+    Tween: Tween,
+    VERSION: VERSION,
+    getAll: getAll,
+    removeAll: removeAll,
+    add: add,
+    remove: remove,
+    update: update
+};
+exports.default = exports1;
+
+},{"process":"6Upk8","@parcel/transformer-js/src/esmodule-helpers.js":"JacNc"}],"jFuxO":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "Handy", ()=>Handy
+) /*
+
+
+	 For my entire life I’ve been attracted to the stimulus
+	 of my eyes and ears; the visual and musical arts.
+	 I’ve made a lot of output to reflect that attraction.
+	 On rare occasions I’ve been forced to confront the 
+	 fact that some human bodies function differently than
+	 others -- for example a friend of mine who couldn’t enjoy
+	(or couldn’t NOT enjoy!) my early stereoscopic experiments
+	 because his eyes and brain do not synthesize stereoscopic 
+	 depth from his two monoscopic inputs. I don’t know how
+	 to rectify my passion (and monetization) of the aural
+	 and the visual within these contexts. Do I need to?
+
+	 But something about defining hand poses for virtual reality
+	 experiences has tripped a small alarm within me. Not everyone
+	 has two hands. Not everyone has five digits on each hand.
+	 The wonder I experience at traversing the threshold from the
+	 physical world to the virtual world and “seeing myself”
+	 from a first-person perspective as I hold out my hands...
+	 That is not a universal experience. I’m not sure where to go 
+	 from here but let’s make sure our wonderful XR community is 
+	 having this conversation, eh? 
+
+
+	 Stewart Smith
+	 August 2020
+
+
+
+
+	 Inclusion
+	 https://en.wikipedia.org/wiki/Inclusion_(disability_rights)
+
+	 Universal design
+	 https://en.wikipedia.org/wiki/Universal_design
+
+	 Accessibility
+	 https://en.wikipedia.org/wiki/Accessibility
+
+	 Ableism
+	 https://en.wikipedia.org/wiki/Ableism
+
+
+
+
+*/ ;
+//  Copyright © 2020–2021 Stewart Smith. See LICENSE for details.
+//	👉 𝖨𝗇𝗍𝗋𝗈𝖽𝗎𝖼𝗂𝗇𝗀 𝗛𝗮𝗻𝗱𝘆.𝗷𝘀 👈
+//
+//  Want to add hand pose recognition to your WebXR project?
+//  Handy makes defining and using custom hand poses a snap!
+//  Why use hand-held contollers when you can use your bare 
+//  hands? 👋  Built on Three.js and tested on the Oculus Quest,
+//  Handy recognizes over 100 hand poses right out of the box --
+//  including the American Sign Language (ASL) alphabet.
+//	And yes, full hand gesture recognition is on the roadmap 👍
+//
+//  Requires OculusBrowser/11.1.0.1.64 or later.
+var _handyPosesLeftJs = require("./Handy-poses-left.js");
+var _handyPosesRightJs = require("./Handy-poses-right.js");
+var _three = require("three");
+const Handy = {
+    //  What revision of Handy is this?
+    //  I don’t have strict critera for requiring a version bump
+    //  but when something biggish changes I’ll bump this number.
+    REVISION: 5,
+    //  The following list of joint names mirrors the constants list
+    //  of window.XRHand. So why duplicate that?
+    //  Because right now XRHand only exists in the Oculus browser
+    //  and we want to be able to reason around XRHand stuff --
+    //  perhaps even playback recorded hand motions --
+    //  right here on your desktop machine where XRHand does not exist.
+    //  Here’s the proposed spec for joint indexes:
+    //  https://github.com/immersive-web/webxr-hand-input/blob/master/explainer.md#appendix-proposed-idl
+    //  We use this Array to look up joint names by index value.
+    //  What’s at joint index #7?
+    //  Just ask for Handy.jointNames[ 7 ]
+    //  and you’ll get the value 'index-finger-phalanx-intermediate'.
+    //  We also use this Array to append constants directly 
+    //  onto the Handy{} object like so:
+    //  Handy[ 'index-finger-phalanx-intermediate' ] === 7.
+    //  This exactly mirrors XRHand:
+    //  Handy[ 'index-finger-phalanx-intermediate' ] === XRHand[ 'index-finger-phalanx-intermediate' ].
+    jointNames: [
+        'wrist',
+        'thumb-metacarpal',
+        'thumb-phalanx-proximal',
+        'thumb-phalanx-distal',
+        'thumb-tip',
+        'index-finger-metacarpal',
+        'index-finger-phalanx-proximal',
+        'index-finger-phalanx-intermediate',
+        'index-finger-phalanx-distal',
+        'index-finger-tip',
+        'middle-finger-metacarpal',
+        'middle-finger-phalanx-proximal',
+        'middle-finger-phalanx-intermediate',
+        'middle-finger-phalanx-distal',
+        'middle-finger-tip',
+        'ring-finger-metacarpal',
+        'ring-finger-phalanx-proximal',
+        'ring-finger-phalanx-intermediate',
+        'ring-finger-phalanx-distal',
+        'ring-finger-tip',
+        'pinky-finger-metacarpal',
+        'pinky-finger-phalanx-proximal',
+        'pinky-finger-phalanx-intermediate',
+        'pinky-finger-phalanx-distal',
+        'pinky-finger-tip' //  24
+    ],
+    //  These are not part of the XRHand spec
+    //  but come in handy -- no pun intended.
+    digitNames: [
+        'thumb',
+        'index',
+        'middle',
+        'ring',
+        'pinky'
+    ],
+    digitTipNames: [
+        'thumb-tip',
+        'index-finger-tip',
+        'middle-finger-tip',
+        'ring-finger-tip',
+        'pinky-finger-tip' //  24
+    ],
+    isDigitTipIndex: function(i) {
+        return i > 0 && i < 25 && !((i + 1) % 5);
+    },
+    fingerNames: [
+        'index',
+        'middle',
+        'ring',
+        'pinky'
+    ],
+    isFingerTipIndex: function(i) {
+        return i > 4 && i < 25 && !((i + 1) % 5);
+    },
+    //  We’ll repeatedly use this
+    //  so let’s just create it once
+    //  and reference it from here on.
+    VECTOR3_ZERO: new _three.Vector3(),
+    //  Here’s the data goods;
+    //  Poses for the left hand to match
+    //  and poses for the right hand to match.
+    poses: {
+        left: _handyPosesLeftJs.poses,
+        right: _handyPosesRightJs.poses
+    },
+    //  Maximum duration in milliseconds
+    //  that we’ll allow per update() loop
+    //  PER HAND for a pose search.
+    //  Remember, we want to get out of the way
+    //  as quickly as possible!
+    searchLoopDurationLimit: 6,
+    //  JavaScript doesn’t need classes.
+    // (You may want to read that again.)
+    //  Here we’re going to REFERENCE (not copy)
+    //  functionality from one object onto another,
+    //  eg. the ‘hand’ that we will makeHandy().
+    //  To make this process more efficient
+    //  when creating more than one hand
+    //  we’ll define the methods just once,
+    //  store them in this ‘protos’ object,
+    //  then add REFERENCES to them on “handy” objects.
+    //  eg. hands.left.reportFingers === hands.right.reportFingers
+    //  https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Working_with_Objects#Comparing_objects
+    protos: {
+    },
+    //  We’re going to keep a reference
+    //  to every object that we “make handy”
+    //  so we can iterate through them later
+    //  and also detect interactions BETWEEN them.
+    // (That is coming soon!)
+    hands: [],
+    //  Now we can update all individual hands
+    //  just by calling Handy.update()!
+    update: function(callbackForAllHands) {
+        this.hands.forEach(function(hand) {
+            hand.update(callbackForAllHands);
+        });
+    },
+    //  Handy.makeHandy() expects an instance of THREE.Object3D,
+    //  or anything that inherits from THREE.Object3D,
+    //  and then injects additional functionality into that object.
+    //  The intended use is with THREE’s XRHand model like so:
+    //
+    //    hand0 = renderer.xr.getHand( 0 )
+    //    Handy.makeHandy( hand0 )//  This is the magic line.
+    //
+    //  Now ‘hand0’ is handy! It’s that easy!
+    //  Just remember to call Handy.update() within your update loop!
+    //  Handy.update() will in turn update all handified objects.
+    makeHandy: function(obj) {
+        obj.name = 'hand';
+        //  We need to find the THREE camera used for this scene
+        //  in order to have our data display frames 
+        //  always lookAt() the camera.
+        //  In the future we might need this to be more robust
+        //  or just pass in the intended camera via update().
+        //  NOTE. THIS IS VEY BRITTLE!
+        //  THANKFULLY THIS IS ONLY FOR RECORDING,
+        //  AND NOT FOR REGULAR USE.
+        const scene = obj.parent;
+        //  NOTE. THIS DOES NOT SEEM TO FUNCTION AS EXPECTED
+        //  BECAUSE OF THE XR CAMERA RIG. COME BACK AND INVESTIGATE.
+        obj.camera = scene.children.find(function(child) {
+            return child.type === 'PerspectiveCamera';
+        });
+        //  Glob on the methods. No classes required :)
+        //  Note that these will be added as REFERENCES
+        //  rather than clones. Very little memory overhead!
+        Object.entries(Handy.protos).forEach(function(entry) {
+            if (obj[entry[0]] === undefined) obj[entry[0]] = entry[1];
+        });
+        //  Let’s keep a list of all handified objects
+        //  which down the road will allow us to detect interactions
+        //  like claps, time freeze, picture framing, etc.
+        Handy.hands.push(obj);
+    }
+};
+//  This is where we make good on our promise above
+//  to append constants directly onto the Handy{} object like so:
+//  Handy.INDEX_PHALANX_INTERMEDIATE === 7.
+//  This exactly mirrors XRHand:
+//  Handy.INDEX_PHALANX_INTERMEDIATE === XRHand.INDEX_PHALANX_INTERMEDIATE.
+Handy.jointNames.forEach(function(name, i) {
+    Handy[name] = i;
+});
+//  Handy.hands is an Array of unlabeled hands
+//  as we do not immediately know the handedness of a hand.
+//  In your own update functions you may wish to do this:
+//  var left  = Handy.hands.getLeft()
+//  var right = Handy.hands.getRight()
+Object.assign(Handy.hands, {
+    getLeft: function() {
+        return this.find(function(hand) {
+            return hand.handedness === 'left';
+        });
+    },
+    getRight: function() {
+        return this.find(function(hand) {
+            return hand.handedness === 'right';
+        });
+    }
+});
+////////////////
+//            //
+//   Protos   //
+//            //
+////////////////
+//  Let’s define all the methods we want to
+//  glob on to any object that we “make handy”.
+//  We’ll store them in Handy’s ‘protos’ object.
+//  https://en.wikipedia.org/wiki/Prototype-based_programming
+Object.assign(Handy.protos, {
+    //  Traverse down this THREE.Group to find
+    //  a child with an ‘xrInputSource’ property,
+    //  which should have a ‘handedness’ property.
+    //  This will both assign that value to this Handy object
+    // (if such a value is found)
+    //  and return the current ‘handedness’ of this Handy object.
+    //  NOTE: Is there a more efficient way to do this??
+    checkHandedness: function() {
+        const hand = this;
+        this.traverse(function(obj) {
+            if (obj.xrInputSource !== undefined && obj.xrInputSource.handedness !== undefined) {
+                hand.handedness = obj.xrInputSource.handedness;
+                hand.name = 'hand ' + hand.handedness;
+            }
+        });
+        return this.handedness;
+    },
+    //  Find the distance (in CENTIMETERS!) between two joints
+    //  by using joint name Strings.
+    //  You can use the constant style ‘INDEX_PHALANX_INTERMEDIATE’
+    //  or a more friendly lowercase-and-spaces style:
+    // “index phalanx intermediate”. Both are valid styles here.
+    //  This makes writing the pose detection logic super legible.
+    //  Here’s some pinch detection logic:
+    //
+    //      return this.distanceBetweenJoints(
+    //
+    //          'index phalanx tip',
+    // 		    'thumb phalanx tip'
+    //	
+    //       ) < 3
+    //
+    //  Easy, right?! Now you can write your own! :)
+    distanceBetweenJoints: function(jointNameA, jointNameB) {
+        if (this.joints.length === 0) return NaN;
+        const hand = this, [jointA, jointB] = [
+            jointNameA,
+            jointNameB
+        ].map(function(name) {
+            return hand.joints[// Handy[ name.toUpperCase().replace( /\s+/g, '_' )]
+            name.toLowerCase().replace(/\s+/g, '-')];
+        });
+        if (jointA.position && jointB.position && !jointA.position.equals(jointB.position)) return jointA.position.distanceTo(jointB.position) * 100;
+        else return NaN;
+    },
+    //  Find the angle (in DEGREES!) from a finger’s base to its tip.
+    //  Here’s how to check if your index finger is extended:
+    //
+    //      return this.digitAngle( 'index' ) < 20
+    //  
+    //  Not bad, eh?
+    digitAngle: function(fingerName) {
+        fingerName = fingerName.toLowerCase();
+        const fingerTip = fingerName === 'thumb' ? this.joints['thumb-tip'] : this.joints[fingerName + '-finger-tip'], fingerProximal = fingerName === 'thumb' ? this.joints['thumb-phalanx-proximal'] : this.joints[fingerName + '-finger-phalanx-proximal'];
+        if (fingerTip && fingerProximal && fingerTip.quaternion && fingerProximal.quaternion) return _three.MathUtils.radToDeg(fingerProximal.quaternion.angleTo(fingerTip.quaternion));
+        return NaN;
+    },
+    //  Some useful helper functions that
+    //  check the angle from digit base to digit tip
+    //  to determine if that digit is extended
+    //  or contracted.
+    digitIsExtended: function(digitName) {
+        return this.digitAngle(digitName) < 45;
+    },
+    digitIsContracted: function(digitName) {
+        return this.digitAngle(digitName) > 110;
+    },
+    //  Useful for assessing 
+    //  what values you may want to use
+    //  in your detection functions.
+    reportDigits: function() {
+        const hand = this;
+        Handy.digitNames.forEach(function(digitName) {
+            const proximalName = digitName === 'thumb' ? 'thumb-phalanx-proximal' : digitName + '-finger-phalanx-proximal', tipName = digitName === 'thumb' ? 'thumb-tip' : digitName + '-finger-tip', distance = hand.distanceBetweenJoints(proximalName, tipName), digitAngle = hand.digitAngle(digitName);
+            console.log(hand.handedness, digitName + '.', 'angle:', Math.round(digitAngle) + '˚', 'distance:', Math.round(distance * 10) / 10 + 'cm', hand.digitIsExtended(digitName) ? 'is extended' : 'is contracted');
+        });
+    },
+    ////////////////
+    //            //
+    //   Record   //
+    //            //
+    ////////////////
+    //  Take a snapshot of this hand’s pose.
+    readLivePoseData: function() {
+        const hand = this, wrist = hand.joints['wrist'], jointPositions = [], digitTipPositions = [], //  Take a position in global space,
+        //  and make it relative to the wrist joint position
+        //  also taking into account the wrist’s rotation.
+        // (So we cannot simply subtract position vectors here!
+        //  We must multiply the full transform matrices!)
+        //  Also, let’s round these positions to the nearest
+        //  millimeter to make things tidier to look at
+        //  and save string space when stored as JSON data.
+        preparePosition = function(joint) {
+            const jointMatrix = joint.matrix.clone().premultiply(// new THREE.Matrix4().copy( wrist.matrixWorld.invert() )
+            wrist.matrixWorld.clone().invert());
+            //  Extract the X, Y, Z positions from the resulting matrix
+            //  and return this as a flat Array
+            //  with distances rounded to the nearest millimeter.
+            return [
+                Math.round(jointMatrix.elements[12] * 1000),
+                Math.round(jointMatrix.elements[13] * 1000),
+                Math.round(jointMatrix.elements[14] * 1000)
+            ];
+        }, //  Store head (camera) position relative to the wrist. 
+        //  In the future we’ll use this to identify hand gestures
+        //  that relate to the position of the head / body.
+        //  NOTE: Camera position is unreliable because of XR camera rig.
+        //  Need to come back and investigate alternatives.
+        headPosition = wrist !== undefined && !wrist.position.equals(Handy.VECTOR3_ZERO) ? preparePosition(hand.camera) : null, headRotation = headPosition === null ? null : hand.camera.quaternion.toArray();
+        //  Store the positions of each joint relative to the wrist.
+        //  Note that if a position is not “ready” 
+        //  then that entry in the Array will be undefined.
+        //  This is important during pose detection:
+        //  Undefined elements will NOT accrue “distance”, ie.
+        //  If the pinky finger positions don’t matter to a particular
+        //  hand pose, you can just delete those entries!
+        Object.values(hand.joints).forEach(function(joint, i) {
+            // console.log( i, 'joint', joint )
+            if (joint !== undefined && joint.position !== undefined && joint.position.equals(Handy.VECTOR3_ZERO) === false) {
+                const preparedPosition = preparePosition(joint);
+                jointPositions[i] = preparedPosition;
+                if (Handy.isDigitTipIndex(i)) digitTipPositions.push(preparedPosition);
+            }
+        });
+        // for( let i = 0; i < hand.joints.length; i ++ ){
+        // const joint = hand.joints[ i ]
+        // 	if( joint !== undefined &&
+        // 		joint.position !== undefined &&
+        // 		joint.position.equals( Handy.VECTOR3_ZERO ) === false ){
+        // 		const preparedPosition = preparePosition( joint )
+        // 		jointPositions[ i ] = preparedPosition
+        // 		if( Handy.isDigitTipIndex( i )){
+        // 			digitTipPositions.push( preparedPosition )
+        // 		}
+        // 	}
+        // }
+        //  Package it up and send it off.
+        return {
+            headPosition,
+            headRotation,
+            jointPositions,
+            digitTipPositions
+        };
+    },
+    //  Grab a snapshot of the live hand pose,
+    //  output its data to the JavaScript console
+    // (so you can copy and paste it into your poses file),
+    //  and also add it to the poses list
+    //  so you can query for it immediately :)
+    recordLivePose: function(name, showIt) {
+        const hand = this, handedness = hand.checkHandedness(), pose = Object.assign({
+            names: [
+                name
+            ],
+            handedness,
+            handyRevision: Handy.REVISION,
+            time: Date.now()
+        }, hand.readLivePoseData());
+        console.log('\n\nPOSE DEFINITION\n\n' + JSON.stringify(pose) + ',\n\n\n');
+        Handy.poses[handedness].push(pose);
+        if (showIt) hand.showPose(pose, hand.joints[0].matrixWorld);
+        return pose;
+    },
+    //  Did your pose record correctly just now?
+    //  This is a quick and dirty way to see 
+    // (within XR!) if it’s roughly correct.
+    showPose: function(pose, matrix) {
+        const hand = this, handRoot = new _three.Object3D(), size = 0.02;
+        pose.jointPositions.forEach(function(position) {
+            const box = new _three.Mesh(new _three.BoxBufferGeometry(size, size, size), new _three.MeshBasicMaterial());
+            box.position.fromArray(position).multiplyScalar(0.001);
+            if (matrix !== undefined) {
+                box.updateMatrix();
+                box.matrix.multiply(matrix);
+            } else box.position.y += 1;
+            handRoot.add(box);
+        });
+        handRoot.position.copy(hand.position);
+        hand.camera.parent.add(handRoot);
+    },
+    //  We can also show previously recorded poses.
+    showPoseByName: function(poseName, matrix) {
+        const hand = this, pose = Handy.poses[hand.handedness].find(function(pose1) {
+            return pose1.names.includes(poseName);
+        });
+        if (pose) hand.showPose(pose, matrix);
+    },
+    ////////////////
+    //            //
+    //   Search   //
+    //            //
+    ////////////////
+    //  Upon casually discussing Handy with a good friend of mine,
+    //  Robert Gerard Pietrusko (http://warning-office.org),
+    //  he suggessted I try recording hand poses and measuring the
+    //  Euclidean distance between them.
+    //  https://en.wikipedia.org/wiki/K-means_clustering
+    //  This turned out to be very efficient! Sort of like Word2Vec,
+    //  but for hands. https://en.wikipedia.org/wiki/Word2vec
+    //
+    //  Question is, do we try Cosine Distance in the future?
+    //  https://cmry.github.io/notes/euclidean-v-cosine
+    livePoseData: [],
+    searchLoopBeganAt: null,
+    searchLoopsCounter: 0,
+    searchLoopsCounterMax: 0,
+    searchPoseIndex: 0,
+    searchResultsBuffer: [],
+    searchResults: [],
+    searchResultsHistory: [],
+    searchMethod: 'jointPositions',
+    lastSearchResult: {
+        name: 'null'
+    },
+    search: function() {
+        const hand = this, handedness = hand.checkHandedness(), poses = Handy.poses[handedness], method = hand.searchMethod;
+        //  Is our handedness undefined?
+        //  Do we have zero poses to detect?
+        //  If so, bail immediately!
+        if (poses === undefined || poses.length === 0) return;
+        //  We’re going to do some serious “Array clutching” here.
+        //  That means we may NOT finish looping through the Array
+        //  before we “run out of time.” Why do this? Because if we’re
+        //  running at 72fps or 90fps, etc. and we really only need
+        //  to do a full poses search a few times per second,
+        //  then we have render loops to spare and we ought to get
+        //  out of the way as quickly as possible so that YOU can
+        //  use that render loop time for yourself :)
+        //  If you want more performance than this, then it’s time
+        //  for Web Workers. But for now this seems to do the trick.
+        //  https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API
+        hand.searchLoopBeganAt = window.performance.now();
+        for(let i = hand.searchPoseIndex; i < poses.length; i++){
+            //  If we’re just beginning a new search
+            //  we need to reset our results buffer
+            //  and ask for new live hand pose data.
+            if (i === 0) {
+                hand.searchLoopsCounter = 0;
+                hand.searchResultsBuffer = [];
+                hand.livePoseData = hand.readLivePoseData();
+                //  If there’s no joint position data
+                //  or if the wrist position of this hand is EXACTLY zero 
+                // (in which case it’s likely ALL joint positions are zero)
+                //  then this live data is useless. (So bail!)
+                if (hand.livePoseData.jointPositions.length === 0 || hand.livePoseData.jointPositions[0][0] === 0 && hand.livePoseData.jointPositions[0][1] === 0 && hand.livePoseData.jointPositions[0][2] === 0) return;
+                //  These flags assert that we are 
+                //  NOT taking the square root of each distance.
+                //  As this might change in the future
+                //  I wanted a way for you to query / write logic
+                //  around that.
+                hand.searchResultsBuffer.distancesAreSquared = true;
+                hand.searchResultsBuffer.distancesAreRooted = false;
+            }
+            //  Go about our normal business.
+            //  eg, evaluate the distance between this hand pose
+            //  and the current-ish state of our real hand.
+            const pose = poses[i];
+            //  Currently we have two methods for detecting poses.
+            // (Down from FOUR in a previous iteration! Sadly,
+            //  the angles between wrist quaternion and digit tip
+            //  weren’t sufficient once we added all of ASL.)
+            //  We may eventually remove this digitTipPositions method
+            //  as [all] jointPositions is obviously more accurate
+            //  and seems speedy enough. 
+            if (method === 'digitTipPositions') hand.searchResultsBuffer.push({
+                pose,
+                distance: pose.digitTipPositions.reduce(function(distance, digitTipPosition, i1) {
+                    if (digitTipPosition.length !== undefined && hand.livePoseData.digitTipPositions[i1] !== undefined && hand.livePoseData.digitTipPositions[i1].length > 0) //  The “correct” way to do this is to take the square root
+                    //  of this sum. But find a square root is inherently slow.
+                    //  Thankfully we can do just as well by NOT taking the root.
+                    //  I leave it here (commented out) for your edification ;)
+                    distance += Math.pow(digitTipPosition[0] - hand.livePoseData.digitTipPositions[i1][0], 2) + Math.pow(digitTipPosition[1] - hand.livePoseData.digitTipPositions[i1][1], 2) + Math.pow(digitTipPosition[2] - hand.livePoseData.digitTipPositions[i1][2], 2);
+                    return distance;
+                }, 0)
+            });
+            else if (method === 'jointPositions') hand.searchResultsBuffer.push({
+                pose,
+                distance: pose.jointPositions.reduce(function(distance, jointPosition, i1) {
+                    if (jointPosition.length !== undefined && hand.livePoseData.jointPositions[i1] !== undefined && hand.livePoseData.jointPositions[i1].length > 0) //  The “correct” way to do this is to take the square root
+                    //  of this sum. But find a square root is inherently slow.
+                    //  Thankfully we can do just as well by NOT taking the root.
+                    //  I leave it here (commented out) for your edification ;)
+                    distance += Math.pow(jointPosition[0] - hand.livePoseData.jointPositions[i1][0], 2) + Math.pow(jointPosition[1] - hand.livePoseData.jointPositions[i1][1], 2) + Math.pow(jointPosition[2] - hand.livePoseData.jointPositions[i1][2], 2);
+                    return distance;
+                }, 0)
+            });
+            //  Let’s keep track of how many loops it’s taking
+            //  to finish searching through our whole poses library;
+            //  accessible with something like:
+            //  Handy.hands.getLeft().searchLoopsCounterMax
+            hand.searchLoopsCounter++;
+            hand.searchLoopsCounterMax = Math.max(hand.searchLoopsCounterMax, hand.searchLoopsCounter);
+            //  Are we done? (If so, shut it down.)
+            if (i === poses.length - 1) {
+                hand.searchResults = hand.searchResultsBuffer.sort(function(a, b) {
+                    return a.distance - b.distance;
+                });
+                const searchResult = hand.searchResults[0];
+                //   Does this search result differ from the previous one?
+                if (hand.lastSearchResult.pose !== searchResult.pose) {
+                    if (hand.lastSearchResult && hand.lastSearchResult.pose) {
+                        //  Fire custom events.
+                        //  We need to fire events for each name
+                        //  that is associated with this pose.
+                        //  Why would there be multiple names??
+                        //  For example, “ASL_2” is the same as “Peace”.
+                        //  Someone unfamiliar with American Sign Language
+                        //  and only concerned with recognizing “peace”
+                        //  ought to have that convenience.
+                        // (And the other way ’round as well!)
+                        hand.lastSearchResult.pose.names.forEach(function(poseName) {
+                            hand.dispatchEvent({
+                                type: poseName + ' pose ended',
+                                hand,
+                                pose: hand.lastSearchResult.pose,
+                                //  Open question here:
+                                //  Should this “distance” property be from this pose’s
+                                //  previous top-result status (as it is currently)
+                                //  or should it be from its new not-top-result status?
+                                distance: hand.lastSearchResult.distance,
+                                message: hand.handedness.toUpperCase() + ' hand “' + poseName + '” pose ended' + ' at a Euclidean distance of ' + hand.lastSearchResult.distance + 'mm.'
+                            });
+                        });
+                        //  Should you need it, 
+                        //  here’s an easy way to get a “from / to” alert.
+                        //  NOTE: Do we need to include distances in here too?
+                        hand.dispatchEvent({
+                            type: 'pose changed',
+                            hand,
+                            resultWas: hand.lastSearchResult,
+                            resultIs: searchResult,
+                            message: hand.handedness.toUpperCase() + ' hand pose changed from ' + JSON.stringify(hand.lastSearchResult.pose.names) + ' to ' + JSON.stringify(searchResult.pose.names) + '.'
+                        });
+                    }
+                    searchResult.pose.names.forEach(function(poseName) {
+                        hand.dispatchEvent({
+                            type: poseName + ' pose began',
+                            hand,
+                            pose: searchResult.pose,
+                            distance: searchResult.distance,
+                            message: hand.handedness.toUpperCase() + ' hand “' + poseName + '” pose began' + ' at a Euclidean distance of ' + searchResult.distance + 'mm.'
+                        });
+                    });
+                    //  We’re ready to make it final.
+                    //  Replace the prior searh result 
+                    //  with the current search result.
+                    hand.lastSearchResult = searchResult;
+                }
+                //  Get things ready for next search.
+                hand.searchIndex = 0;
+                hand.searchResultsBuffer = [];
+                //  Bail both from this local “for” loop 
+                //  and from this entire function.
+                return searchResult;
+            } else //  If we’re taking too long
+            //  let’s note what index we should start at next time
+            //  and bail for now.
+            if (window.performance.now() - hand.searchLoopBeganAt > Handy.searchLoopDurationLimit) {
+                hand.findPoseIndex = i + 1;
+                break;
+            }
+        }
+    },
+    //  If the pose is the top search result
+    // (or it’s in the results list above a given distance threshold)
+    //  return the result itself so it includes 
+    //  all of the pose data as well as distance.
+    //  Otherwise return false.
+    //  NOTE: This “threshold” argument is tricky
+    //  because search() calculates distance in mm
+    //  from the recorded model.
+    //  But we might need NORMALIZED results instead.
+    isPose: function(poseName, threshold) {
+        const hand = this;
+        if (typeof threshold === 'number') {
+            const result = hand.searchResults.find(function(result1) {
+                return result1.distance <= threshold && result1.pose.names.includes(poseName);
+            });
+            return result ? result : false;
+        } else if (hand.searchResults.length) return hand.searchResults[0].pose.names.includes(poseName) ? hand.searchResults[0] : false;
+        return false;
+    },
+    //  Some leftover debugging functions.
+    comparePoses: function(poseAName, poseBName) {
+        const hand = this, posesList = Handy.poses[hand.handedness], poseA = posesList.find(function(pose) {
+            return pose.name === poseAName;
+        }), poseB = posesList.find(function(pose) {
+            return pose.name === poseBName;
+        });
+        let poseDistanceAbs = 0, poseDistanceSqr = 0;
+        for(let i = 0; i < poseA.positions.length; i++){
+            const positionA = poseA.positions[i], positionB = poseB.positions[i], jointDistanceAbs = Math.abs(positionA[0] - positionB[0]) + Math.abs(positionA[1] - positionB[1]) + Math.abs(positionA[2] - positionB[2]), jointDistanceSqr = Math.sqrt(Math.pow(positionA[0] - positionB[0], 2) + Math.pow(positionA[1] - positionB[1], 2) + Math.pow(positionA[2] - positionB[2], 2));
+            // console.log( 
+            // 	'i', i, 
+            // 	'\n', positionA, 
+            // 	'\n', positionB, 
+            // 	'\nSqr distance:', jointDistanceSqr,
+            // 	'\nAbs distance:', jointDistanceAbs,
+            // )
+            poseDistanceAbs += jointDistanceAbs;
+            poseDistanceSqr += jointDistanceSqr;
+        }
+        console.log('\nThe distance between', poseAName, 'and', poseBName, 'is', '\nAbs:', poseDistanceAbs, '\nSqr:', poseDistanceSqr, '\n\n');
+        return poseDistanceSqr;
+    },
+    compareAllTo: function(inputPose) {
+        const hand = this, posesList = Handy.poses[hand.handedness];
+        return posesList.reduce(function(list, pose) {
+            return list.concat({
+                name: pose.name,
+                distance: hands.left.comparePoses('Fist', pose.name)
+            });
+        }, []).sort(function(a, b) {
+            return a.distance - b.distance;
+        });
+    },
+    ////////////////
+    //            //
+    //   Update   //
+    //            //
+    ////////////////
+    //  Did you add a pose name to the Handy.poseNames Array?
+    //  Did you also define a check function for it?
+    //  If so, this function -- which you must remember to call 
+    //  from within your update loop -- will check the status 
+    //  of each pose, set the boolean flags accordingly,
+    //  and fire off events on the frame when the state changes.
+    update: function(callback) {
+        const hand = this;
+        //  Do you believe in magic?
+        hand.search();
+        //  Are we supposed to do something?
+        if (typeof callback === 'function') callback(hand);
+    }
+});
+//  Announce yourself and make yourself available!
+console.log('\n\n👋 Handy (rev ' + Handy.REVISION + ')\n\n\n');
+
+},{"./Handy-poses-left.js":"hsJgr","./Handy-poses-right.js":"enOjr","three":"1AKvZ","@parcel/transformer-js/src/esmodule-helpers.js":"JacNc"}],"hsJgr":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "poses", ()=>poses
+);
+//  Copyright © 2020–2021 Stewart Smith. See LICENSE for details.
+//  Oculus Quest has trouble with finger overlaps 
+//  as illustrated by American Sign Language (ASL)
+//  for M, N, R, T, X etc.
+const poses = [
+    //////////////
+    //          //
+    //   Misc   //
+    //          //
+    //////////////
+    {
+        "names": [
+            "rest"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621870340884,
+        "headPosition": [
+            228,
+            -319,
+            -29
+        ],
+        "headRotation": [
+            0.042313734006100286,
+            0.0793769324853405,
+            0.08404512224641432,
+            0.9923937055825774
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                24,
+                -23,
+                -37
+            ],
+            [
+                36,
+                -41,
+                -62
+            ],
+            [
+                32,
+                -57,
+                -91
+            ],
+            [
+                36,
+                -71,
+                -111
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                21,
+                -25,
+                -130
+            ],
+            [
+                19,
+                -45,
+                -143
+            ],
+            [
+                16,
+                -64,
+                -154
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                -5,
+                -24,
+                -132
+            ],
+            [
+                -7,
+                -46,
+                -148
+            ],
+            [
+                -9,
+                -68,
+                -161
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -26,
+                -26,
+                -121
+            ],
+            [
+                -27,
+                -49,
+                -135
+            ],
+            [
+                -25,
+                -72,
+                -143
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -43,
+                -30,
+                -102
+            ],
+            [
+                -42,
+                -49,
+                -109
+            ],
+            [
+                -38,
+                -69,
+                -118
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                36,
+                -71,
+                -111
+            ],
+            [
+                16,
+                -64,
+                -154
+            ],
+            [
+                -9,
+                -68,
+                -161
+            ],
+            [
+                -25,
+                -72,
+                -143
+            ],
+            [
+                -38,
+                -69,
+                -118
+            ]
+        ]
+    },
+    {
+        "names": [
+            "flat"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1622838692830,
+        "headPosition": [
+            -37,
+            -306,
+            146
+        ],
+        "headRotation": [
+            -0.16087238216297503,
+            0.736996354269557,
+            0.11679953861143919,
+            0.6459980712285526
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                28,
+                -19,
+                -36
+            ],
+            [
+                45,
+                -18,
+                -64
+            ],
+            [
+                46,
+                -21,
+                -98
+            ],
+            [
+                47,
+                -25,
+                -122
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                17,
+                -21,
+                -131
+            ],
+            [
+                13,
+                -30,
+                -153
+            ],
+            [
+                7,
+                -35,
+                -174
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                -4,
+                -22,
+                -134
+            ],
+            [
+                -7,
+                -34,
+                -158
+            ],
+            [
+                -12,
+                -40,
+                -182
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -20,
+                -21,
+                -125
+            ],
+            [
+                -23,
+                -32,
+                -149
+            ],
+            [
+                -24,
+                -38,
+                -172
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -34,
+                -21,
+                -108
+            ],
+            [
+                -35,
+                -27,
+                -127
+            ],
+            [
+                -35,
+                -31,
+                -149
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                47,
+                -25,
+                -122
+            ],
+            [
+                7,
+                -35,
+                -174
+            ],
+            [
+                -12,
+                -40,
+                -182
+            ],
+            [
+                -24,
+                -38,
+                -172
+            ],
+            [
+                -35,
+                -31,
+                -149
+            ]
+        ]
+    },
+    {
+        "names": [
+            "flare"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621870729293,
+        "headPosition": [
+            224,
+            -266,
+            -10
+        ],
+        "headRotation": [
+            -0.04992509472591704,
+            0.06641473014981725,
+            0.002912952517820356,
+            0.9965380489834185
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                33,
+                -9,
+                -31
+            ],
+            [
+                60,
+                -11,
+                -49
+            ],
+            [
+                85,
+                -12,
+                -71
+            ],
+            [
+                108,
+                -9,
+                -80
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                33,
+                -1,
+                -132
+            ],
+            [
+                38,
+                3,
+                -156
+            ],
+            [
+                42,
+                11,
+                -176
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                3,
+                5,
+                -138
+            ],
+            [
+                4,
+                9,
+                -165
+            ],
+            [
+                4,
+                19,
+                -188
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -21,
+                1,
+                -127
+            ],
+            [
+                -23,
+                6,
+                -153
+            ],
+            [
+                -24,
+                13,
+                -176
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -45,
+                -4,
+                -105
+            ],
+            [
+                -54,
+                2,
+                -123
+            ],
+            [
+                -61,
+                11,
+                -141
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                108,
+                -9,
+                -80
+            ],
+            [
+                42,
+                11,
+                -176
+            ],
+            [
+                4,
+                19,
+                -188
+            ],
+            [
+                -24,
+                13,
+                -176
+            ],
+            [
+                -61,
+                11,
+                -141
+            ]
+        ]
+    },
+    {
+        "names": [
+            "devil",
+            "bull",
+            "🤘"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621870797909,
+        "headPosition": [
+            172,
+            -355,
+            -52
+        ],
+        "headRotation": [
+            -0.14613844665483355,
+            0.03216120412662604,
+            -0.08777611686557621,
+            0.9848373274434009
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                23,
+                -24,
+                -38
+            ],
+            [
+                30,
+                -47,
+                -60
+            ],
+            [
+                4,
+                -57,
+                -79
+            ],
+            [
+                -19,
+                -58,
+                -85
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                28,
+                -18,
+                -132
+            ],
+            [
+                31,
+                -28,
+                -154
+            ],
+            [
+                32,
+                -35,
+                -175
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                0,
+                -42,
+                -113
+            ],
+            [
+                4,
+                -45,
+                -86
+            ],
+            [
+                8,
+                -23,
+                -75
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -17,
+                -42,
+                -104
+            ],
+            [
+                -9,
+                -52,
+                -81
+            ],
+            [
+                -5,
+                -33,
+                -66
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -45,
+                -25,
+                -105
+            ],
+            [
+                -53,
+                -33,
+                -121
+            ],
+            [
+                -61,
+                -38,
+                -141
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -19,
+                -58,
+                -85
+            ],
+            [
+                32,
+                -35,
+                -175
+            ],
+            [
+                8,
+                -23,
+                -75
+            ],
+            [
+                -5,
+                -33,
+                -66
+            ],
+            [
+                -61,
+                -38,
+                -141
+            ]
+        ]
+    },
+    {
+        "names": [
+            "love",
+            "🤟"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621870846672,
+        "headPosition": [
+            76,
+            -367,
+            -49
+        ],
+        "headRotation": [
+            -0.1152941543929793,
+            0.048167698917214355,
+            -0.052965546817437634,
+            0.9907480912876637
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                33,
+                -8,
+                -30
+            ],
+            [
+                61,
+                -13,
+                -46
+            ],
+            [
+                87,
+                -16,
+                -67
+            ],
+            [
+                110,
+                -16,
+                -77
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                32,
+                -15,
+                -132
+            ],
+            [
+                37,
+                -24,
+                -154
+            ],
+            [
+                41,
+                -29,
+                -176
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                0,
+                -40,
+                -117
+            ],
+            [
+                3,
+                -46,
+                -90
+            ],
+            [
+                8,
+                -31,
+                -71
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -18,
+                -40,
+                -109
+            ],
+            [
+                -10,
+                -48,
+                -85
+            ],
+            [
+                -5,
+                -32,
+                -67
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -43,
+                -26,
+                -105
+            ],
+            [
+                -48,
+                -37,
+                -121
+            ],
+            [
+                -52,
+                -48,
+                -140
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                110,
+                -16,
+                -77
+            ],
+            [
+                41,
+                -29,
+                -176
+            ],
+            [
+                8,
+                -31,
+                -71
+            ],
+            [
+                -5,
+                -32,
+                -67
+            ],
+            [
+                -52,
+                -48,
+                -140
+            ]
+        ]
+    },
+    {
+        "names": [
+            "vulcan",
+            "🖖"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621870872498,
+        "headPosition": [
+            138,
+            -358,
+            -122
+        ],
+        "headRotation": [
+            -0.04294578752919011,
+            0.041824031577178906,
+            -0.030016467247729422,
+            0.9977501798111046
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                33,
+                -6,
+                -30
+            ],
+            [
+                61,
+                -7,
+                -46
+            ],
+            [
+                86,
+                -7,
+                -68
+            ],
+            [
+                108,
+                -5,
+                -79
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                25,
+                -9,
+                -134
+            ],
+            [
+                25,
+                -12,
+                -158
+            ],
+            [
+                24,
+                -14,
+                -180
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                4,
+                -8,
+                -138
+            ],
+            [
+                6,
+                -12,
+                -165
+            ],
+            [
+                6,
+                -12,
+                -190
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -34,
+                -12,
+                -123
+            ],
+            [
+                -45,
+                -20,
+                -147
+            ],
+            [
+                -54,
+                -25,
+                -169
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -49,
+                -12,
+                -105
+            ],
+            [
+                -57,
+                -18,
+                -123
+            ],
+            [
+                -65,
+                -22,
+                -143
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                108,
+                -5,
+                -79
+            ],
+            [
+                24,
+                -14,
+                -180
+            ],
+            [
+                6,
+                -12,
+                -190
+            ],
+            [
+                -54,
+                -25,
+                -169
+            ],
+            [
+                -65,
+                -22,
+                -143
+            ]
+        ]
+    },
+    {
+        "names": [
+            "vulcan inverse"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621870905109,
+        "headPosition": [
+            33,
+            -360,
+            -118
+        ],
+        "headRotation": [
+            -0.06983393567810782,
+            0.05415511046157339,
+            -0.06155924014684721,
+            0.9941835367251566
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                33,
+                -6,
+                -29
+            ],
+            [
+                63,
+                -14,
+                -39
+            ],
+            [
+                91,
+                -22,
+                -55
+            ],
+            [
+                115,
+                -25,
+                -60
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                35,
+                -8,
+                -132
+            ],
+            [
+                42,
+                -11,
+                -155
+            ],
+            [
+                48,
+                -14,
+                -177
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                -8,
+                -6,
+                -137
+            ],
+            [
+                -14,
+                -10,
+                -164
+            ],
+            [
+                -21,
+                -9,
+                -188
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -26,
+                -10,
+                -127
+            ],
+            [
+                -33,
+                -12,
+                -152
+            ],
+            [
+                -37,
+                -13,
+                -176
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -55,
+                -11,
+                -101
+            ],
+            [
+                -69,
+                -10,
+                -115
+            ],
+            [
+                -83,
+                -6,
+                -132
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                115,
+                -25,
+                -60
+            ],
+            [
+                48,
+                -14,
+                -177
+            ],
+            [
+                -21,
+                -9,
+                -188
+            ],
+            [
+                -37,
+                -13,
+                -176
+            ],
+            [
+                -83,
+                -6,
+                -132
+            ]
+        ]
+    },
+    {
+        "names": [
+            "bird",
+            "middle finger",
+            "🖕"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621870934292,
+        "headPosition": [
+            29,
+            -365,
+            13
+        ],
+        "headRotation": [
+            -0.09765417588049972,
+            0.04561368081047964,
+            -0.04616405326027284,
+            0.9931021767911381
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                24,
+                -23,
+                -38
+            ],
+            [
+                34,
+                -41,
+                -63
+            ],
+            [
+                10,
+                -51,
+                -85
+            ],
+            [
+                -14,
+                -53,
+                -90
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                23,
+                -42,
+                -111
+            ],
+            [
+                21,
+                -44,
+                -87
+            ],
+            [
+                21,
+                -26,
+                -74
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                5,
+                -27,
+                -130
+            ],
+            [
+                8,
+                -44,
+                -152
+            ],
+            [
+                9,
+                -59,
+                -172
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -17,
+                -43,
+                -103
+            ],
+            [
+                -9,
+                -44,
+                -77
+            ],
+            [
+                -5,
+                -26,
+                -62
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -29,
+                -42,
+                -87
+            ],
+            [
+                -21,
+                -45,
+                -69
+            ],
+            [
+                -15,
+                -29,
+                -55
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -14,
+                -53,
+                -90
+            ],
+            [
+                21,
+                -26,
+                -74
+            ],
+            [
+                9,
+                -59,
+                -172
+            ],
+            [
+                -5,
+                -26,
+                -62
+            ],
+            [
+                -15,
+                -29,
+                -55
+            ]
+        ]
+    },
+    {
+        "names": [
+            "pinch"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621870973822,
+        "headPosition": [
+            -80,
+            -375,
+            -14
+        ],
+        "headRotation": [
+            -0.0592691555368637,
+            0.08070381363327728,
+            -0.04523214167279594,
+            0.9939457300835792
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                23,
+                -23,
+                -38
+            ],
+            [
+                30,
+                -49,
+                -57
+            ],
+            [
+                26,
+                -72,
+                -81
+            ],
+            [
+                29,
+                -91,
+                -96
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                30,
+                -41,
+                -113
+            ],
+            [
+                28,
+                -65,
+                -110
+            ],
+            [
+                23,
+                -86,
+                -106
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                1,
+                -45,
+                -103
+            ],
+            [
+                6,
+                -45,
+                -76
+            ],
+            [
+                11,
+                -25,
+                -62
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -14,
+                -45,
+                -91
+            ],
+            [
+                -8,
+                -41,
+                -65
+            ],
+            [
+                -5,
+                -21,
+                -52
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -26,
+                -43,
+                -78
+            ],
+            [
+                -22,
+                -39,
+                -59
+            ],
+            [
+                -20,
+                -21,
+                -47
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                29,
+                -91,
+                -96
+            ],
+            [
+                23,
+                -86,
+                -106
+            ],
+            [
+                11,
+                -25,
+                -62
+            ],
+            [
+                -5,
+                -21,
+                -52
+            ],
+            [
+                -20,
+                -21,
+                -47
+            ]
+        ]
+    },
+    {
+        "names": [
+            "grab"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621871012181,
+        "headPosition": [
+            137,
+            -356,
+            -110
+        ],
+        "headRotation": [
+            -0.09641663327072797,
+            0.06199126892725712,
+            -0.03122037558161582,
+            0.992918024589878
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                27,
+                -20,
+                -36
+            ],
+            [
+                42,
+                -38,
+                -59
+            ],
+            [
+                34,
+                -56,
+                -86
+            ],
+            [
+                18,
+                -67,
+                -102
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                24,
+                -21,
+                -131
+            ],
+            [
+                24,
+                -44,
+                -124
+            ],
+            [
+                22,
+                -57,
+                -106
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                -3,
+                -25,
+                -132
+            ],
+            [
+                0,
+                -47,
+                -115
+            ],
+            [
+                6,
+                -52,
+                -91
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -21,
+                -39,
+                -110
+            ],
+            [
+                -11,
+                -56,
+                -91
+            ],
+            [
+                -1,
+                -54,
+                -69
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -28,
+                -43,
+                -82
+            ],
+            [
+                -18,
+                -52,
+                -67
+            ],
+            [
+                -8,
+                -43,
+                -50
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                18,
+                -67,
+                -102
+            ],
+            [
+                22,
+                -57,
+                -106
+            ],
+            [
+                6,
+                -52,
+                -91
+            ],
+            [
+                -1,
+                -54,
+                -69
+            ],
+            [
+                -8,
+                -43,
+                -50
+            ]
+        ]
+    },
+    {
+        "names": [
+            "crook only thumb"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621871085295,
+        "headPosition": [
+            84,
+            -361,
+            -92
+        ],
+        "headRotation": [
+            -0.048161230828918475,
+            0.05242634667049729,
+            -0.04066655647431307,
+            0.9966334356117791
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                33,
+                -8,
+                -30
+            ],
+            [
+                60,
+                -12,
+                -47
+            ],
+            [
+                59,
+                -31,
+                -75
+            ],
+            [
+                39,
+                -43,
+                -84
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                25,
+                -14,
+                -133
+            ],
+            [
+                25,
+                -20,
+                -157
+            ],
+            [
+                24,
+                -25,
+                -179
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                1,
+                -12,
+                -137
+            ],
+            [
+                1,
+                -18,
+                -164
+            ],
+            [
+                0,
+                -23,
+                -189
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -24,
+                -10,
+                -127
+            ],
+            [
+                -28,
+                -15,
+                -153
+            ],
+            [
+                -30,
+                -18,
+                -177
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -48,
+                -11,
+                -106
+            ],
+            [
+                -56,
+                -14,
+                -124
+            ],
+            [
+                -64,
+                -15,
+                -144
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                39,
+                -43,
+                -84
+            ],
+            [
+                24,
+                -25,
+                -179
+            ],
+            [
+                0,
+                -23,
+                -189
+            ],
+            [
+                -30,
+                -18,
+                -177
+            ],
+            [
+                -64,
+                -15,
+                -144
+            ]
+        ]
+    },
+    {
+        "names": [
+            "crook only index"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621871116568,
+        "headPosition": [
+            109,
+            -354,
+            -92
+        ],
+        "headRotation": [
+            -0.025244615259063023,
+            0.06940812270429603,
+            -0.003147654385321818,
+            0.9972639139799938
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                33,
+                -9,
+                -31
+            ],
+            [
+                60,
+                -16,
+                -47
+            ],
+            [
+                84,
+                -24,
+                -70
+            ],
+            [
+                104,
+                -30,
+                -83
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                26,
+                -11,
+                -134
+            ],
+            [
+                26,
+                -35,
+                -129
+            ],
+            [
+                24,
+                -42,
+                -108
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                3,
+                -7,
+                -138
+            ],
+            [
+                3,
+                -11,
+                -166
+            ],
+            [
+                3,
+                -12,
+                -191
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -27,
+                -4,
+                -126
+            ],
+            [
+                -34,
+                -3,
+                -152
+            ],
+            [
+                -39,
+                0,
+                -176
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -50,
+                -5,
+                -103
+            ],
+            [
+                -62,
+                1,
+                -119
+            ],
+            [
+                -73,
+                8,
+                -136
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                104,
+                -30,
+                -83
+            ],
+            [
+                24,
+                -42,
+                -108
+            ],
+            [
+                3,
+                -12,
+                -191
+            ],
+            [
+                -39,
+                0,
+                -176
+            ],
+            [
+                -73,
+                8,
+                -136
+            ]
+        ]
+    },
+    {
+        "names": [
+            "crook only middle"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621871143565,
+        "headPosition": [
+            10,
+            -330,
+            -80
+        ],
+        "headRotation": [
+            -0.05540664951072286,
+            0.09246454859110617,
+            -0.039987209005985715,
+            0.9933687295694825
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                33,
+                -9,
+                -31
+            ],
+            [
+                60,
+                -15,
+                -47
+            ],
+            [
+                87,
+                -19,
+                -67
+            ],
+            [
+                109,
+                -22,
+                -78
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                33,
+                -20,
+                -131
+            ],
+            [
+                39,
+                -29,
+                -152
+            ],
+            [
+                43,
+                -37,
+                -173
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                -3,
+                -16,
+                -136
+            ],
+            [
+                0,
+                -39,
+                -121
+            ],
+            [
+                5,
+                -45,
+                -97
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -33,
+                -12,
+                -124
+            ],
+            [
+                -43,
+                -18,
+                -148
+            ],
+            [
+                -52,
+                -23,
+                -170
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -55,
+                -11,
+                -101
+            ],
+            [
+                -69,
+                -11,
+                -116
+            ],
+            [
+                -82,
+                -12,
+                -133
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                109,
+                -22,
+                -78
+            ],
+            [
+                43,
+                -37,
+                -173
+            ],
+            [
+                5,
+                -45,
+                -97
+            ],
+            [
+                -52,
+                -23,
+                -170
+            ],
+            [
+                -82,
+                -12,
+                -133
+            ]
+        ]
+    },
+    {
+        "names": [
+            "crook only ring"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621871174756,
+        "headPosition": [
+            162,
+            -243,
+            -137
+        ],
+        "headRotation": [
+            -0.03531085193242154,
+            0.08132296593588238,
+            -0.06410119332766226,
+            0.9939973621394745
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                33,
+                -7,
+                -30
+            ],
+            [
+                61,
+                -12,
+                -46
+            ],
+            [
+                89,
+                -13,
+                -65
+            ],
+            [
+                111,
+                -13,
+                -75
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                31,
+                -5,
+                -133
+            ],
+            [
+                36,
+                -9,
+                -157
+            ],
+            [
+                39,
+                -13,
+                -178
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                1,
+                -7,
+                -138
+            ],
+            [
+                1,
+                -13,
+                -165
+            ],
+            [
+                0,
+                -16,
+                -190
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -30,
+                -18,
+                -124
+            ],
+            [
+                -21,
+                -41,
+                -113
+            ],
+            [
+                -9,
+                -47,
+                -93
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -54,
+                -11,
+                -102
+            ],
+            [
+                -67,
+                -12,
+                -117
+            ],
+            [
+                -80,
+                -9,
+                -135
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                111,
+                -13,
+                -75
+            ],
+            [
+                39,
+                -13,
+                -178
+            ],
+            [
+                0,
+                -16,
+                -190
+            ],
+            [
+                -9,
+                -47,
+                -93
+            ],
+            [
+                -80,
+                -9,
+                -135
+            ]
+        ]
+    },
+    {
+        "names": [
+            "crook only pinky"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621871196045,
+        "headPosition": [
+            118,
+            -343,
+            -147
+        ],
+        "headRotation": [
+            -0.05171503372828628,
+            0.05318582908522139,
+            -0.03922934621709521,
+            0.9964727196529259
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                33,
+                -8,
+                -30
+            ],
+            [
+                58,
+                -3,
+                -51
+            ],
+            [
+                72,
+                -6,
+                -81
+            ],
+            [
+                84,
+                -10,
+                -102
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                35,
+                -4,
+                -132
+            ],
+            [
+                42,
+                -6,
+                -155
+            ],
+            [
+                47,
+                -8,
+                -177
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                5,
+                -2,
+                -138
+            ],
+            [
+                7,
+                -3,
+                -166
+            ],
+            [
+                8,
+                -3,
+                -191
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -22,
+                -7,
+                -127
+            ],
+            [
+                -25,
+                -10,
+                -154
+            ],
+            [
+                -27,
+                -13,
+                -178
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -42,
+                -26,
+                -105
+            ],
+            [
+                -32,
+                -43,
+                -99
+            ],
+            [
+                -20,
+                -44,
+                -81
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                84,
+                -10,
+                -102
+            ],
+            [
+                47,
+                -8,
+                -177
+            ],
+            [
+                8,
+                -3,
+                -191
+            ],
+            [
+                -27,
+                -13,
+                -178
+            ],
+            [
+                -20,
+                -44,
+                -81
+            ]
+        ]
+    },
+    {
+        "names": [
+            "thumb",
+            "thumb up",
+            "thumb down",
+            "👍",
+            "👎"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621874504996,
+        "headPosition": [
+            208,
+            -220,
+            187
+        ],
+        "headRotation": [
+            -0.10413736410854106,
+            -0.13845956424681852,
+            -0.061015808711887554,
+            0.9829859737676301
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                33,
+                -8,
+                -30
+            ],
+            [
+                60,
+                -10,
+                -49
+            ],
+            [
+                86,
+                -8,
+                -70
+            ],
+            [
+                108,
+                -6,
+                -80
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                21,
+                -45,
+                -102
+            ],
+            [
+                21,
+                -41,
+                -78
+            ],
+            [
+                22,
+                -20,
+                -68
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                2,
+                -45,
+                -97
+            ],
+            [
+                4,
+                -45,
+                -70
+            ],
+            [
+                8,
+                -22,
+                -60
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -14,
+                -45,
+                -88
+            ],
+            [
+                -9,
+                -42,
+                -62
+            ],
+            [
+                -8,
+                -18,
+                -56
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -26,
+                -43,
+                -79
+            ],
+            [
+                -22,
+                -42,
+                -59
+            ],
+            [
+                -23,
+                -21,
+                -53
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                108,
+                -6,
+                -80
+            ],
+            [
+                22,
+                -20,
+                -68
+            ],
+            [
+                8,
+                -22,
+                -60
+            ],
+            [
+                -8,
+                -18,
+                -56
+            ],
+            [
+                -23,
+                -21,
+                -53
+            ]
+        ]
+    },
+    {
+        "names": [
+            "walk index down"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1622838940850,
+        "headPosition": [
+            210,
+            -229,
+            -182
+        ],
+        "headRotation": [
+            0.018567989878047544,
+            0.13087108802529573,
+            -0.0842125910254808,
+            0.9876417495981804
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                22,
+                -24,
+                -38
+            ],
+            [
+                29,
+                -46,
+                -61
+            ],
+            [
+                11,
+                -60,
+                -86
+            ],
+            [
+                6,
+                -76,
+                -104
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                21,
+                -42,
+                -112
+            ],
+            [
+                19,
+                -66,
+                -114
+            ],
+            [
+                16,
+                -87,
+                -120
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                -4,
+                -25,
+                -132
+            ],
+            [
+                -8,
+                -39,
+                -155
+            ],
+            [
+                -13,
+                -47,
+                -178
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -21,
+                -42,
+                -105
+            ],
+            [
+                -9,
+                -52,
+                -83
+            ],
+            [
+                0,
+                -37,
+                -66
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -30,
+                -43,
+                -87
+            ],
+            [
+                -20,
+                -51,
+                -72
+            ],
+            [
+                -12,
+                -38,
+                -56
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                6,
+                -76,
+                -104
+            ],
+            [
+                16,
+                -87,
+                -120
+            ],
+            [
+                -13,
+                -47,
+                -178
+            ],
+            [
+                0,
+                -37,
+                -66
+            ],
+            [
+                -12,
+                -38,
+                -56
+            ]
+        ]
+    },
+    {
+        "names": [
+            "walk middle down"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1622838929543,
+        "headPosition": [
+            222,
+            -212,
+            -98
+        ],
+        "headRotation": [
+            -0.029124571298756327,
+            0.12533504788819275,
+            -0.06603274110385798,
+            0.989486008434431
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                20,
+                -25,
+                -39
+            ],
+            [
+                25,
+                -44,
+                -65
+            ],
+            [
+                -1,
+                -51,
+                -85
+            ],
+            [
+                -14,
+                -62,
+                -103
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                24,
+                -13,
+                -134
+            ],
+            [
+                24,
+                -17,
+                -157
+            ],
+            [
+                22,
+                -18,
+                -180
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                -5,
+                -39,
+                -118
+            ],
+            [
+                -7,
+                -65,
+                -125
+            ],
+            [
+                -12,
+                -87,
+                -137
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -18,
+                -44,
+                -101
+            ],
+            [
+                -8,
+                -52,
+                -78
+            ],
+            [
+                -1,
+                -36,
+                -61
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -29,
+                -43,
+                -84
+            ],
+            [
+                -19,
+                -50,
+                -68
+            ],
+            [
+                -12,
+                -37,
+                -52
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -14,
+                -62,
+                -103
+            ],
+            [
+                22,
+                -18,
+                -180
+            ],
+            [
+                -12,
+                -87,
+                -137
+            ],
+            [
+                -1,
+                -36,
+                -61
+            ],
+            [
+                -12,
+                -37,
+                -52
+            ]
+        ]
+    },
+    //  Note that this pose only contains thumb and index positions.
+    //  Right now it’s “too close” to Rest...
+    //
+    //{"names":["pinch"],"handedness":"left","handyRevision":4,"time":1597940692048,"headPosition":[-938,-443,-5899],"headRotation":[-3.700743415417188e-17,0,0,1],"jointPositions":[[0,0,0],[36,19,-28],[51,44,-43],[74,68,-39],[90,82,-26],[41,9,-16],[96,7,-24],[114,41,-25],[104,63,-22],[90,80,-17]],"digitTipPositions":[[90,82,-26],[90,80,-17],[177,52,3],[173,36,24],[144,19,65]]},
+    /////////////////////
+    //                 //
+    //   ASL Letters   //
+    //                 //
+    /////////////////////
+    {
+        "names": [
+            "asl a"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621871778897,
+        "headPosition": [
+            182,
+            -314,
+            -49
+        ],
+        "headRotation": [
+            -0.019499852484758707,
+            0.13519208424834633,
+            -0.016835377760294666,
+            0.9904844400501002
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                28,
+                -20,
+                -36
+            ],
+            [
+                44,
+                -28,
+                -63
+            ],
+            [
+                42,
+                -38,
+                -95
+            ],
+            [
+                44,
+                -48,
+                -118
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                20,
+                -43,
+                -108
+            ],
+            [
+                22,
+                -45,
+                -84
+            ],
+            [
+                24,
+                -30,
+                -68
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                1,
+                -45,
+                -104
+            ],
+            [
+                6,
+                -47,
+                -76
+            ],
+            [
+                11,
+                -29,
+                -59
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -15,
+                -45,
+                -96
+            ],
+            [
+                -8,
+                -46,
+                -70
+            ],
+            [
+                -5,
+                -27,
+                -56
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -28,
+                -43,
+                -85
+            ],
+            [
+                -21,
+                -46,
+                -67
+            ],
+            [
+                -17,
+                -28,
+                -54
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                44,
+                -48,
+                -118
+            ],
+            [
+                24,
+                -30,
+                -68
+            ],
+            [
+                11,
+                -29,
+                -59
+            ],
+            [
+                -5,
+                -27,
+                -56
+            ],
+            [
+                -17,
+                -28,
+                -54
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl b"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621871797724,
+        "headPosition": [
+            106,
+            -283,
+            -133
+        ],
+        "headRotation": [
+            -0.016803011780765674,
+            0.14045297940279608,
+            -0.04276299160758588,
+            0.9890207004499837
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                17,
+                -26,
+                -39
+            ],
+            [
+                23,
+                -32,
+                -70
+            ],
+            [
+                -4,
+                -31,
+                -91
+            ],
+            [
+                -28,
+                -27,
+                -88
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                18,
+                -16,
+                -132
+            ],
+            [
+                14,
+                -26,
+                -154
+            ],
+            [
+                9,
+                -35,
+                -174
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                -3,
+                -13,
+                -137
+            ],
+            [
+                -7,
+                -22,
+                -163
+            ],
+            [
+                -11,
+                -29,
+                -187
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -22,
+                -15,
+                -127
+            ],
+            [
+                -24,
+                -22,
+                -152
+            ],
+            [
+                -26,
+                -28,
+                -175
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -36,
+                -17,
+                -108
+            ],
+            [
+                -38,
+                -22,
+                -128
+            ],
+            [
+                -38,
+                -27,
+                -149
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -28,
+                -27,
+                -88
+            ],
+            [
+                9,
+                -35,
+                -174
+            ],
+            [
+                -11,
+                -29,
+                -187
+            ],
+            [
+                -26,
+                -28,
+                -175
+            ],
+            [
+                -38,
+                -27,
+                -149
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl c"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621871824275,
+        "headPosition": [
+            293,
+            44,
+            -167
+        ],
+        "headRotation": [
+            -0.015769441657005542,
+            0.112834419485063,
+            -0.035860055813715576,
+            0.992841263536418
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                28,
+                -19,
+                -36
+            ],
+            [
+                41,
+                -47,
+                -47
+            ],
+            [
+                39,
+                -74,
+                -66
+            ],
+            [
+                29,
+                -92,
+                -80
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                17,
+                -19,
+                -132
+            ],
+            [
+                15,
+                -42,
+                -139
+            ],
+            [
+                14,
+                -64,
+                -136
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                -4,
+                -18,
+                -135
+            ],
+            [
+                -4,
+                -45,
+                -140
+            ],
+            [
+                -2,
+                -69,
+                -134
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -27,
+                -19,
+                -125
+            ],
+            [
+                -26,
+                -43,
+                -135
+            ],
+            [
+                -20,
+                -67,
+                -134
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -46,
+                -22,
+                -105
+            ],
+            [
+                -45,
+                -40,
+                -115
+            ],
+            [
+                -42,
+                -59,
+                -125
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                29,
+                -92,
+                -80
+            ],
+            [
+                14,
+                -64,
+                -136
+            ],
+            [
+                -2,
+                -69,
+                -134
+            ],
+            [
+                -20,
+                -67,
+                -134
+            ],
+            [
+                -42,
+                -59,
+                -125
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl ch"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621871850479,
+        "headPosition": [
+            134,
+            -368,
+            -103
+        ],
+        "headRotation": [
+            -0.14110001342866,
+            0.04533962313519235,
+            -0.053365810088084144,
+            0.9875156674652266
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                33,
+                -6,
+                -29
+            ],
+            [
+                61,
+                -6,
+                -45
+            ],
+            [
+                89,
+                -2,
+                -64
+            ],
+            [
+                112,
+                4,
+                -70
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                16,
+                -3,
+                -133
+            ],
+            [
+                10,
+                -4,
+                -157
+            ],
+            [
+                4,
+                -3,
+                -178
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                -5,
+                -13,
+                -137
+            ],
+            [
+                -9,
+                -20,
+                -163
+            ],
+            [
+                -14,
+                -20,
+                -188
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -19,
+                -39,
+                -110
+            ],
+            [
+                -11,
+                -48,
+                -86
+            ],
+            [
+                -4,
+                -35,
+                -66
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -31,
+                -42,
+                -89
+            ],
+            [
+                -21,
+                -52,
+                -74
+            ],
+            [
+                -11,
+                -45,
+                -56
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                112,
+                4,
+                -70
+            ],
+            [
+                4,
+                -3,
+                -178
+            ],
+            [
+                -14,
+                -20,
+                -188
+            ],
+            [
+                -4,
+                -35,
+                -66
+            ],
+            [
+                -11,
+                -45,
+                -56
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl d"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621871879065,
+        "headPosition": [
+            82,
+            -336,
+            -76
+        ],
+        "headRotation": [
+            -0.03353359924419279,
+            0.12287977213974101,
+            -0.04041665519891565,
+            0.9910310553223595
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                23,
+                -23,
+                -38
+            ],
+            [
+                32,
+                -45,
+                -61
+            ],
+            [
+                10,
+                -57,
+                -83
+            ],
+            [
+                -14,
+                -59,
+                -90
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                23,
+                -14,
+                -133
+            ],
+            [
+                22,
+                -22,
+                -156
+            ],
+            [
+                19,
+                -27,
+                -178
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                0,
+                -40,
+                -117
+            ],
+            [
+                3,
+                -46,
+                -90
+            ],
+            [
+                8,
+                -25,
+                -77
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -18,
+                -41,
+                -107
+            ],
+            [
+                -10,
+                -49,
+                -83
+            ],
+            [
+                -6,
+                -29,
+                -69
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -34,
+                -41,
+                -92
+            ],
+            [
+                -23,
+                -53,
+                -79
+            ],
+            [
+                -14,
+                -40,
+                -64
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -14,
+                -59,
+                -90
+            ],
+            [
+                19,
+                -27,
+                -178
+            ],
+            [
+                8,
+                -25,
+                -77
+            ],
+            [
+                -6,
+                -29,
+                -69
+            ],
+            [
+                -14,
+                -40,
+                -64
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl e"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621871902498,
+        "headPosition": [
+            240,
+            -223,
+            -110
+        ],
+        "headRotation": [
+            -0.07470552022672951,
+            0.11509268691627174,
+            -0.04199302744642415,
+            0.989651121681134
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                24,
+                -23,
+                -38
+            ],
+            [
+                33,
+                -47,
+                -58
+            ],
+            [
+                9,
+                -59,
+                -78
+            ],
+            [
+                -15,
+                -58,
+                -83
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                22,
+                -37,
+                -120
+            ],
+            [
+                21,
+                -52,
+                -100
+            ],
+            [
+                21,
+                -46,
+                -78
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                -2,
+                -33,
+                -126
+            ],
+            [
+                1,
+                -52,
+                -107
+            ],
+            [
+                7,
+                -56,
+                -82
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -21,
+                -34,
+                -116
+            ],
+            [
+                -13,
+                -55,
+                -101
+            ],
+            [
+                -4,
+                -58,
+                -79
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -38,
+                -34,
+                -101
+            ],
+            [
+                -28,
+                -49,
+                -92
+            ],
+            [
+                -15,
+                -55,
+                -76
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -15,
+                -58,
+                -83
+            ],
+            [
+                21,
+                -46,
+                -78
+            ],
+            [
+                7,
+                -56,
+                -82
+            ],
+            [
+                -4,
+                -58,
+                -79
+            ],
+            [
+                -15,
+                -55,
+                -76
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl f"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621871946803,
+        "headPosition": [
+            285,
+            -154,
+            -118
+        ],
+        "headRotation": [
+            -0.07042098151078573,
+            0.11591182654618942,
+            -0.025152650726378848,
+            0.9904406477814583
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                28,
+                -20,
+                -36
+            ],
+            [
+                43,
+                -40,
+                -56
+            ],
+            [
+                38,
+                -59,
+                -83
+            ],
+            [
+                19,
+                -69,
+                -97
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                17,
+                -32,
+                -124
+            ],
+            [
+                17,
+                -55,
+                -114
+            ],
+            [
+                20,
+                -67,
+                -95
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                -2,
+                -17,
+                -136
+            ],
+            [
+                -4,
+                -27,
+                -161
+            ],
+            [
+                -8,
+                -31,
+                -186
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -22,
+                -14,
+                -127
+            ],
+            [
+                -25,
+                -22,
+                -152
+            ],
+            [
+                -27,
+                -26,
+                -176
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -43,
+                -16,
+                -107
+            ],
+            [
+                -48,
+                -24,
+                -126
+            ],
+            [
+                -52,
+                -29,
+                -146
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                19,
+                -69,
+                -97
+            ],
+            [
+                20,
+                -67,
+                -95
+            ],
+            [
+                -8,
+                -31,
+                -186
+            ],
+            [
+                -27,
+                -26,
+                -176
+            ],
+            [
+                -52,
+                -29,
+                -146
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl g",
+            "fire point",
+            "👆",
+            "👉",
+            "👇",
+            "👈"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621871992236,
+        "headPosition": [
+            152,
+            -320,
+            5
+        ],
+        "headRotation": [
+            -0.12025793906110596,
+            0.07165933203263994,
+            -0.049117525611445945,
+            0.9889339901669068
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                24,
+                -23,
+                -38
+            ],
+            [
+                35,
+                -34,
+                -66
+            ],
+            [
+                21,
+                -44,
+                -96
+            ],
+            [
+                9,
+                -52,
+                -116
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                15,
+                -10,
+                -133
+            ],
+            [
+                10,
+                -20,
+                -154
+            ],
+            [
+                3,
+                -26,
+                -175
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                1,
+                -45,
+                -102
+            ],
+            [
+                6,
+                -47,
+                -75
+            ],
+            [
+                11,
+                -39,
+                -52
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -14,
+                -45,
+                -87
+            ],
+            [
+                -6,
+                -46,
+                -61
+            ],
+            [
+                1,
+                -38,
+                -39
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -26,
+                -43,
+                -77
+            ],
+            [
+                -19,
+                -47,
+                -59
+            ],
+            [
+                -11,
+                -40,
+                -39
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                9,
+                -52,
+                -116
+            ],
+            [
+                3,
+                -26,
+                -175
+            ],
+            [
+                11,
+                -39,
+                -52
+            ],
+            [
+                1,
+                -38,
+                -39
+            ],
+            [
+                -11,
+                -40,
+                -39
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl h"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621874757545,
+        "headPosition": [
+            205,
+            -344,
+            -16
+        ],
+        "headRotation": [
+            -0.09469252775371846,
+            -0.10182401471920463,
+            -0.06394111551742929,
+            0.9882189680900528
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                24,
+                -23,
+                -38
+            ],
+            [
+                35,
+                -33,
+                -66
+            ],
+            [
+                14,
+                -41,
+                -91
+            ],
+            [
+                -8,
+                -46,
+                -101
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                18,
+                -16,
+                -132
+            ],
+            [
+                14,
+                -27,
+                -154
+            ],
+            [
+                8,
+                -34,
+                -174
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                -4,
+                -23,
+                -133
+            ],
+            [
+                -8,
+                -35,
+                -157
+            ],
+            [
+                -13,
+                -42,
+                -181
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -16,
+                -44,
+                -98
+            ],
+            [
+                -8,
+                -44,
+                -73
+            ],
+            [
+                -2,
+                -25,
+                -58
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -27,
+                -43,
+                -80
+            ],
+            [
+                -19,
+                -45,
+                -62
+            ],
+            [
+                -12,
+                -31,
+                -46
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -8,
+                -46,
+                -101
+            ],
+            [
+                8,
+                -34,
+                -174
+            ],
+            [
+                -13,
+                -42,
+                -181
+            ],
+            [
+                -2,
+                -25,
+                -58
+            ],
+            [
+                -12,
+                -31,
+                -46
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl i"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621874785896,
+        "headPosition": [
+            209,
+            -245,
+            -147
+        ],
+        "headRotation": [
+            -0.009838126529548984,
+            -0.02254838053924534,
+            -0.05005611914789935,
+            0.9984433718110498
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                23,
+                -24,
+                -38
+            ],
+            [
+                31,
+                -45,
+                -61
+            ],
+            [
+                12,
+                -59,
+                -86
+            ],
+            [
+                -12,
+                -60,
+                -94
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                21,
+                -39,
+                -116
+            ],
+            [
+                22,
+                -45,
+                -93
+            ],
+            [
+                23,
+                -28,
+                -78
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                0,
+                -41,
+                -114
+            ],
+            [
+                4,
+                -48,
+                -88
+            ],
+            [
+                8,
+                -30,
+                -71
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -19,
+                -41,
+                -107
+            ],
+            [
+                -10,
+                -52,
+                -84
+            ],
+            [
+                -3,
+                -38,
+                -66
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -44,
+                -22,
+                -106
+            ],
+            [
+                -52,
+                -27,
+                -124
+            ],
+            [
+                -58,
+                -29,
+                -145
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -12,
+                -60,
+                -94
+            ],
+            [
+                23,
+                -28,
+                -78
+            ],
+            [
+                8,
+                -30,
+                -71
+            ],
+            [
+                -3,
+                -38,
+                -66
+            ],
+            [
+                -58,
+                -29,
+                -145
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl j"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621874806141,
+        "headPosition": [
+            81,
+            -372,
+            -62
+        ],
+        "headRotation": [
+            -0.1193971858043141,
+            0.018630852201901558,
+            -0.017104356346808108,
+            0.9925243796603203
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                23,
+                -24,
+                -38
+            ],
+            [
+                31,
+                -44,
+                -62
+            ],
+            [
+                12,
+                -57,
+                -87
+            ],
+            [
+                -11,
+                -60,
+                -96
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                23,
+                -41,
+                -113
+            ],
+            [
+                21,
+                -45,
+                -89
+            ],
+            [
+                21,
+                -26,
+                -77
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                2,
+                -42,
+                -111
+            ],
+            [
+                3,
+                -45,
+                -84
+            ],
+            [
+                7,
+                -24,
+                -72
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -18,
+                -42,
+                -104
+            ],
+            [
+                -9,
+                -50,
+                -80
+            ],
+            [
+                -5,
+                -29,
+                -67
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -49,
+                -34,
+                -97
+            ],
+            [
+                -59,
+                -47,
+                -108
+            ],
+            [
+                -71,
+                -58,
+                -123
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -11,
+                -60,
+                -96
+            ],
+            [
+                21,
+                -26,
+                -77
+            ],
+            [
+                7,
+                -24,
+                -72
+            ],
+            [
+                -5,
+                -29,
+                -67
+            ],
+            [
+                -71,
+                -58,
+                -123
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl k"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621874830200,
+        "headPosition": [
+            158,
+            -326,
+            -62
+        ],
+        "headRotation": [
+            -0.028979113756510227,
+            -0.04323874215541325,
+            -0.022131525157084293,
+            0.9983991274498364
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                21,
+                -25,
+                -38
+            ],
+            [
+                30,
+                -29,
+                -69
+            ],
+            [
+                19,
+                -30,
+                -102
+            ],
+            [
+                13,
+                -33,
+                -125
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                28,
+                -26,
+                -129
+            ],
+            [
+                30,
+                -38,
+                -150
+            ],
+            [
+                31,
+                -45,
+                -171
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                -5,
+                -31,
+                -127
+            ],
+            [
+                -9,
+                -50,
+                -147
+            ],
+            [
+                -15,
+                -63,
+                -167
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -14,
+                -45,
+                -88
+            ],
+            [
+                -6,
+                -46,
+                -63
+            ],
+            [
+                -1,
+                -30,
+                -46
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -26,
+                -43,
+                -74
+            ],
+            [
+                -19,
+                -44,
+                -54
+            ],
+            [
+                -13,
+                -33,
+                -37
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                13,
+                -33,
+                -125
+            ],
+            [
+                31,
+                -45,
+                -171
+            ],
+            [
+                -15,
+                -63,
+                -167
+            ],
+            [
+                -1,
+                -30,
+                -46
+            ],
+            [
+                -13,
+                -33,
+                -37
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl l"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621874854915,
+        "headPosition": [
+            124,
+            -342,
+            -101
+        ],
+        "headRotation": [
+            -0.04056130114109347,
+            -0.012641947539927575,
+            -0.03336729866091117,
+            0.9985397264789792
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                33,
+                -8,
+                -30
+            ],
+            [
+                61,
+                -13,
+                -47
+            ],
+            [
+                87,
+                -15,
+                -68
+            ],
+            [
+                109,
+                -16,
+                -78
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                22,
+                -15,
+                -133
+            ],
+            [
+                20,
+                -23,
+                -156
+            ],
+            [
+                17,
+                -29,
+                -177
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                0,
+                -44,
+                -107
+            ],
+            [
+                6,
+                -50,
+                -81
+            ],
+            [
+                12,
+                -36,
+                -61
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -15,
+                -45,
+                -95
+            ],
+            [
+                -8,
+                -45,
+                -69
+            ],
+            [
+                -2,
+                -28,
+                -53
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -27,
+                -43,
+                -82
+            ],
+            [
+                -20,
+                -43,
+                -63
+            ],
+            [
+                -16,
+                -25,
+                -52
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                109,
+                -16,
+                -78
+            ],
+            [
+                17,
+                -29,
+                -177
+            ],
+            [
+                12,
+                -36,
+                -61
+            ],
+            [
+                -2,
+                -28,
+                -53
+            ],
+            [
+                -16,
+                -25,
+                -52
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl m"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621874899359,
+        "headPosition": [
+            -7,
+            -329,
+            -74
+        ],
+        "headRotation": [
+            -0.10023329730644388,
+            0.019886358808611837,
+            -0.09346890997315044,
+            0.9903642664417475
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                21,
+                -25,
+                -38
+            ],
+            [
+                25,
+                -49,
+                -60
+            ],
+            [
+                -1,
+                -59,
+                -80
+            ],
+            [
+                -20,
+                -68,
+                -93
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                20,
+                -38,
+                -118
+            ],
+            [
+                21,
+                -53,
+                -99
+            ],
+            [
+                21,
+                -57,
+                -77
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                -1,
+                -34,
+                -125
+            ],
+            [
+                2,
+                -53,
+                -105
+            ],
+            [
+                6,
+                -63,
+                -83
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -17,
+                -37,
+                -113
+            ],
+            [
+                -12,
+                -62,
+                -103
+            ],
+            [
+                -5,
+                -70,
+                -81
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -28,
+                -43,
+                -84
+            ],
+            [
+                -21,
+                -58,
+                -72
+            ],
+            [
+                -10,
+                -69,
+                -57
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -20,
+                -68,
+                -93
+            ],
+            [
+                21,
+                -57,
+                -77
+            ],
+            [
+                6,
+                -63,
+                -83
+            ],
+            [
+                -5,
+                -70,
+                -81
+            ],
+            [
+                -10,
+                -69,
+                -57
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl n"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621874947800,
+        "headPosition": [
+            69,
+            -339,
+            -86
+        ],
+        "headRotation": [
+            -0.1260730941506564,
+            0.012984495560338512,
+            -0.06277382522941126,
+            0.989947687334436
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                22,
+                -24,
+                -38
+            ],
+            [
+                28,
+                -47,
+                -61
+            ],
+            [
+                5,
+                -59,
+                -82
+            ],
+            [
+                -15,
+                -67,
+                -94
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                25,
+                -41,
+                -113
+            ],
+            [
+                21,
+                -62,
+                -101
+            ],
+            [
+                17,
+                -81,
+                -89
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                1,
+                -38,
+                -119
+            ],
+            [
+                2,
+                -62,
+                -106
+            ],
+            [
+                4,
+                -80,
+                -88
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -16,
+                -45,
+                -97
+            ],
+            [
+                -8,
+                -54,
+                -74
+            ],
+            [
+                -3,
+                -36,
+                -57
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -27,
+                -43,
+                -81
+            ],
+            [
+                -19,
+                -48,
+                -64
+            ],
+            [
+                -12,
+                -36,
+                -47
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -15,
+                -67,
+                -94
+            ],
+            [
+                17,
+                -81,
+                -89
+            ],
+            [
+                4,
+                -80,
+                -88
+            ],
+            [
+                -3,
+                -36,
+                -57
+            ],
+            [
+                -12,
+                -36,
+                -47
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl o",
+            "loupe"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621874979309,
+        "headPosition": [
+            263,
+            -147,
+            -170
+        ],
+        "headRotation": [
+            -0.052768789541090794,
+            0.010279973383880656,
+            -0.02899980022490039,
+            0.998132650773966
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                25,
+                -22,
+                -37
+            ],
+            [
+                36,
+                -48,
+                -54
+            ],
+            [
+                27,
+                -70,
+                -78
+            ],
+            [
+                6,
+                -77,
+                -89
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                15,
+                -37,
+                -118
+            ],
+            [
+                16,
+                -59,
+                -108
+            ],
+            [
+                19,
+                -74,
+                -92
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                -8,
+                -36,
+                -120
+            ],
+            [
+                -3,
+                -60,
+                -107
+            ],
+            [
+                7,
+                -73,
+                -88
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -25,
+                -35,
+                -114
+            ],
+            [
+                -17,
+                -59,
+                -104
+            ],
+            [
+                -5,
+                -72,
+                -87
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -38,
+                -35,
+                -100
+            ],
+            [
+                -31,
+                -54,
+                -97
+            ],
+            [
+                -18,
+                -69,
+                -88
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                6,
+                -77,
+                -89
+            ],
+            [
+                19,
+                -74,
+                -92
+            ],
+            [
+                7,
+                -73,
+                -88
+            ],
+            [
+                -5,
+                -72,
+                -87
+            ],
+            [
+                -18,
+                -69,
+                -88
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl p"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621875141939,
+        "headPosition": [
+            324,
+            -37,
+            -48
+        ],
+        "headRotation": [
+            0.07310354596958854,
+            -0.05858616953154791,
+            -0.07153327076220885,
+            0.9930289635753409
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                23,
+                -23,
+                -38
+            ],
+            [
+                34,
+                -37,
+                -66
+            ],
+            [
+                29,
+                -48,
+                -97
+            ],
+            [
+                24,
+                -57,
+                -119
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                19,
+                -8,
+                -134
+            ],
+            [
+                16,
+                -11,
+                -158
+            ],
+            [
+                12,
+                -11,
+                -180
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                3,
+                -38,
+                -119
+            ],
+            [
+                4,
+                -66,
+                -119
+            ],
+            [
+                4,
+                -91,
+                -120
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -13,
+                -42,
+                -104
+            ],
+            [
+                -10,
+                -68,
+                -108
+            ],
+            [
+                -6,
+                -92,
+                -113
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -27,
+                -39,
+                -94
+            ],
+            [
+                -22,
+                -58,
+                -96
+            ],
+            [
+                -14,
+                -78,
+                -101
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                24,
+                -57,
+                -119
+            ],
+            [
+                12,
+                -11,
+                -180
+            ],
+            [
+                4,
+                -91,
+                -120
+            ],
+            [
+                -6,
+                -92,
+                -113
+            ],
+            [
+                -14,
+                -78,
+                -101
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl q"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621875184308,
+        "headPosition": [
+            104,
+            -258,
+            -220
+        ],
+        "headRotation": [
+            0.07703235647263597,
+            -0.0335867033420876,
+            -0.0672623059090038,
+            0.9941899873872886
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                23,
+                -23,
+                -38
+            ],
+            [
+                30,
+                -51,
+                -54
+            ],
+            [
+                33,
+                -77,
+                -75
+            ],
+            [
+                39,
+                -97,
+                -88
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                23,
+                -44,
+                -106
+            ],
+            [
+                21,
+                -68,
+                -105
+            ],
+            [
+                18,
+                -90,
+                -109
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                1,
+                -45,
+                -103
+            ],
+            [
+                5,
+                -55,
+                -78
+            ],
+            [
+                12,
+                -38,
+                -61
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -15,
+                -45,
+                -92
+            ],
+            [
+                -7,
+                -49,
+                -67
+            ],
+            [
+                -2,
+                -28,
+                -54
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -27,
+                -43,
+                -80
+            ],
+            [
+                -19,
+                -44,
+                -61
+            ],
+            [
+                -14,
+                -28,
+                -47
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                39,
+                -97,
+                -88
+            ],
+            [
+                18,
+                -90,
+                -109
+            ],
+            [
+                12,
+                -38,
+                -61
+            ],
+            [
+                -2,
+                -28,
+                -54
+            ],
+            [
+                -14,
+                -28,
+                -47
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl r"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621875274715,
+        "headPosition": [
+            216,
+            -302,
+            -93
+        ],
+        "headRotation": [
+            0.06510766615081523,
+            -0.02983815151591771,
+            -0.025680876928263853,
+            0.9971013834983259
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                24,
+                -23,
+                -38
+            ],
+            [
+                34,
+                -40,
+                -63
+            ],
+            [
+                11,
+                -50,
+                -86
+            ],
+            [
+                -7,
+                -59,
+                -100
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                14,
+                -23,
+                -129
+            ],
+            [
+                9,
+                -37,
+                -148
+            ],
+            [
+                2,
+                -48,
+                -166
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                -5,
+                -13,
+                -137
+            ],
+            [
+                -9,
+                -24,
+                -161
+            ],
+            [
+                -14,
+                -29,
+                -185
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -17,
+                -43,
+                -103
+            ],
+            [
+                -9,
+                -48,
+                -78
+            ],
+            [
+                -4,
+                -30,
+                -63
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -30,
+                -43,
+                -87
+            ],
+            [
+                -20,
+                -50,
+                -71
+            ],
+            [
+                -11,
+                -38,
+                -55
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -7,
+                -59,
+                -100
+            ],
+            [
+                2,
+                -48,
+                -166
+            ],
+            [
+                -14,
+                -29,
+                -185
+            ],
+            [
+                -4,
+                -30,
+                -63
+            ],
+            [
+                -11,
+                -38,
+                -55
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl s",
+            "fist",
+            "✊",
+            "👊",
+            "🤛",
+            "🤜"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621870370249,
+        "headPosition": [
+            203,
+            -292,
+            -19
+        ],
+        "headRotation": [
+            -0.017547499176952776,
+            0.13279210878847558,
+            0.1290836948078115,
+            0.9825455389301496
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                23,
+                -24,
+                -38
+            ],
+            [
+                31,
+                -45,
+                -61
+            ],
+            [
+                10,
+                -58,
+                -84
+            ],
+            [
+                -14,
+                -57,
+                -89
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                19,
+                -41,
+                -112
+            ],
+            [
+                22,
+                -45,
+                -88
+            ],
+            [
+                25,
+                -25,
+                -79
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                0,
+                -44,
+                -107
+            ],
+            [
+                5,
+                -44,
+                -80
+            ],
+            [
+                10,
+                -21,
+                -71
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -15,
+                -45,
+                -93
+            ],
+            [
+                -7,
+                -44,
+                -68
+            ],
+            [
+                -4,
+                -21,
+                -60
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -27,
+                -43,
+                -80
+            ],
+            [
+                -20,
+                -43,
+                -61
+            ],
+            [
+                -17,
+                -24,
+                -50
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -14,
+                -57,
+                -89
+            ],
+            [
+                25,
+                -25,
+                -79
+            ],
+            [
+                10,
+                -21,
+                -71
+            ],
+            [
+                -4,
+                -21,
+                -60
+            ],
+            [
+                -17,
+                -24,
+                -50
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl t"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621875341312,
+        "headPosition": [
+            80,
+            -305,
+            -152
+        ],
+        "headRotation": [
+            0.008885164891425348,
+            -0.08500178270105636,
+            -0.029174463053758787,
+            0.995913952803595
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                25,
+                -22,
+                -37
+            ],
+            [
+                37,
+                -38,
+                -64
+            ],
+            [
+                23,
+                -50,
+                -92
+            ],
+            [
+                7,
+                -59,
+                -108
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                20,
+                -41,
+                -113
+            ],
+            [
+                20,
+                -56,
+                -94
+            ],
+            [
+                21,
+                -61,
+                -72
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                -1,
+                -42,
+                -112
+            ],
+            [
+                4,
+                -53,
+                -87
+            ],
+            [
+                10,
+                -51,
+                -63
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -16,
+                -44,
+                -98
+            ],
+            [
+                -8,
+                -51,
+                -73
+            ],
+            [
+                -1,
+                -40,
+                -52
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -28,
+                -43,
+                -85
+            ],
+            [
+                -20,
+                -48,
+                -67
+            ],
+            [
+                -13,
+                -36,
+                -49
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                7,
+                -59,
+                -108
+            ],
+            [
+                21,
+                -61,
+                -72
+            ],
+            [
+                10,
+                -51,
+                -63
+            ],
+            [
+                -1,
+                -40,
+                -52
+            ],
+            [
+                -13,
+                -36,
+                -49
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl u"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621875374841,
+        "headPosition": [
+            109,
+            -385,
+            -119
+        ],
+        "headRotation": [
+            0.03669679849630809,
+            -0.08965324550882436,
+            -0.020928895465911704,
+            0.9950766913450697
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                23,
+                -24,
+                -38
+            ],
+            [
+                31,
+                -43,
+                -63
+            ],
+            [
+                6,
+                -52,
+                -84
+            ],
+            [
+                -14,
+                -60,
+                -97
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                23,
+                -16,
+                -133
+            ],
+            [
+                23,
+                -23,
+                -156
+            ],
+            [
+                20,
+                -26,
+                -178
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                3,
+                -16,
+                -136
+            ],
+            [
+                3,
+                -25,
+                -162
+            ],
+            [
+                2,
+                -27,
+                -187
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -17,
+                -43,
+                -102
+            ],
+            [
+                -9,
+                -49,
+                -77
+            ],
+            [
+                -4,
+                -30,
+                -63
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -29,
+                -43,
+                -85
+            ],
+            [
+                -20,
+                -51,
+                -68
+            ],
+            [
+                -12,
+                -38,
+                -52
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -14,
+                -60,
+                -97
+            ],
+            [
+                20,
+                -26,
+                -178
+            ],
+            [
+                2,
+                -27,
+                -187
+            ],
+            [
+                -4,
+                -30,
+                -63
+            ],
+            [
+                -12,
+                -38,
+                -52
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl v",
+            "peace",
+            "✌️"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621875402912,
+        "headPosition": [
+            122,
+            -316,
+            -124
+        ],
+        "headRotation": [
+            -0.046381640765697923,
+            -0.1386975035631272,
+            -0.04666913413286176,
+            0.9881466168669708
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                22,
+                -24,
+                -38
+            ],
+            [
+                31,
+                -38,
+                -66
+            ],
+            [
+                7,
+                -46,
+                -88
+            ],
+            [
+                -16,
+                -48,
+                -96
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                28,
+                -17,
+                -132
+            ],
+            [
+                30,
+                -25,
+                -155
+            ],
+            [
+                31,
+                -31,
+                -177
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                -1,
+                -20,
+                -135
+            ],
+            [
+                -3,
+                -31,
+                -160
+            ],
+            [
+                -6,
+                -36,
+                -184
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -17,
+                -43,
+                -102
+            ],
+            [
+                -9,
+                -46,
+                -77
+            ],
+            [
+                -3,
+                -27,
+                -62
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -29,
+                -43,
+                -85
+            ],
+            [
+                -19,
+                -49,
+                -68
+            ],
+            [
+                -12,
+                -35,
+                -52
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -16,
+                -48,
+                -96
+            ],
+            [
+                31,
+                -31,
+                -177
+            ],
+            [
+                -6,
+                -36,
+                -184
+            ],
+            [
+                -3,
+                -27,
+                -62
+            ],
+            [
+                -12,
+                -35,
+                -52
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl w"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621875430912,
+        "headPosition": [
+            91,
+            -299,
+            -165
+        ],
+        "headRotation": [
+            0.005363275076511218,
+            -0.08574498229404216,
+            -0.037063463384950326,
+            0.9956130437140168
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                19,
+                -26,
+                -39
+            ],
+            [
+                21,
+                -48,
+                -62
+            ],
+            [
+                -2,
+                -58,
+                -85
+            ],
+            [
+                -25,
+                -59,
+                -93
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                33,
+                -8,
+                -133
+            ],
+            [
+                38,
+                -11,
+                -156
+            ],
+            [
+                42,
+                -12,
+                -178
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                1,
+                -1,
+                -139
+            ],
+            [
+                0,
+                -1,
+                -166
+            ],
+            [
+                -2,
+                1,
+                -191
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -26,
+                -10,
+                -127
+            ],
+            [
+                -32,
+                -14,
+                -152
+            ],
+            [
+                -35,
+                -21,
+                -175
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -33,
+                -34,
+                -100
+            ],
+            [
+                -27,
+                -54,
+                -99
+            ],
+            [
+                -17,
+                -57,
+                -79
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -25,
+                -59,
+                -93
+            ],
+            [
+                42,
+                -12,
+                -178
+            ],
+            [
+                -2,
+                1,
+                -191
+            ],
+            [
+                -35,
+                -21,
+                -175
+            ],
+            [
+                -17,
+                -57,
+                -79
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl x"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621875479783,
+        "headPosition": [
+            204,
+            -230,
+            -126
+        ],
+        "headRotation": [
+            -0.035253246808133305,
+            -0.1081898174369778,
+            -0.04904097832277269,
+            0.9922938851090634
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                26,
+                -21,
+                -37
+            ],
+            [
+                40,
+                -39,
+                -61
+            ],
+            [
+                20,
+                -52,
+                -85
+            ],
+            [
+                -3,
+                -55,
+                -91
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                21,
+                -13,
+                -133
+            ],
+            [
+                20,
+                -35,
+                -143
+            ],
+            [
+                18,
+                -57,
+                -144
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                -1,
+                -42,
+                -112
+            ],
+            [
+                4,
+                -58,
+                -91
+            ],
+            [
+                10,
+                -59,
+                -67
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -17,
+                -44,
+                -99
+            ],
+            [
+                -8,
+                -58,
+                -78
+            ],
+            [
+                1,
+                -54,
+                -56
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -29,
+                -43,
+                -85
+            ],
+            [
+                -20,
+                -56,
+                -72
+            ],
+            [
+                -10,
+                -50,
+                -53
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -3,
+                -55,
+                -91
+            ],
+            [
+                18,
+                -57,
+                -144
+            ],
+            [
+                10,
+                -59,
+                -67
+            ],
+            [
+                1,
+                -54,
+                -56
+            ],
+            [
+                -10,
+                -50,
+                -53
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl y"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621875524911,
+        "headPosition": [
+            151,
+            -342,
+            -69
+        ],
+        "headRotation": [
+            0.036581437519999545,
+            -0.07335823014707835,
+            -0.029505239595445182,
+            0.9961976758259407
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                32,
+                -11,
+                -32
+            ],
+            [
+                58,
+                -18,
+                -51
+            ],
+            [
+                82,
+                -23,
+                -74
+            ],
+            [
+                101,
+                -28,
+                -89
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                21,
+                -45,
+                -102
+            ],
+            [
+                21,
+                -41,
+                -78
+            ],
+            [
+                22,
+                -20,
+                -69
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                2,
+                -45,
+                -101
+            ],
+            [
+                5,
+                -44,
+                -74
+            ],
+            [
+                9,
+                -20,
+                -66
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -15,
+                -45,
+                -97
+            ],
+            [
+                -9,
+                -48,
+                -71
+            ],
+            [
+                -7,
+                -25,
+                -63
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -46,
+                -31,
+                -101
+            ],
+            [
+                -50,
+                -48,
+                -111
+            ],
+            [
+                -52,
+                -66,
+                -124
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                101,
+                -28,
+                -89
+            ],
+            [
+                22,
+                -20,
+                -69
+            ],
+            [
+                9,
+                -20,
+                -66
+            ],
+            [
+                -7,
+                -25,
+                -63
+            ],
+            [
+                -52,
+                -66,
+                -124
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl z",
+            "point"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621875547773,
+        "headPosition": [
+            212,
+            -342,
+            -12
+        ],
+        "headRotation": [
+            0.031743901208425594,
+            -0.06209305218894014,
+            -0.042621428217515016,
+            0.9966544994485798
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                25,
+                -22,
+                -37
+            ],
+            [
+                37,
+                -42,
+                -60
+            ],
+            [
+                14,
+                -55,
+                -81
+            ],
+            [
+                -10,
+                -54,
+                -84
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                29,
+                -21,
+                -131
+            ],
+            [
+                31,
+                -42,
+                -144
+            ],
+            [
+                31,
+                -60,
+                -156
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                1,
+                -44,
+                -108
+            ],
+            [
+                4,
+                -43,
+                -80
+            ],
+            [
+                8,
+                -20,
+                -71
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -14,
+                -45,
+                -90
+            ],
+            [
+                -9,
+                -42,
+                -65
+            ],
+            [
+                -7,
+                -18,
+                -58
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -26,
+                -43,
+                -76
+            ],
+            [
+                -21,
+                -43,
+                -56
+            ],
+            [
+                -19,
+                -25,
+                -45
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -10,
+                -54,
+                -84
+            ],
+            [
+                31,
+                -60,
+                -156
+            ],
+            [
+                8,
+                -20,
+                -71
+            ],
+            [
+                -7,
+                -18,
+                -58
+            ],
+            [
+                -19,
+                -25,
+                -45
+            ]
+        ]
+    },
+    ///////////////////////
+    //                   //
+    //    ASL Numbers    //
+    //                   //
+    ///////////////////////
+    {
+        "names": [
+            "asl 1",
+            "point"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621874139596,
+        "headPosition": [
+            64,
+            -351,
+            -84
+        ],
+        "headRotation": [
+            -0.029158160599974753,
+            -0.019127475048798265,
+            -0.07787657102664286,
+            0.9963529399451466
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                23,
+                -24,
+                -38
+            ],
+            [
+                30,
+                -49,
+                -57
+            ],
+            [
+                7,
+                -63,
+                -78
+            ],
+            [
+                -17,
+                -59,
+                -81
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                31,
+                -17,
+                -132
+            ],
+            [
+                35,
+                -24,
+                -155
+            ],
+            [
+                37,
+                -29,
+                -177
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                1,
+                -43,
+                -109
+            ],
+            [
+                4,
+                -44,
+                -82
+            ],
+            [
+                8,
+                -21,
+                -72
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -14,
+                -45,
+                -90
+            ],
+            [
+                -7,
+                -45,
+                -65
+            ],
+            [
+                -5,
+                -22,
+                -56
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -26,
+                -43,
+                -75
+            ],
+            [
+                -19,
+                -46,
+                -56
+            ],
+            [
+                -16,
+                -28,
+                -44
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -17,
+                -59,
+                -81
+            ],
+            [
+                37,
+                -29,
+                -177
+            ],
+            [
+                8,
+                -21,
+                -72
+            ],
+            [
+                -5,
+                -22,
+                -56
+            ],
+            [
+                -16,
+                -28,
+                -44
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl 2",
+            "peace",
+            "✌️"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621874075200,
+        "headPosition": [
+            151,
+            -390,
+            -87
+        ],
+        "headRotation": [
+            0.006502625489545991,
+            -0.024572932419834225,
+            -0.02214079376699433,
+            0.9994316745529562
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                21,
+                -24,
+                -38
+            ],
+            [
+                28,
+                -46,
+                -62
+            ],
+            [
+                1,
+                -55,
+                -81
+            ],
+            [
+                -23,
+                -55,
+                -86
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                35,
+                -15,
+                -131
+            ],
+            [
+                42,
+                -21,
+                -154
+            ],
+            [
+                48,
+                -23,
+                -175
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                -7,
+                -17,
+                -135
+            ],
+            [
+                -12,
+                -27,
+                -160
+            ],
+            [
+                -18,
+                -30,
+                -184
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -17,
+                -43,
+                -102
+            ],
+            [
+                -9,
+                -48,
+                -77
+            ],
+            [
+                -5,
+                -28,
+                -64
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -28,
+                -43,
+                -84
+            ],
+            [
+                -19,
+                -51,
+                -68
+            ],
+            [
+                -14,
+                -35,
+                -54
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -23,
+                -55,
+                -86
+            ],
+            [
+                48,
+                -23,
+                -175
+            ],
+            [
+                -18,
+                -30,
+                -184
+            ],
+            [
+                -5,
+                -28,
+                -64
+            ],
+            [
+                -14,
+                -35,
+                -54
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl 3"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621874201097,
+        "headPosition": [
+            190,
+            -342,
+            -61
+        ],
+        "headRotation": [
+            -0.04114482518126441,
+            -0.04672599021504886,
+            -0.059016801086056524,
+            0.9963136063146777
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                33,
+                -8,
+                -30
+            ],
+            [
+                60,
+                -9,
+                -48
+            ],
+            [
+                85,
+                -9,
+                -70
+            ],
+            [
+                107,
+                -8,
+                -81
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                32,
+                -10,
+                -133
+            ],
+            [
+                36,
+                -16,
+                -156
+            ],
+            [
+                39,
+                -17,
+                -178
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                -2,
+                -20,
+                -135
+            ],
+            [
+                -4,
+                -31,
+                -160
+            ],
+            [
+                -7,
+                -35,
+                -184
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -16,
+                -44,
+                -99
+            ],
+            [
+                -8,
+                -48,
+                -74
+            ],
+            [
+                -4,
+                -29,
+                -60
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -27,
+                -43,
+                -81
+            ],
+            [
+                -19,
+                -48,
+                -63
+            ],
+            [
+                -14,
+                -32,
+                -48
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                107,
+                -8,
+                -81
+            ],
+            [
+                39,
+                -17,
+                -178
+            ],
+            [
+                -7,
+                -35,
+                -184
+            ],
+            [
+                -4,
+                -29,
+                -60
+            ],
+            [
+                -14,
+                -32,
+                -48
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl 4"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621874257740,
+        "headPosition": [
+            140,
+            -362,
+            -107
+        ],
+        "headRotation": [
+            0.03238182935539894,
+            -0.02523442422633529,
+            -0.024968573666132005,
+            0.9988449385498364
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                17,
+                -26,
+                -39
+            ],
+            [
+                21,
+                -37,
+                -69
+            ],
+            [
+                -6,
+                -36,
+                -89
+            ],
+            [
+                -30,
+                -31,
+                -85
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                33,
+                -14,
+                -132
+            ],
+            [
+                38,
+                -20,
+                -155
+            ],
+            [
+                42,
+                -25,
+                -177
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                -1,
+                -5,
+                -138
+            ],
+            [
+                -2,
+                -7,
+                -166
+            ],
+            [
+                -5,
+                -6,
+                -191
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -28,
+                -3,
+                -126
+            ],
+            [
+                -35,
+                -2,
+                -152
+            ],
+            [
+                -40,
+                3,
+                -175
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -53,
+                -9,
+                -103
+            ],
+            [
+                -66,
+                -7,
+                -118
+            ],
+            [
+                -78,
+                -2,
+                -135
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -30,
+                -31,
+                -85
+            ],
+            [
+                42,
+                -25,
+                -177
+            ],
+            [
+                -5,
+                -6,
+                -191
+            ],
+            [
+                -40,
+                3,
+                -175
+            ],
+            [
+                -78,
+                -2,
+                -135
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl 5"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621874278975,
+        "headPosition": [
+            11,
+            -375,
+            -145
+        ],
+        "headRotation": [
+            -0.01424900891631985,
+            -0.014852552866668253,
+            -0.033428050597345875,
+            0.9992291693359462
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                32,
+                -11,
+                -32
+            ],
+            [
+                58,
+                -18,
+                -50
+            ],
+            [
+                79,
+                -26,
+                -75
+            ],
+            [
+                95,
+                -34,
+                -92
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                29,
+                -14,
+                -133
+            ],
+            [
+                32,
+                -21,
+                -156
+            ],
+            [
+                33,
+                -26,
+                -178
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                -1,
+                -10,
+                -138
+            ],
+            [
+                -2,
+                -16,
+                -165
+            ],
+            [
+                -4,
+                -20,
+                -189
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -27,
+                -3,
+                -126
+            ],
+            [
+                -33,
+                -5,
+                -152
+            ],
+            [
+                -36,
+                -12,
+                -175
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -50,
+                -7,
+                -104
+            ],
+            [
+                -59,
+                -9,
+                -122
+            ],
+            [
+                -67,
+                -12,
+                -142
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                95,
+                -34,
+                -92
+            ],
+            [
+                33,
+                -26,
+                -178
+            ],
+            [
+                -4,
+                -20,
+                -189
+            ],
+            [
+                -36,
+                -12,
+                -175
+            ],
+            [
+                -67,
+                -12,
+                -142
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl 6"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621874305650,
+        "headPosition": [
+            79,
+            -333,
+            -120
+        ],
+        "headRotation": [
+            -0.035647110822363375,
+            -0.013440825782236418,
+            -0.06558875464630948,
+            0.9971192219848677
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                23,
+                -24,
+                -38
+            ],
+            [
+                30,
+                -47,
+                -60
+            ],
+            [
+                4,
+                -58,
+                -79
+            ],
+            [
+                -20,
+                -56,
+                -84
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                34,
+                -10,
+                -132
+            ],
+            [
+                40,
+                -17,
+                -155
+            ],
+            [
+                44,
+                -20,
+                -177
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                0,
+                -7,
+                -138
+            ],
+            [
+                -2,
+                -12,
+                -165
+            ],
+            [
+                -4,
+                -11,
+                -190
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -28,
+                -12,
+                -126
+            ],
+            [
+                -35,
+                -18,
+                -151
+            ],
+            [
+                -39,
+                -27,
+                -173
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -41,
+                -32,
+                -102
+            ],
+            [
+                -32,
+                -50,
+                -97
+            ],
+            [
+                -18,
+                -52,
+                -80
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -20,
+                -56,
+                -84
+            ],
+            [
+                44,
+                -20,
+                -177
+            ],
+            [
+                -4,
+                -11,
+                -190
+            ],
+            [
+                -39,
+                -27,
+                -173
+            ],
+            [
+                -18,
+                -52,
+                -80
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl 7"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621874326397,
+        "headPosition": [
+            85,
+            -327,
+            -141
+        ],
+        "headRotation": [
+            -0.02404793325717927,
+            -0.03915655630906013,
+            -0.05397512383887663,
+            0.9974844093542959
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                22,
+                -24,
+                -38
+            ],
+            [
+                31,
+                -42,
+                -64
+            ],
+            [
+                10,
+                -53,
+                -88
+            ],
+            [
+                -14,
+                -54,
+                -94
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                33,
+                -10,
+                -133
+            ],
+            [
+                39,
+                -14,
+                -156
+            ],
+            [
+                42,
+                -16,
+                -178
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                -1,
+                -4,
+                -138
+            ],
+            [
+                -4,
+                -9,
+                -166
+            ],
+            [
+                -6,
+                -11,
+                -190
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -27,
+                -23,
+                -123
+            ],
+            [
+                -18,
+                -43,
+                -108
+            ],
+            [
+                -7,
+                -46,
+                -86
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -53,
+                -16,
+                -103
+            ],
+            [
+                -61,
+                -28,
+                -117
+            ],
+            [
+                -69,
+                -39,
+                -135
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -14,
+                -54,
+                -94
+            ],
+            [
+                42,
+                -16,
+                -178
+            ],
+            [
+                -6,
+                -11,
+                -190
+            ],
+            [
+                -7,
+                -46,
+                -86
+            ],
+            [
+                -69,
+                -39,
+                -135
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl 8"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621874353242,
+        "headPosition": [
+            78,
+            -339,
+            -125
+        ],
+        "headRotation": [
+            -0.0394012707434378,
+            -0.018567670747027278,
+            -0.06706900603639192,
+            0.9967971357081135
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                24,
+                -23,
+                -38
+            ],
+            [
+                34,
+                -42,
+                -62
+            ],
+            [
+                22,
+                -58,
+                -89
+            ],
+            [
+                2,
+                -64,
+                -102
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                28,
+                -13,
+                -133
+            ],
+            [
+                30,
+                -24,
+                -155
+            ],
+            [
+                31,
+                -33,
+                -175
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                -7,
+                -24,
+                -132
+            ],
+            [
+                -3,
+                -48,
+                -119
+            ],
+            [
+                3,
+                -61,
+                -100
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -36,
+                -18,
+                -121
+            ],
+            [
+                -47,
+                -32,
+                -141
+            ],
+            [
+                -54,
+                -46,
+                -159
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -59,
+                -11,
+                -97
+            ],
+            [
+                -75,
+                -11,
+                -109
+            ],
+            [
+                -92,
+                -8,
+                -123
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                2,
+                -64,
+                -102
+            ],
+            [
+                31,
+                -33,
+                -175
+            ],
+            [
+                3,
+                -61,
+                -100
+            ],
+            [
+                -54,
+                -46,
+                -159
+            ],
+            [
+                -92,
+                -8,
+                -123
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl 9"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621874380658,
+        "headPosition": [
+            89,
+            -334,
+            -145
+        ],
+        "headRotation": [
+            0.00175277867453723,
+            -0.040796866892560436,
+            -0.016166442497654962,
+            0.9990351292865637
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                28,
+                -19,
+                -36
+            ],
+            [
+                44,
+                -40,
+                -55
+            ],
+            [
+                37,
+                -60,
+                -81
+            ],
+            [
+                21,
+                -71,
+                -96
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                23,
+                -34,
+                -123
+            ],
+            [
+                22,
+                -56,
+                -111
+            ],
+            [
+                20,
+                -69,
+                -93
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                -1,
+                -12,
+                -137
+            ],
+            [
+                -2,
+                -19,
+                -164
+            ],
+            [
+                -5,
+                -21,
+                -189
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -34,
+                -7,
+                -124
+            ],
+            [
+                -45,
+                -8,
+                -148
+            ],
+            [
+                -55,
+                -6,
+                -170
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -59,
+                -10,
+                -97
+            ],
+            [
+                -75,
+                -10,
+                -109
+            ],
+            [
+                -91,
+                -6,
+                -123
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                21,
+                -71,
+                -96
+            ],
+            [
+                20,
+                -69,
+                -93
+            ],
+            [
+                -5,
+                -21,
+                -189
+            ],
+            [
+                -55,
+                -6,
+                -170
+            ],
+            [
+                -91,
+                -6,
+                -123
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl 10"
+        ],
+        "handedness": "left",
+        "handyRevision": 5,
+        "time": 1621874477261,
+        "headPosition": [
+            220,
+            -224,
+            101
+        ],
+        "headRotation": [
+            -0.10380468555712614,
+            -0.13570943839560753,
+            -0.05264908799584896,
+            0.9838880041058812
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                32,
+                -11,
+                -32
+            ],
+            [
+                53,
+                -6,
+                -56
+            ],
+            [
+                72,
+                3,
+                -83
+            ],
+            [
+                92,
+                13,
+                -94
+            ],
+            [
+                16,
+                -9,
+                -41
+            ],
+            [
+                24,
+                -7,
+                -96
+            ],
+            [
+                20,
+                -45,
+                -102
+            ],
+            [
+                21,
+                -43,
+                -77
+            ],
+            [
+                23,
+                -23,
+                -67
+            ],
+            [
+                3,
+                -9,
+                -41
+            ],
+            [
+                2,
+                -3,
+                -96
+            ],
+            [
+                2,
+                -45,
+                -98
+            ],
+            [
+                5,
+                -45,
+                -70
+            ],
+            [
+                10,
+                -24,
+                -58
+            ],
+            [
+                -8,
+                -9,
+                -38
+            ],
+            [
+                -17,
+                -7,
+                -89
+            ],
+            [
+                -14,
+                -45,
+                -88
+            ],
+            [
+                -7,
+                -43,
+                -62
+            ],
+            [
+                -5,
+                -21,
+                -53
+            ],
+            [
+                -23,
+                -9,
+                -34
+            ],
+            [
+                -35,
+                -14,
+                -78
+            ],
+            [
+                -26,
+                -43,
+                -77
+            ],
+            [
+                -22,
+                -40,
+                -57
+            ],
+            [
+                -20,
+                -21,
+                -46
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                92,
+                13,
+                -94
+            ],
+            [
+                23,
+                -23,
+                -67
+            ],
+            [
+                10,
+                -24,
+                -58
+            ],
+            [
+                -5,
+                -21,
+                -53
+            ],
+            [
+                -20,
+                -21,
+                -46
+            ]
+        ]
+    }
+];
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"JacNc"}],"enOjr":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "poses", ()=>poses
+);
+//  Copyright © 2020–2021 Stewart Smith. See LICENSE for details.
+//  Oculus Quest has trouble with finger overlaps 
+//  as illustrated by American Sign Language (ASL)
+//  for M, N, R, T, X etc.
+const poses = [
+    //////////////
+    //          //
+    //   Misc   //
+    //          //
+    //////////////
+    {
+        "names": [
+            "rest"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621881514856,
+        "headPosition": [
+            -64,
+            -391,
+            45
+        ],
+        "headRotation": [
+            -0.11318427621538905,
+            -0.1625642803168944,
+            -0.006275592560091326,
+            0.9801646728407021
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -27,
+                -20,
+                -37
+            ],
+            [
+                -41,
+                -42,
+                -57
+            ],
+            [
+                -42,
+                -62,
+                -84
+            ],
+            [
+                -46,
+                -79,
+                -101
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -25,
+                -31,
+                -125
+            ],
+            [
+                -24,
+                -54,
+                -133
+            ],
+            [
+                -22,
+                -77,
+                -136
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                3,
+                -26,
+                -131
+            ],
+            [
+                4,
+                -52,
+                -142
+            ],
+            [
+                3,
+                -77,
+                -143
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                25,
+                -29,
+                -120
+            ],
+            [
+                26,
+                -53,
+                -132
+            ],
+            [
+                21,
+                -77,
+                -132
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                40,
+                -36,
+                -98
+            ],
+            [
+                40,
+                -56,
+                -104
+            ],
+            [
+                35,
+                -76,
+                -110
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -46,
+                -79,
+                -101
+            ],
+            [
+                -22,
+                -77,
+                -136
+            ],
+            [
+                3,
+                -77,
+                -143
+            ],
+            [
+                21,
+                -77,
+                -132
+            ],
+            [
+                35,
+                -76,
+                -110
+            ]
+        ]
+    },
+    {
+        "names": [
+            "flat"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1622838762796,
+        "headPosition": [
+            158,
+            -222,
+            108
+        ],
+        "headRotation": [
+            -0.1172082908243403,
+            0.44275682814448214,
+            0.08105469925532659,
+            0.8852449738878424
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -27,
+                -20,
+                -37
+            ],
+            [
+                -42,
+                -25,
+                -65
+            ],
+            [
+                -41,
+                -31,
+                -98
+            ],
+            [
+                -34,
+                -37,
+                -121
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -15,
+                -21,
+                -130
+            ],
+            [
+                -9,
+                -32,
+                -151
+            ],
+            [
+                -2,
+                -40,
+                -171
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                7,
+                -21,
+                -134
+            ],
+            [
+                12,
+                -34,
+                -157
+            ],
+            [
+                19,
+                -41,
+                -180
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                24,
+                -22,
+                -124
+            ],
+            [
+                28,
+                -33,
+                -148
+            ],
+            [
+                32,
+                -41,
+                -170
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                37,
+                -22,
+                -107
+            ],
+            [
+                41,
+                -28,
+                -126
+            ],
+            [
+                41,
+                -35,
+                -147
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -34,
+                -37,
+                -121
+            ],
+            [
+                -2,
+                -40,
+                -171
+            ],
+            [
+                19,
+                -41,
+                -180
+            ],
+            [
+                32,
+                -41,
+                -170
+            ],
+            [
+                41,
+                -35,
+                -147
+            ]
+        ]
+    },
+    {
+        "names": [
+            "flare"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621881545752,
+        "headPosition": [
+            -119,
+            -335,
+            -149
+        ],
+        "headRotation": [
+            -0.042908171671413545,
+            -0.0891097255155344,
+            0.02898383397506922,
+            0.9946749633099781
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -32,
+                -13,
+                -33
+            ],
+            [
+                -55,
+                -16,
+                -55
+            ],
+            [
+                -77,
+                -17,
+                -81
+            ],
+            [
+                -99,
+                -15,
+                -92
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -33,
+                -2,
+                -132
+            ],
+            [
+                -38,
+                1,
+                -156
+            ],
+            [
+                -42,
+                8,
+                -177
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                3,
+                2,
+                -138
+            ],
+            [
+                6,
+                6,
+                -165
+            ],
+            [
+                9,
+                14,
+                -188
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                28,
+                0,
+                -126
+            ],
+            [
+                36,
+                4,
+                -151
+            ],
+            [
+                42,
+                11,
+                -173
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                54,
+                -6,
+                -101
+            ],
+            [
+                67,
+                0,
+                -115
+            ],
+            [
+                80,
+                8,
+                -131
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -99,
+                -15,
+                -92
+            ],
+            [
+                -42,
+                8,
+                -177
+            ],
+            [
+                9,
+                14,
+                -188
+            ],
+            [
+                42,
+                11,
+                -173
+            ],
+            [
+                80,
+                8,
+                -131
+            ]
+        ]
+    },
+    {
+        "names": [
+            "devil",
+            "bull"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621881578193,
+        "headPosition": [
+            -125,
+            -290,
+            -121
+        ],
+        "headRotation": [
+            0.015154962337995587,
+            -0.2145673568118638,
+            0.01317463214916269,
+            0.9765027420731681
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -23,
+                -24,
+                -38
+            ],
+            [
+                -30,
+                -47,
+                -60
+            ],
+            [
+                -7,
+                -59,
+                -82
+            ],
+            [
+                15,
+                -64,
+                -92
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -21,
+                -12,
+                -134
+            ],
+            [
+                -20,
+                -19,
+                -157
+            ],
+            [
+                -16,
+                -22,
+                -179
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                1,
+                -42,
+                -111
+            ],
+            [
+                -5,
+                -50,
+                -85
+            ],
+            [
+                -11,
+                -30,
+                -71
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                17,
+                -44,
+                -100
+            ],
+            [
+                8,
+                -59,
+                -80
+            ],
+            [
+                -1,
+                -50,
+                -59
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                42,
+                -25,
+                -106
+            ],
+            [
+                49,
+                -32,
+                -123
+            ],
+            [
+                55,
+                -37,
+                -144
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                15,
+                -64,
+                -92
+            ],
+            [
+                -16,
+                -22,
+                -179
+            ],
+            [
+                -11,
+                -30,
+                -71
+            ],
+            [
+                -1,
+                -50,
+                -59
+            ],
+            [
+                55,
+                -37,
+                -144
+            ]
+        ]
+    },
+    {
+        "names": [
+            "love"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621881607628,
+        "headPosition": [
+            -119,
+            -304,
+            -80
+        ],
+        "headRotation": [
+            -0.003695033792621759,
+            -0.1937612061195965,
+            -0.0058891848113515255,
+            0.9810240869633209
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -32,
+                -12,
+                -32
+            ],
+            [
+                -57,
+                -18,
+                -52
+            ],
+            [
+                -82,
+                -21,
+                -75
+            ],
+            [
+                -104,
+                -22,
+                -86
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -26,
+                -18,
+                -132
+            ],
+            [
+                -27,
+                -28,
+                -154
+            ],
+            [
+                -26,
+                -33,
+                -176
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                -2,
+                -44,
+                -106
+            ],
+            [
+                -4,
+                -47,
+                -78
+            ],
+            [
+                -7,
+                -30,
+                -60
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                15,
+                -43,
+                -101
+            ],
+            [
+                9,
+                -54,
+                -77
+            ],
+            [
+                5,
+                -42,
+                -57
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                39,
+                -30,
+                -104
+            ],
+            [
+                43,
+                -41,
+                -121
+            ],
+            [
+                46,
+                -49,
+                -140
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -104,
+                -22,
+                -86
+            ],
+            [
+                -26,
+                -33,
+                -176
+            ],
+            [
+                -7,
+                -30,
+                -60
+            ],
+            [
+                5,
+                -42,
+                -57
+            ],
+            [
+                46,
+                -49,
+                -140
+            ]
+        ]
+    },
+    {
+        "names": [
+            "vulcan",
+            "🖖"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621881629782,
+        "headPosition": [
+            -47,
+            -285,
+            -137
+        ],
+        "headRotation": [
+            -0.00788533602704356,
+            -0.17753875000023764,
+            0.03477551031615197,
+            0.9834675783171185
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -32,
+                -13,
+                -33
+            ],
+            [
+                -55,
+                -18,
+                -55
+            ],
+            [
+                -77,
+                -20,
+                -80
+            ],
+            [
+                -98,
+                -21,
+                -93
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -27,
+                -10,
+                -134
+            ],
+            [
+                -28,
+                -21,
+                -155
+            ],
+            [
+                -28,
+                -28,
+                -177
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                -8,
+                -17,
+                -136
+            ],
+            [
+                -12,
+                -26,
+                -161
+            ],
+            [
+                -14,
+                -29,
+                -186
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                29,
+                -16,
+                -125
+            ],
+            [
+                36,
+                -26,
+                -148
+            ],
+            [
+                41,
+                -36,
+                -170
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                46,
+                -17,
+                -107
+            ],
+            [
+                54,
+                -20,
+                -125
+            ],
+            [
+                61,
+                -24,
+                -145
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -98,
+                -21,
+                -93
+            ],
+            [
+                -28,
+                -28,
+                -177
+            ],
+            [
+                -14,
+                -29,
+                -186
+            ],
+            [
+                41,
+                -36,
+                -170
+            ],
+            [
+                61,
+                -24,
+                -145
+            ]
+        ]
+    },
+    {
+        "names": [
+            "vulcan inverse"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621881661054,
+        "headPosition": [
+            -59,
+            -334,
+            -130
+        ],
+        "headRotation": [
+            0.017199811443081248,
+            -0.20500198528557165,
+            0.006698643820019644,
+            0.9785874924887487
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -32,
+                -12,
+                -32
+            ],
+            [
+                -57,
+                -21,
+                -50
+            ],
+            [
+                -82,
+                -28,
+                -72
+            ],
+            [
+                -106,
+                -30,
+                -79
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -34,
+                -9,
+                -132
+            ],
+            [
+                -41,
+                -15,
+                -155
+            ],
+            [
+                -45,
+                -16,
+                -177
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                9,
+                -6,
+                -137
+            ],
+            [
+                16,
+                -10,
+                -163
+            ],
+            [
+                24,
+                -7,
+                -187
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                29,
+                -6,
+                -126
+            ],
+            [
+                38,
+                -7,
+                -151
+            ],
+            [
+                45,
+                -4,
+                -174
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                55,
+                -13,
+                -101
+            ],
+            [
+                69,
+                -12,
+                -116
+            ],
+            [
+                83,
+                -8,
+                -132
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -106,
+                -30,
+                -79
+            ],
+            [
+                -45,
+                -16,
+                -177
+            ],
+            [
+                24,
+                -7,
+                -187
+            ],
+            [
+                45,
+                -4,
+                -174
+            ],
+            [
+                83,
+                -8,
+                -132
+            ]
+        ]
+    },
+    {
+        "names": [
+            "bird",
+            "middle finger",
+            "🖕"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621881686130,
+        "headPosition": [
+            29,
+            -350,
+            -7
+        ],
+        "headRotation": [
+            -0.0004854304158765525,
+            -0.1877960176241366,
+            0.0020061913749466315,
+            0.982205882346267
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -25,
+                -22,
+                -37
+            ],
+            [
+                -36,
+                -42,
+                -60
+            ],
+            [
+                -14,
+                -55,
+                -83
+            ],
+            [
+                9,
+                -58,
+                -90
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -21,
+                -44,
+                -105
+            ],
+            [
+                -20,
+                -43,
+                -81
+            ],
+            [
+                -21,
+                -24,
+                -69
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                -3,
+                -31,
+                -128
+            ],
+            [
+                -4,
+                -50,
+                -148
+            ],
+            [
+                -4,
+                -63,
+                -169
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                16,
+                -45,
+                -96
+            ],
+            [
+                7,
+                -48,
+                -71
+            ],
+            [
+                2,
+                -29,
+                -56
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                28,
+                -43,
+                -83
+            ],
+            [
+                19,
+                -47,
+                -65
+            ],
+            [
+                12,
+                -34,
+                -49
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                9,
+                -58,
+                -90
+            ],
+            [
+                -21,
+                -24,
+                -69
+            ],
+            [
+                -4,
+                -63,
+                -169
+            ],
+            [
+                2,
+                -29,
+                -56
+            ],
+            [
+                12,
+                -34,
+                -49
+            ]
+        ]
+    },
+    {
+        "names": [
+            "pinch"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621881712711,
+        "headPosition": [
+            -305,
+            -136,
+            -110
+        ],
+        "headRotation": [
+            -0.06083174371449158,
+            -0.19810562171298635,
+            -0.012269519211855118,
+            0.9782142508052221
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -21,
+                -25,
+                -38
+            ],
+            [
+                -24,
+                -51,
+                -57
+            ],
+            [
+                -15,
+                -74,
+                -81
+            ],
+            [
+                -12,
+                -93,
+                -96
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -16,
+                -43,
+                -105
+            ],
+            [
+                -14,
+                -67,
+                -103
+            ],
+            [
+                -11,
+                -90,
+                -101
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                -1,
+                -45,
+                -104
+            ],
+            [
+                -5,
+                -51,
+                -78
+            ],
+            [
+                -10,
+                -32,
+                -63
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                14,
+                -45,
+                -91
+            ],
+            [
+                7,
+                -51,
+                -66
+            ],
+            [
+                1,
+                -36,
+                -48
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                26,
+                -43,
+                -77
+            ],
+            [
+                18,
+                -47,
+                -59
+            ],
+            [
+                10,
+                -35,
+                -42
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -12,
+                -93,
+                -96
+            ],
+            [
+                -11,
+                -90,
+                -101
+            ],
+            [
+                -10,
+                -32,
+                -63
+            ],
+            [
+                1,
+                -36,
+                -48
+            ],
+            [
+                10,
+                -35,
+                -42
+            ]
+        ]
+    },
+    {
+        "names": [
+            "grab"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621881737885,
+        "headPosition": [
+            -75,
+            -302,
+            -135
+        ],
+        "headRotation": [
+            -0.06681427167873569,
+            -0.1353902095223235,
+            0.004201903876012201,
+            0.9885280405653611
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -25,
+                -22,
+                -37
+            ],
+            [
+                -36,
+                -44,
+                -59
+            ],
+            [
+                -36,
+                -63,
+                -86
+            ],
+            [
+                -23,
+                -76,
+                -104
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -23,
+                -30,
+                -127
+            ],
+            [
+                -22,
+                -53,
+                -120
+            ],
+            [
+                -20,
+                -72,
+                -108
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                5,
+                -26,
+                -131
+            ],
+            [
+                2,
+                -51,
+                -118
+            ],
+            [
+                -5,
+                -60,
+                -96
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                24,
+                -34,
+                -115
+            ],
+            [
+                13,
+                -46,
+                -94
+            ],
+            [
+                4,
+                -38,
+                -73
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                34,
+                -41,
+                -92
+            ],
+            [
+                22,
+                -48,
+                -77
+            ],
+            [
+                10,
+                -41,
+                -60
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -23,
+                -76,
+                -104
+            ],
+            [
+                -20,
+                -72,
+                -108
+            ],
+            [
+                -5,
+                -60,
+                -96
+            ],
+            [
+                4,
+                -38,
+                -73
+            ],
+            [
+                10,
+                -41,
+                -60
+            ]
+        ]
+    },
+    {
+        "names": [
+            "crook only thumb"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621881768169,
+        "headPosition": [
+            -45,
+            -354,
+            -97
+        ],
+        "headRotation": [
+            -0.05281256618128167,
+            -0.20128351515725584,
+            0.016699590289580905,
+            0.9779656952298778
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -31,
+                -14,
+                -33
+            ],
+            [
+                -54,
+                -31,
+                -49
+            ],
+            [
+                -47,
+                -52,
+                -74
+            ],
+            [
+                -26,
+                -60,
+                -85
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -28,
+                -18,
+                -132
+            ],
+            [
+                -30,
+                -28,
+                -154
+            ],
+            [
+                -31,
+                -36,
+                -175
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                7,
+                -13,
+                -136
+            ],
+            [
+                13,
+                -23,
+                -161
+            ],
+            [
+                19,
+                -29,
+                -185
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                31,
+                -11,
+                -125
+            ],
+            [
+                41,
+                -17,
+                -149
+            ],
+            [
+                48,
+                -21,
+                -172
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                54,
+                -13,
+                -102
+            ],
+            [
+                68,
+                -16,
+                -117
+            ],
+            [
+                81,
+                -18,
+                -134
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -26,
+                -60,
+                -85
+            ],
+            [
+                -31,
+                -36,
+                -175
+            ],
+            [
+                19,
+                -29,
+                -185
+            ],
+            [
+                48,
+                -21,
+                -172
+            ],
+            [
+                81,
+                -18,
+                -134
+            ]
+        ]
+    },
+    {
+        "names": [
+            "crook only index"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621881789208,
+        "headPosition": [
+            -102,
+            -330,
+            -84
+        ],
+        "headRotation": [
+            0.009144924780874994,
+            -0.23451003158022074,
+            0.013531559764024191,
+            0.971976497706242
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -31,
+                -14,
+                -34
+            ],
+            [
+                -54,
+                -25,
+                -54
+            ],
+            [
+                -75,
+                -33,
+                -80
+            ],
+            [
+                -97,
+                -37,
+                -90
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -19,
+                -17,
+                -132
+            ],
+            [
+                -20,
+                -40,
+                -123
+            ],
+            [
+                -21,
+                -51,
+                -103
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                10,
+                -1,
+                -137
+            ],
+            [
+                17,
+                -14,
+                -161
+            ],
+            [
+                24,
+                -20,
+                -184
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                32,
+                -2,
+                -124
+            ],
+            [
+                42,
+                -5,
+                -149
+            ],
+            [
+                49,
+                -9,
+                -172
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                55,
+                -10,
+                -101
+            ],
+            [
+                69,
+                -10,
+                -116
+            ],
+            [
+                82,
+                -7,
+                -133
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -97,
+                -37,
+                -90
+            ],
+            [
+                -21,
+                -51,
+                -103
+            ],
+            [
+                24,
+                -20,
+                -184
+            ],
+            [
+                49,
+                -9,
+                -172
+            ],
+            [
+                82,
+                -7,
+                -133
+            ]
+        ]
+    },
+    {
+        "names": [
+            "crook only middle"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621881809592,
+        "headPosition": [
+            -108,
+            -303,
+            -104
+        ],
+        "headRotation": [
+            0.021550719084558165,
+            -0.2641360591010682,
+            0.017785397286299166,
+            0.9640805918183769
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -32,
+                -13,
+                -33
+            ],
+            [
+                -56,
+                -21,
+                -53
+            ],
+            [
+                -78,
+                -26,
+                -78
+            ],
+            [
+                -100,
+                -28,
+                -88
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -33,
+                -8,
+                -133
+            ],
+            [
+                -38,
+                -17,
+                -154
+            ],
+            [
+                -42,
+                -22,
+                -176
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                9,
+                -7,
+                -137
+            ],
+            [
+                6,
+                -34,
+                -131
+            ],
+            [
+                -1,
+                -50,
+                -113
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                33,
+                -7,
+                -125
+            ],
+            [
+                42,
+                -13,
+                -149
+            ],
+            [
+                48,
+                -24,
+                -170
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                57,
+                -9,
+                -99
+            ],
+            [
+                73,
+                -9,
+                -112
+            ],
+            [
+                88,
+                -6,
+                -127
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -100,
+                -28,
+                -88
+            ],
+            [
+                -42,
+                -22,
+                -176
+            ],
+            [
+                -1,
+                -50,
+                -113
+            ],
+            [
+                48,
+                -24,
+                -170
+            ],
+            [
+                88,
+                -6,
+                -127
+            ]
+        ]
+    },
+    {
+        "names": [
+            "crook only ring"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621881827288,
+        "headPosition": [
+            -152,
+            -291,
+            -100
+        ],
+        "headRotation": [
+            0.041323393072950305,
+            -0.25220391221424776,
+            0.01942511734346915,
+            0.9665962065144839
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -32,
+                -12,
+                -33
+            ],
+            [
+                -56,
+                -18,
+                -54
+            ],
+            [
+                -79,
+                -20,
+                -79
+            ],
+            [
+                -101,
+                -19,
+                -90
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -32,
+                -6,
+                -133
+            ],
+            [
+                -37,
+                -9,
+                -156
+            ],
+            [
+                -41,
+                -8,
+                -179
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                1,
+                -3,
+                -138
+            ],
+            [
+                3,
+                -7,
+                -166
+            ],
+            [
+                6,
+                -5,
+                -190
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                27,
+                -17,
+                -125
+            ],
+            [
+                21,
+                -43,
+                -119
+            ],
+            [
+                10,
+                -48,
+                -98
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                55,
+                -11,
+                -101
+            ],
+            [
+                68,
+                -13,
+                -116
+            ],
+            [
+                82,
+                -12,
+                -134
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -101,
+                -19,
+                -90
+            ],
+            [
+                -41,
+                -8,
+                -179
+            ],
+            [
+                6,
+                -5,
+                -190
+            ],
+            [
+                10,
+                -48,
+                -98
+            ],
+            [
+                82,
+                -12,
+                -134
+            ]
+        ]
+    },
+    {
+        "names": [
+            "crook only pinky"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621881858744,
+        "headPosition": [
+            -135,
+            -284,
+            -123
+        ],
+        "headRotation": [
+            0.005733437519730562,
+            -0.2159877088253948,
+            0.014911793850178559,
+            0.9762653714762984
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -32,
+                -12,
+                -33
+            ],
+            [
+                -56,
+                -17,
+                -54
+            ],
+            [
+                -77,
+                -19,
+                -80
+            ],
+            [
+                -99,
+                -18,
+                -91
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -29,
+                -7,
+                -134
+            ],
+            [
+                -32,
+                -12,
+                -157
+            ],
+            [
+                -34,
+                -12,
+                -179
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                1,
+                -2,
+                -138
+            ],
+            [
+                4,
+                -4,
+                -166
+            ],
+            [
+                7,
+                1,
+                -190
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                30,
+                -10,
+                -126
+            ],
+            [
+                37,
+                -19,
+                -149
+            ],
+            [
+                39,
+                -35,
+                -168
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                52,
+                -15,
+                -103
+            ],
+            [
+                46,
+                -35,
+                -106
+            ],
+            [
+                32,
+                -51,
+                -100
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -99,
+                -18,
+                -91
+            ],
+            [
+                -34,
+                -12,
+                -179
+            ],
+            [
+                7,
+                1,
+                -190
+            ],
+            [
+                39,
+                -35,
+                -168
+            ],
+            [
+                32,
+                -51,
+                -100
+            ]
+        ]
+    },
+    {
+        "names": [
+            "thumb",
+            "thumb up",
+            "thumb down",
+            "👍",
+            "👎"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621881942689,
+        "headPosition": [
+            -248,
+            -272,
+            18
+        ],
+        "headRotation": [
+            -0.11001935349063505,
+            -0.1617075878223402,
+            -0.002788315921741593,
+            0.9806827306290092
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -32,
+                -13,
+                -33
+            ],
+            [
+                -54,
+                -15,
+                -56
+            ],
+            [
+                -75,
+                -14,
+                -83
+            ],
+            [
+                -95,
+                -12,
+                -97
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -20,
+                -45,
+                -102
+            ],
+            [
+                -21,
+                -41,
+                -78
+            ],
+            [
+                -23,
+                -20,
+                -69
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                -2,
+                -45,
+                -97
+            ],
+            [
+                -5,
+                -42,
+                -70
+            ],
+            [
+                -9,
+                -19,
+                -61
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                14,
+                -45,
+                -89
+            ],
+            [
+                10,
+                -41,
+                -63
+            ],
+            [
+                9,
+                -17,
+                -57
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                26,
+                -43,
+                -81
+            ],
+            [
+                23,
+                -41,
+                -61
+            ],
+            [
+                23,
+                -21,
+                -52
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -95,
+                -12,
+                -97
+            ],
+            [
+                -23,
+                -20,
+                -69
+            ],
+            [
+                -9,
+                -19,
+                -61
+            ],
+            [
+                9,
+                -17,
+                -57
+            ],
+            [
+                23,
+                -21,
+                -52
+            ]
+        ]
+    },
+    {
+        "names": [
+            "walk index down"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1622838817238,
+        "headPosition": [
+            139,
+            -276,
+            -77
+        ],
+        "headRotation": [
+            0.04400396843457909,
+            0.39634227956261536,
+            0.07614551298960316,
+            0.913880893128327
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -23,
+                -24,
+                -38
+            ],
+            [
+                -32,
+                -43,
+                -62
+            ],
+            [
+                -13,
+                -56,
+                -87
+            ],
+            [
+                8,
+                -62,
+                -99
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -30,
+                -36,
+                -120
+            ],
+            [
+                -30,
+                -60,
+                -123
+            ],
+            [
+                -28,
+                -82,
+                -125
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                3,
+                -28,
+                -130
+            ],
+            [
+                5,
+                -49,
+                -148
+            ],
+            [
+                8,
+                -65,
+                -166
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                16,
+                -45,
+                -95
+            ],
+            [
+                6,
+                -53,
+                -71
+            ],
+            [
+                1,
+                -32,
+                -59
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                26,
+                -43,
+                -76
+            ],
+            [
+                16,
+                -50,
+                -59
+            ],
+            [
+                9,
+                -36,
+                -44
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                8,
+                -62,
+                -99
+            ],
+            [
+                -28,
+                -82,
+                -125
+            ],
+            [
+                8,
+                -65,
+                -166
+            ],
+            [
+                1,
+                -32,
+                -59
+            ],
+            [
+                9,
+                -36,
+                -44
+            ]
+        ]
+    },
+    {
+        "names": [
+            "walk middle down"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1622838844155,
+        "headPosition": [
+            -42,
+            -343,
+            -199
+        ],
+        "headRotation": [
+            0.09813459168249522,
+            0.3594401540784347,
+            0.11199783218577673,
+            0.9212105127240787
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -23,
+                -24,
+                -38
+            ],
+            [
+                -31,
+                -43,
+                -63
+            ],
+            [
+                -12,
+                -56,
+                -87
+            ],
+            [
+                7,
+                -63,
+                -101
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -18,
+                -5,
+                -133
+            ],
+            [
+                -14,
+                -6,
+                -157
+            ],
+            [
+                -10,
+                -9,
+                -179
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                3,
+                -35,
+                -124
+            ],
+            [
+                5,
+                -61,
+                -133
+            ],
+            [
+                8,
+                -81,
+                -147
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                16,
+                -45,
+                -95
+            ],
+            [
+                6,
+                -52,
+                -71
+            ],
+            [
+                0,
+                -35,
+                -55
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                27,
+                -43,
+                -80
+            ],
+            [
+                18,
+                -53,
+                -64
+            ],
+            [
+                11,
+                -41,
+                -47
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                7,
+                -63,
+                -101
+            ],
+            [
+                -10,
+                -9,
+                -179
+            ],
+            [
+                8,
+                -81,
+                -147
+            ],
+            [
+                0,
+                -35,
+                -55
+            ],
+            [
+                11,
+                -41,
+                -47
+            ]
+        ]
+    },
+    //  Note that this pose only contains thumb and index positions.
+    //  Right now it’s “too close” to Rest...
+    //
+    // {"names":["Pinch"],"handedness":"left","handyRevision":4,"time":1597940692048,"headPosition":[-938,-443,-5899],"headRotation":[-3.700743415417188e-17,0,0,1],"jointPositions":[[0,0,0],[36,19,-28],[51,44,-43],[74,68,-39],[90,82,-26],[41,9,-16],[96,7,-24],[114,41,-25],[104,63,-22],[90,80,-17]],"digitTipPositions":[[90,82,-26],[90,80,-17],[177,52,3],[173,36,24],[144,19,65]]},
+    /////////////////////
+    //                 //
+    //   ASL Letters   //
+    //                 //
+    /////////////////////
+    {
+        "names": [
+            "asl a"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621882944164,
+        "headPosition": [
+            53,
+            -321,
+            -89
+        ],
+        "headRotation": [
+            -0.024134810454782985,
+            -0.26288105009248797,
+            -0.03824814169067881,
+            0.9637676804180307
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -26,
+                -21,
+                -37
+            ],
+            [
+                -41,
+                -29,
+                -65
+            ],
+            [
+                -40,
+                -37,
+                -98
+            ],
+            [
+                -42,
+                -44,
+                -121
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -18,
+                -41,
+                -112
+            ],
+            [
+                -22,
+                -49,
+                -89
+            ],
+            [
+                -26,
+                -38,
+                -70
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                -1,
+                -45,
+                -102
+            ],
+            [
+                -6,
+                -48,
+                -75
+            ],
+            [
+                -12,
+                -30,
+                -59
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                14,
+                -45,
+                -90
+            ],
+            [
+                7,
+                -47,
+                -65
+            ],
+            [
+                3,
+                -27,
+                -52
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                27,
+                -43,
+                -80
+            ],
+            [
+                20,
+                -44,
+                -60
+            ],
+            [
+                17,
+                -26,
+                -48
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -42,
+                -44,
+                -121
+            ],
+            [
+                -26,
+                -38,
+                -70
+            ],
+            [
+                -12,
+                -30,
+                -59
+            ],
+            [
+                3,
+                -27,
+                -52
+            ],
+            [
+                17,
+                -26,
+                -48
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl b"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621883082793,
+        "headPosition": [
+            -48,
+            -279,
+            -105
+        ],
+        "headRotation": [
+            -0.0472995944462143,
+            -0.2602977265871908,
+            -0.04700969032239724,
+            0.9632226772436064
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -18,
+                -26,
+                -39
+            ],
+            [
+                -23,
+                -38,
+                -69
+            ],
+            [
+                4,
+                -40,
+                -89
+            ],
+            [
+                27,
+                -34,
+                -83
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -17,
+                -12,
+                -133
+            ],
+            [
+                -13,
+                -19,
+                -156
+            ],
+            [
+                -7,
+                -23,
+                -177
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                4,
+                -7,
+                -138
+            ],
+            [
+                7,
+                -15,
+                -164
+            ],
+            [
+                11,
+                -17,
+                -189
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                21,
+                -11,
+                -127
+            ],
+            [
+                24,
+                -16,
+                -153
+            ],
+            [
+                25,
+                -18,
+                -177
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                37,
+                -15,
+                -109
+            ],
+            [
+                39,
+                -17,
+                -129
+            ],
+            [
+                38,
+                -21,
+                -150
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                27,
+                -34,
+                -83
+            ],
+            [
+                -7,
+                -23,
+                -177
+            ],
+            [
+                11,
+                -17,
+                -189
+            ],
+            [
+                25,
+                -18,
+                -177
+            ],
+            [
+                38,
+                -21,
+                -150
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl c"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621883106278,
+        "headPosition": [
+            -161,
+            -253,
+            -181
+        ],
+        "headRotation": [
+            -0.031044843855791704,
+            -0.3587409993860259,
+            -0.022698032565334196,
+            0.932644578090668
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -26,
+                -22,
+                -37
+            ],
+            [
+                -35,
+                -48,
+                -53
+            ],
+            [
+                -32,
+                -73,
+                -76
+            ],
+            [
+                -19,
+                -87,
+                -91
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -15,
+                -22,
+                -130
+            ],
+            [
+                -13,
+                -45,
+                -136
+            ],
+            [
+                -11,
+                -68,
+                -135
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                7,
+                -19,
+                -135
+            ],
+            [
+                7,
+                -46,
+                -138
+            ],
+            [
+                3,
+                -69,
+                -129
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                26,
+                -18,
+                -125
+            ],
+            [
+                24,
+                -44,
+                -131
+            ],
+            [
+                16,
+                -66,
+                -123
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                43,
+                -22,
+                -107
+            ],
+            [
+                39,
+                -40,
+                -113
+            ],
+            [
+                29,
+                -60,
+                -112
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -19,
+                -87,
+                -91
+            ],
+            [
+                -11,
+                -68,
+                -135
+            ],
+            [
+                3,
+                -69,
+                -129
+            ],
+            [
+                16,
+                -66,
+                -123
+            ],
+            [
+                29,
+                -60,
+                -112
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl ch"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621883140308,
+        "headPosition": [
+            -189,
+            -341,
+            -23
+        ],
+        "headRotation": [
+            -0.08784393135065552,
+            -0.292413990755669,
+            -0.03092413135597379,
+            0.9517463881176054
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -33,
+                -10,
+                -31
+            ],
+            [
+                -58,
+                -10,
+                -52
+            ],
+            [
+                -82,
+                -6,
+                -75
+            ],
+            [
+                -104,
+                -2,
+                -85
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -13,
+                -14,
+                -132
+            ],
+            [
+                -6,
+                -29,
+                -150
+            ],
+            [
+                1,
+                -39,
+                -168
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                10,
+                -21,
+                -133
+            ],
+            [
+                18,
+                -32,
+                -156
+            ],
+            [
+                27,
+                -38,
+                -179
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                17,
+                -43,
+                -103
+            ],
+            [
+                9,
+                -47,
+                -78
+            ],
+            [
+                3,
+                -31,
+                -60
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                27,
+                -43,
+                -80
+            ],
+            [
+                18,
+                -45,
+                -62
+            ],
+            [
+                12,
+                -29,
+                -49
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -104,
+                -2,
+                -85
+            ],
+            [
+                1,
+                -39,
+                -168
+            ],
+            [
+                27,
+                -38,
+                -179
+            ],
+            [
+                3,
+                -31,
+                -60
+            ],
+            [
+                12,
+                -29,
+                -49
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl d"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621883173585,
+        "headPosition": [
+            -65,
+            -248,
+            -180
+        ],
+        "headRotation": [
+            -0.0327625837204299,
+            -0.280829044991422,
+            -0.0223488575246916,
+            0.9589380517573219
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -27,
+                -21,
+                -37
+            ],
+            [
+                -39,
+                -45,
+                -55
+            ],
+            [
+                -23,
+                -64,
+                -78
+            ],
+            [
+                -1,
+                -68,
+                -87
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -25,
+                0,
+                -133
+            ],
+            [
+                -25,
+                -2,
+                -157
+            ],
+            [
+                -24,
+                -3,
+                -180
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                1,
+                -34,
+                -125
+            ],
+            [
+                -2,
+                -56,
+                -109
+            ],
+            [
+                -6,
+                -67,
+                -86
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                21,
+                -37,
+                -113
+            ],
+            [
+                12,
+                -53,
+                -94
+            ],
+            [
+                3,
+                -56,
+                -72
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                35,
+                -37,
+                -98
+            ],
+            [
+                25,
+                -50,
+                -85
+            ],
+            [
+                13,
+                -50,
+                -67
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -1,
+                -68,
+                -87
+            ],
+            [
+                -24,
+                -3,
+                -180
+            ],
+            [
+                -6,
+                -67,
+                -86
+            ],
+            [
+                3,
+                -56,
+                -72
+            ],
+            [
+                13,
+                -50,
+                -67
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl e"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621883218489,
+        "headPosition": [
+            -197,
+            -273,
+            -145
+        ],
+        "headRotation": [
+            -0.017489514609342158,
+            -0.26509877312444663,
+            0.013989895152736636,
+            0.9639611193528128
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -25,
+                -22,
+                -37
+            ],
+            [
+                -35,
+                -47,
+                -56
+            ],
+            [
+                -16,
+                -63,
+                -77
+            ],
+            [
+                8,
+                -62,
+                -82
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -21,
+                -39,
+                -117
+            ],
+            [
+                -20,
+                -57,
+                -100
+            ],
+            [
+                -20,
+                -64,
+                -79
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                2,
+                -37,
+                -121
+            ],
+            [
+                -1,
+                -59,
+                -104
+            ],
+            [
+                -7,
+                -68,
+                -81
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                21,
+                -36,
+                -114
+            ],
+            [
+                13,
+                -57,
+                -99
+            ],
+            [
+                3,
+                -63,
+                -78
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                40,
+                -32,
+                -102
+            ],
+            [
+                32,
+                -51,
+                -99
+            ],
+            [
+                19,
+                -64,
+                -88
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                8,
+                -62,
+                -82
+            ],
+            [
+                -20,
+                -64,
+                -79
+            ],
+            [
+                -7,
+                -68,
+                -81
+            ],
+            [
+                3,
+                -63,
+                -78
+            ],
+            [
+                19,
+                -64,
+                -88
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl f"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621883249037,
+        "headPosition": [
+            -28,
+            -306,
+            -143
+        ],
+        "headRotation": [
+            -0.0007735203828889945,
+            -0.25933821184840133,
+            0.015459251370733788,
+            0.965662521187352
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -25,
+                -22,
+                -37
+            ],
+            [
+                -37,
+                -34,
+                -65
+            ],
+            [
+                -34,
+                -43,
+                -98
+            ],
+            [
+                -14,
+                -48,
+                -111
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -11,
+                -11,
+                -132
+            ],
+            [
+                -12,
+                -35,
+                -126
+            ],
+            [
+                -18,
+                -46,
+                -108
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                6,
+                -8,
+                -138
+            ],
+            [
+                10,
+                -17,
+                -163
+            ],
+            [
+                15,
+                -21,
+                -187
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                23,
+                -9,
+                -127
+            ],
+            [
+                27,
+                -13,
+                -153
+            ],
+            [
+                30,
+                -14,
+                -177
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                40,
+                -11,
+                -108
+            ],
+            [
+                43,
+                -13,
+                -128
+            ],
+            [
+                45,
+                -13,
+                -150
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -14,
+                -48,
+                -111
+            ],
+            [
+                -18,
+                -46,
+                -108
+            ],
+            [
+                15,
+                -21,
+                -187
+            ],
+            [
+                30,
+                -14,
+                -177
+            ],
+            [
+                45,
+                -13,
+                -150
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl g",
+            "fire point",
+            "👆",
+            "👉",
+            "👇",
+            "👈"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621883280506,
+        "headPosition": [
+            -138,
+            -288,
+            -47
+        ],
+        "headRotation": [
+            -0.06227371595365319,
+            -0.30639725922426614,
+            -0.04356903981644507,
+            0.9488648129806869
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -24,
+                -23,
+                -37
+            ],
+            [
+                -36,
+                -35,
+                -65
+            ],
+            [
+                -24,
+                -45,
+                -95
+            ],
+            [
+                -15,
+                -55,
+                -115
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -15,
+                -17,
+                -132
+            ],
+            [
+                -10,
+                -29,
+                -152
+            ],
+            [
+                -4,
+                -39,
+                -171
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                -1,
+                -44,
+                -106
+            ],
+            [
+                -5,
+                -45,
+                -78
+            ],
+            [
+                -10,
+                -27,
+                -62
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                14,
+                -45,
+                -87
+            ],
+            [
+                7,
+                -42,
+                -62
+            ],
+            [
+                2,
+                -23,
+                -46
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                26,
+                -43,
+                -75
+            ],
+            [
+                20,
+                -41,
+                -56
+            ],
+            [
+                15,
+                -26,
+                -40
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -15,
+                -55,
+                -115
+            ],
+            [
+                -4,
+                -39,
+                -171
+            ],
+            [
+                -10,
+                -27,
+                -62
+            ],
+            [
+                2,
+                -23,
+                -46
+            ],
+            [
+                15,
+                -26,
+                -40
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl h"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621883524798,
+        "headPosition": [
+            -160,
+            -335,
+            107
+        ],
+        "headRotation": [
+            -0.03357166353848798,
+            -0.4143326464547515,
+            -0.030494249244769803,
+            0.9089947721405505
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -22,
+                -24,
+                -38
+            ],
+            [
+                -30,
+                -39,
+                -66
+            ],
+            [
+                -8,
+                -47,
+                -90
+            ],
+            [
+                12,
+                -53,
+                -104
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -16,
+                -25,
+                -129
+            ],
+            [
+                -11,
+                -39,
+                -148
+            ],
+            [
+                -4,
+                -48,
+                -167
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                6,
+                -27,
+                -130
+            ],
+            [
+                11,
+                -42,
+                -153
+            ],
+            [
+                17,
+                -51,
+                -175
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                15,
+                -45,
+                -96
+            ],
+            [
+                8,
+                -44,
+                -70
+            ],
+            [
+                4,
+                -23,
+                -59
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                26,
+                -43,
+                -77
+            ],
+            [
+                18,
+                -46,
+                -59
+            ],
+            [
+                11,
+                -31,
+                -44
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                12,
+                -53,
+                -104
+            ],
+            [
+                -4,
+                -48,
+                -167
+            ],
+            [
+                17,
+                -51,
+                -175
+            ],
+            [
+                4,
+                -23,
+                -59
+            ],
+            [
+                11,
+                -31,
+                -44
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl i"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621883555010,
+        "headPosition": [
+            172,
+            -321,
+            -44
+        ],
+        "headRotation": [
+            0.03749899091529338,
+            -0.23097225888692183,
+            0.009067786883806443,
+            0.9721951528832367
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -25,
+                -22,
+                -37
+            ],
+            [
+                -38,
+                -38,
+                -63
+            ],
+            [
+                -19,
+                -51,
+                -88
+            ],
+            [
+                4,
+                -54,
+                -95
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -17,
+                -42,
+                -110
+            ],
+            [
+                -23,
+                -45,
+                -87
+            ],
+            [
+                -27,
+                -26,
+                -76
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                1,
+                -43,
+                -109
+            ],
+            [
+                -5,
+                -44,
+                -82
+            ],
+            [
+                -11,
+                -24,
+                -68
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                17,
+                -43,
+                -103
+            ],
+            [
+                9,
+                -51,
+                -79
+            ],
+            [
+                4,
+                -31,
+                -65
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                35,
+                -21,
+                -108
+            ],
+            [
+                37,
+                -26,
+                -127
+            ],
+            [
+                37,
+                -29,
+                -149
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                4,
+                -54,
+                -95
+            ],
+            [
+                -27,
+                -26,
+                -76
+            ],
+            [
+                -11,
+                -24,
+                -68
+            ],
+            [
+                4,
+                -31,
+                -65
+            ],
+            [
+                37,
+                -29,
+                -149
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl j"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621883586214,
+        "headPosition": [
+            -9,
+            -350,
+            -84
+        ],
+        "headRotation": [
+            0.055186108607465874,
+            -0.5228392650974379,
+            0.018024563460881608,
+            0.8504520631419987
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -25,
+                -22,
+                -37
+            ],
+            [
+                -36,
+                -44,
+                -59
+            ],
+            [
+                -13,
+                -58,
+                -81
+            ],
+            [
+                11,
+                -58,
+                -86
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -20,
+                -43,
+                -110
+            ],
+            [
+                -21,
+                -46,
+                -86
+            ],
+            [
+                -23,
+                -26,
+                -75
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                -1,
+                -44,
+                -106
+            ],
+            [
+                -4,
+                -45,
+                -78
+            ],
+            [
+                -8,
+                -22,
+                -68
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                15,
+                -44,
+                -99
+            ],
+            [
+                9,
+                -52,
+                -74
+            ],
+            [
+                6,
+                -31,
+                -62
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                52,
+                -25,
+                -101
+            ],
+            [
+                65,
+                -32,
+                -115
+            ],
+            [
+                78,
+                -37,
+                -132
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                11,
+                -58,
+                -86
+            ],
+            [
+                -23,
+                -26,
+                -75
+            ],
+            [
+                -8,
+                -22,
+                -68
+            ],
+            [
+                6,
+                -31,
+                -62
+            ],
+            [
+                78,
+                -37,
+                -132
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl k"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621883617097,
+        "headPosition": [
+            -71,
+            -335,
+            -50
+        ],
+        "headRotation": [
+            0.043609006075050166,
+            -0.2717876341766656,
+            0.010052260968215465,
+            0.9613161218418714
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -19,
+                -26,
+                -39
+            ],
+            [
+                -26,
+                -33,
+                -70
+            ],
+            [
+                -16,
+                -35,
+                -102
+            ],
+            [
+                -10,
+                -39,
+                -125
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -27,
+                -29,
+                -127
+            ],
+            [
+                -29,
+                -44,
+                -146
+            ],
+            [
+                -30,
+                -53,
+                -167
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                6,
+                -34,
+                -124
+            ],
+            [
+                11,
+                -53,
+                -143
+            ],
+            [
+                17,
+                -67,
+                -163
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                14,
+                -45,
+                -88
+            ],
+            [
+                5,
+                -53,
+                -64
+            ],
+            [
+                -3,
+                -39,
+                -45
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                25,
+                -43,
+                -74
+            ],
+            [
+                16,
+                -49,
+                -57
+            ],
+            [
+                6,
+                -42,
+                -39
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -10,
+                -39,
+                -125
+            ],
+            [
+                -30,
+                -53,
+                -167
+            ],
+            [
+                17,
+                -67,
+                -163
+            ],
+            [
+                -3,
+                -39,
+                -45
+            ],
+            [
+                6,
+                -42,
+                -39
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl l"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621883650723,
+        "headPosition": [
+            -272,
+            -199,
+            -128
+        ],
+        "headRotation": [
+            0.03381098601398088,
+            -0.30375360911327437,
+            0.012240874941304313,
+            0.9520718046173584
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -32,
+                -13,
+                -33
+            ],
+            [
+                -54,
+                -15,
+                -57
+            ],
+            [
+                -76,
+                -11,
+                -82
+            ],
+            [
+                -98,
+                -6,
+                -92
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -17,
+                -9,
+                -133
+            ],
+            [
+                -13,
+                -13,
+                -157
+            ],
+            [
+                -8,
+                -12,
+                -179
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                0,
+                -43,
+                -110
+            ],
+            [
+                -4,
+                -51,
+                -84
+            ],
+            [
+                -10,
+                -34,
+                -67
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                16,
+                -45,
+                -96
+            ],
+            [
+                7,
+                -48,
+                -71
+            ],
+            [
+                1,
+                -32,
+                -54
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                28,
+                -43,
+                -81
+            ],
+            [
+                19,
+                -44,
+                -63
+            ],
+            [
+                12,
+                -29,
+                -48
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -98,
+                -6,
+                -92
+            ],
+            [
+                -8,
+                -12,
+                -179
+            ],
+            [
+                -10,
+                -34,
+                -67
+            ],
+            [
+                1,
+                -32,
+                -54
+            ],
+            [
+                12,
+                -29,
+                -48
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl m"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621883703132,
+        "headPosition": [
+            -85,
+            -346,
+            -124
+        ],
+        "headRotation": [
+            0.03243759818141493,
+            -0.3761283240070181,
+            0.04622402810031861,
+            0.9248451855190484
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -20,
+                -25,
+                -38
+            ],
+            [
+                -24,
+                -48,
+                -61
+            ],
+            [
+                -6,
+                -63,
+                -86
+            ],
+            [
+                2,
+                -79,
+                -103
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -18,
+                -42,
+                -110
+            ],
+            [
+                -18,
+                -65,
+                -102
+            ],
+            [
+                -15,
+                -86,
+                -96
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                0,
+                -39,
+                -119
+            ],
+            [
+                -1,
+                -65,
+                -111
+            ],
+            [
+                -4,
+                -85,
+                -96
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                19,
+                -40,
+                -108
+            ],
+            [
+                15,
+                -66,
+                -106
+            ],
+            [
+                7,
+                -85,
+                -92
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                32,
+                -43,
+                -87
+            ],
+            [
+                20,
+                -48,
+                -72
+            ],
+            [
+                6,
+                -45,
+                -55
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                2,
+                -79,
+                -103
+            ],
+            [
+                -15,
+                -86,
+                -96
+            ],
+            [
+                -4,
+                -85,
+                -96
+            ],
+            [
+                7,
+                -85,
+                -92
+            ],
+            [
+                6,
+                -45,
+                -55
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl n"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621883735422,
+        "headPosition": [
+            -32,
+            -352,
+            -23
+        ],
+        "headRotation": [
+            0.011456122586089225,
+            -0.33282557994311757,
+            0.03247964659171118,
+            0.9423592525900056
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -25,
+                -22,
+                -37
+            ],
+            [
+                -35,
+                -45,
+                -59
+            ],
+            [
+                -22,
+                -62,
+                -84
+            ],
+            [
+                2,
+                -64,
+                -92
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -19,
+                -43,
+                -107
+            ],
+            [
+                -19,
+                -64,
+                -94
+            ],
+            [
+                -18,
+                -84,
+                -83
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                0,
+                -42,
+                -112
+            ],
+            [
+                -2,
+                -66,
+                -99
+            ],
+            [
+                -6,
+                -83,
+                -80
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                17,
+                -45,
+                -97
+            ],
+            [
+                6,
+                -51,
+                -73
+            ],
+            [
+                -2,
+                -34,
+                -58
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                27,
+                -43,
+                -80
+            ],
+            [
+                17,
+                -47,
+                -63
+            ],
+            [
+                7,
+                -36,
+                -47
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                2,
+                -64,
+                -92
+            ],
+            [
+                -18,
+                -84,
+                -83
+            ],
+            [
+                -6,
+                -83,
+                -80
+            ],
+            [
+                -2,
+                -34,
+                -58
+            ],
+            [
+                7,
+                -36,
+                -47
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl o",
+            "loupe"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621883772792,
+        "headPosition": [
+            -91,
+            -299,
+            -181
+        ],
+        "headRotation": [
+            0.03348119013821816,
+            -0.30966151142360704,
+            0.020763452838619665,
+            0.9500303335970862
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -26,
+                -21,
+                -37
+            ],
+            [
+                -38,
+                -43,
+                -58
+            ],
+            [
+                -34,
+                -63,
+                -84
+            ],
+            [
+                -17,
+                -72,
+                -99
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -16,
+                -35,
+                -120
+            ],
+            [
+                -17,
+                -57,
+                -111
+            ],
+            [
+                -18,
+                -74,
+                -96
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                6,
+                -34,
+                -124
+            ],
+            [
+                2,
+                -58,
+                -110
+            ],
+            [
+                -5,
+                -71,
+                -90
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                23,
+                -35,
+                -115
+            ],
+            [
+                16,
+                -59,
+                -105
+            ],
+            [
+                6,
+                -72,
+                -87
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                37,
+                -34,
+                -101
+            ],
+            [
+                30,
+                -53,
+                -98
+            ],
+            [
+                17,
+                -68,
+                -87
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -17,
+                -72,
+                -99
+            ],
+            [
+                -18,
+                -74,
+                -96
+            ],
+            [
+                -5,
+                -71,
+                -90
+            ],
+            [
+                6,
+                -72,
+                -87
+            ],
+            [
+                17,
+                -68,
+                -87
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl p"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621883843845,
+        "headPosition": [
+            -71,
+            -274,
+            -308
+        ],
+        "headRotation": [
+            0.07772350924323665,
+            -0.37829868968310615,
+            0.09670243274415982,
+            0.9173318684924602
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -19,
+                -26,
+                -39
+            ],
+            [
+                -23,
+                -40,
+                -67
+            ],
+            [
+                -14,
+                -50,
+                -98
+            ],
+            [
+                -12,
+                -60,
+                -121
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -19,
+                -17,
+                -132
+            ],
+            [
+                -15,
+                -25,
+                -155
+            ],
+            [
+                -10,
+                -28,
+                -177
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                4,
+                -42,
+                -112
+            ],
+            [
+                4,
+                -69,
+                -112
+            ],
+            [
+                5,
+                -94,
+                -114
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                15,
+                -43,
+                -102
+            ],
+            [
+                13,
+                -70,
+                -104
+            ],
+            [
+                10,
+                -93,
+                -110
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                28,
+                -41,
+                -89
+            ],
+            [
+                25,
+                -61,
+                -95
+            ],
+            [
+                19,
+                -80,
+                -104
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -12,
+                -60,
+                -121
+            ],
+            [
+                -10,
+                -28,
+                -177
+            ],
+            [
+                5,
+                -94,
+                -114
+            ],
+            [
+                10,
+                -93,
+                -110
+            ],
+            [
+                19,
+                -80,
+                -104
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl q"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621883887900,
+        "headPosition": [
+            -280,
+            -176,
+            -112
+        ],
+        "headRotation": [
+            0.05420933391156161,
+            -0.353771206620907,
+            0.03822371464044733,
+            0.9329770786074582
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -19,
+                -26,
+                -39
+            ],
+            [
+                -21,
+                -48,
+                -62
+            ],
+            [
+                -11,
+                -65,
+                -90
+            ],
+            [
+                -3,
+                -79,
+                -109
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -25,
+                -39,
+                -117
+            ],
+            [
+                -24,
+                -61,
+                -126
+            ],
+            [
+                -23,
+                -82,
+                -134
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                3,
+                -44,
+                -107
+            ],
+            [
+                -7,
+                -55,
+                -84
+            ],
+            [
+                -17,
+                -37,
+                -69
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                15,
+                -45,
+                -92
+            ],
+            [
+                7,
+                -51,
+                -67
+            ],
+            [
+                3,
+                -30,
+                -54
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                27,
+                -43,
+                -79
+            ],
+            [
+                18,
+                -49,
+                -62
+            ],
+            [
+                13,
+                -33,
+                -48
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -3,
+                -79,
+                -109
+            ],
+            [
+                -23,
+                -82,
+                -134
+            ],
+            [
+                -17,
+                -37,
+                -69
+            ],
+            [
+                3,
+                -30,
+                -54
+            ],
+            [
+                13,
+                -33,
+                -48
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl r"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621883941368,
+        "headPosition": [
+            -158,
+            -291,
+            -93
+        ],
+        "headRotation": [
+            0.06442846407322658,
+            -0.42058347759655473,
+            0.03868907364814559,
+            0.9041358573449799
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -23,
+                -24,
+                -38
+            ],
+            [
+                -31,
+                -43,
+                -62
+            ],
+            [
+                -13,
+                -57,
+                -88
+            ],
+            [
+                8,
+                -62,
+                -100
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -13,
+                -23,
+                -129
+            ],
+            [
+                -6,
+                -35,
+                -148
+            ],
+            [
+                2,
+                -43,
+                -168
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                12,
+                -14,
+                -135
+            ],
+            [
+                20,
+                -22,
+                -160
+            ],
+            [
+                29,
+                -23,
+                -183
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                17,
+                -44,
+                -101
+            ],
+            [
+                8,
+                -49,
+                -76
+            ],
+            [
+                3,
+                -29,
+                -63
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                29,
+                -43,
+                -82
+            ],
+            [
+                18,
+                -48,
+                -66
+            ],
+            [
+                9,
+                -34,
+                -51
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                8,
+                -62,
+                -100
+            ],
+            [
+                2,
+                -43,
+                -168
+            ],
+            [
+                29,
+                -23,
+                -183
+            ],
+            [
+                3,
+                -29,
+                -63
+            ],
+            [
+                9,
+                -34,
+                -51
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl s",
+            "fist",
+            "✊",
+            "👊",
+            "🤛",
+            "🤜"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621882985698,
+        "headPosition": [
+            -49,
+            -305,
+            -88
+        ],
+        "headRotation": [
+            -0.031909189820257,
+            -0.2846129436992186,
+            -0.02500938264617849,
+            0.957784842470128
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -23,
+                -24,
+                -38
+            ],
+            [
+                -32,
+                -45,
+                -61
+            ],
+            [
+                -9,
+                -57,
+                -83
+            ],
+            [
+                15,
+                -56,
+                -87
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -19,
+                -41,
+                -113
+            ],
+            [
+                -22,
+                -45,
+                -89
+            ],
+            [
+                -25,
+                -25,
+                -79
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                -1,
+                -44,
+                -106
+            ],
+            [
+                -5,
+                -45,
+                -79
+            ],
+            [
+                -9,
+                -22,
+                -69
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                14,
+                -45,
+                -91
+            ],
+            [
+                8,
+                -45,
+                -65
+            ],
+            [
+                5,
+                -24,
+                -55
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                26,
+                -43,
+                -77
+            ],
+            [
+                21,
+                -44,
+                -58
+            ],
+            [
+                19,
+                -27,
+                -44
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                15,
+                -56,
+                -87
+            ],
+            [
+                -25,
+                -25,
+                -79
+            ],
+            [
+                -9,
+                -22,
+                -69
+            ],
+            [
+                5,
+                -24,
+                -55
+            ],
+            [
+                19,
+                -27,
+                -44
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl t"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621883992482,
+        "headPosition": [
+            -6,
+            -305,
+            -167
+        ],
+        "headRotation": [
+            -0.009946231507828314,
+            -0.3057487129007078,
+            0.006151601101235265,
+            0.9520404164885696
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -23,
+                -23,
+                -38
+            ],
+            [
+                -34,
+                -36,
+                -66
+            ],
+            [
+                -20,
+                -45,
+                -95
+            ],
+            [
+                -9,
+                -55,
+                -115
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -20,
+                -39,
+                -117
+            ],
+            [
+                -21,
+                -55,
+                -98
+            ],
+            [
+                -21,
+                -57,
+                -76
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                1,
+                -42,
+                -113
+            ],
+            [
+                -4,
+                -55,
+                -90
+            ],
+            [
+                -10,
+                -55,
+                -65
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                16,
+                -45,
+                -94
+            ],
+            [
+                6,
+                -54,
+                -71
+            ],
+            [
+                -2,
+                -47,
+                -49
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                26,
+                -43,
+                -77
+            ],
+            [
+                18,
+                -50,
+                -60
+            ],
+            [
+                8,
+                -43,
+                -41
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -9,
+                -55,
+                -115
+            ],
+            [
+                -21,
+                -57,
+                -76
+            ],
+            [
+                -10,
+                -55,
+                -65
+            ],
+            [
+                -2,
+                -47,
+                -49
+            ],
+            [
+                8,
+                -43,
+                -41
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl u"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621884035004,
+        "headPosition": [
+            -281,
+            -172,
+            -142
+        ],
+        "headRotation": [
+            0.017931342214383392,
+            -0.33171469918263097,
+            0.013389412271516729,
+            0.9431142820221716
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -20,
+                -25,
+                -38
+            ],
+            [
+                -26,
+                -43,
+                -65
+            ],
+            [
+                -4,
+                -53,
+                -89
+            ],
+            [
+                19,
+                -53,
+                -96
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -23,
+                -13,
+                -134
+            ],
+            [
+                -22,
+                -17,
+                -157
+            ],
+            [
+                -19,
+                -16,
+                -180
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                3,
+                -11,
+                -138
+            ],
+            [
+                7,
+                -16,
+                -164
+            ],
+            [
+                11,
+                -15,
+                -189
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                17,
+                -41,
+                -106
+            ],
+            [
+                10,
+                -48,
+                -81
+            ],
+            [
+                7,
+                -27,
+                -68
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                29,
+                -43,
+                -83
+            ],
+            [
+                18,
+                -48,
+                -67
+            ],
+            [
+                8,
+                -36,
+                -51
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                19,
+                -53,
+                -96
+            ],
+            [
+                -19,
+                -16,
+                -180
+            ],
+            [
+                11,
+                -15,
+                -189
+            ],
+            [
+                7,
+                -27,
+                -68
+            ],
+            [
+                8,
+                -36,
+                -51
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl v"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621884066917,
+        "headPosition": [
+            -55,
+            -372,
+            -73
+        ],
+        "headRotation": [
+            -0.003567139123922908,
+            -0.36063626617032946,
+            -0.010871286411395613,
+            0.932636356721219
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -22,
+                -24,
+                -38
+            ],
+            [
+                -29,
+                -46,
+                -61
+            ],
+            [
+                -7,
+                -58,
+                -84
+            ],
+            [
+                15,
+                -62,
+                -94
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -31,
+                -21,
+                -131
+            ],
+            [
+                -35,
+                -31,
+                -153
+            ],
+            [
+                -37,
+                -35,
+                -174
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                0,
+                -23,
+                -134
+            ],
+            [
+                1,
+                -35,
+                -158
+            ],
+            [
+                3,
+                -42,
+                -182
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                15,
+                -45,
+                -94
+            ],
+            [
+                7,
+                -55,
+                -71
+            ],
+            [
+                1,
+                -38,
+                -54
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                26,
+                -43,
+                -78
+            ],
+            [
+                17,
+                -53,
+                -62
+            ],
+            [
+                7,
+                -43,
+                -45
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                15,
+                -62,
+                -94
+            ],
+            [
+                -37,
+                -35,
+                -174
+            ],
+            [
+                3,
+                -42,
+                -182
+            ],
+            [
+                1,
+                -38,
+                -54
+            ],
+            [
+                7,
+                -43,
+                -45
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl w"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621884095655,
+        "headPosition": [
+            -27,
+            -347,
+            -153
+        ],
+        "headRotation": [
+            0.061287759096724834,
+            -0.335442304747717,
+            -0.02348200677658124,
+            0.9397717051435551
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -19,
+                -26,
+                -39
+            ],
+            [
+                -22,
+                -47,
+                -63
+            ],
+            [
+                2,
+                -56,
+                -85
+            ],
+            [
+                25,
+                -59,
+                -95
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -36,
+                -16,
+                -131
+            ],
+            [
+                -44,
+                -22,
+                -153
+            ],
+            [
+                -49,
+                -23,
+                -175
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                -4,
+                -1,
+                -139
+            ],
+            [
+                -5,
+                0,
+                -166
+            ],
+            [
+                -4,
+                6,
+                -190
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                32,
+                -16,
+                -124
+            ],
+            [
+                41,
+                -24,
+                -147
+            ],
+            [
+                49,
+                -30,
+                -170
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                34,
+                -40,
+                -93
+            ],
+            [
+                25,
+                -56,
+                -84
+            ],
+            [
+                11,
+                -65,
+                -69
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                25,
+                -59,
+                -95
+            ],
+            [
+                -49,
+                -23,
+                -175
+            ],
+            [
+                -4,
+                6,
+                -190
+            ],
+            [
+                49,
+                -30,
+                -170
+            ],
+            [
+                11,
+                -65,
+                -69
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl x"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621884136146,
+        "headPosition": [
+            -97,
+            -294,
+            -162
+        ],
+        "headRotation": [
+            0.008090741280468114,
+            -0.36292840909942425,
+            -0.018366003423345226,
+            0.931600879540233
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -24,
+                -23,
+                -38
+            ],
+            [
+                -36,
+                -40,
+                -63
+            ],
+            [
+                -24,
+                -53,
+                -91
+            ],
+            [
+                0,
+                -55,
+                -99
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -17,
+                -2,
+                -133
+            ],
+            [
+                -15,
+                -24,
+                -142
+            ],
+            [
+                -14,
+                -47,
+                -139
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                1,
+                -41,
+                -115
+            ],
+            [
+                -3,
+                -59,
+                -94
+            ],
+            [
+                -10,
+                -50,
+                -72
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                17,
+                -44,
+                -100
+            ],
+            [
+                8,
+                -56,
+                -78
+            ],
+            [
+                0,
+                -45,
+                -58
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                29,
+                -43,
+                -86
+            ],
+            [
+                20,
+                -54,
+                -71
+            ],
+            [
+                11,
+                -45,
+                -53
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                0,
+                -55,
+                -99
+            ],
+            [
+                -14,
+                -47,
+                -139
+            ],
+            [
+                -10,
+                -50,
+                -72
+            ],
+            [
+                0,
+                -45,
+                -58
+            ],
+            [
+                11,
+                -45,
+                -53
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl y"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621884157713,
+        "headPosition": [
+            -29,
+            -367,
+            -103
+        ],
+        "headRotation": [
+            -0.06855263397774006,
+            -0.3187233045746792,
+            -0.0068701472086373635,
+            0.9453405652940129
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -32,
+                -13,
+                -33
+            ],
+            [
+                -55,
+                -20,
+                -55
+            ],
+            [
+                -78,
+                -23,
+                -79
+            ],
+            [
+                -99,
+                -24,
+                -92
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -21,
+                -45,
+                -102
+            ],
+            [
+                -20,
+                -46,
+                -77
+            ],
+            [
+                -21,
+                -29,
+                -62
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                -2,
+                -45,
+                -101
+            ],
+            [
+                -5,
+                -50,
+                -74
+            ],
+            [
+                -9,
+                -30,
+                -59
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                15,
+                -45,
+                -96
+            ],
+            [
+                9,
+                -54,
+                -72
+            ],
+            [
+                4,
+                -36,
+                -55
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                47,
+                -24,
+                -104
+            ],
+            [
+                52,
+                -39,
+                -117
+            ],
+            [
+                52,
+                -57,
+                -130
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -99,
+                -24,
+                -92
+            ],
+            [
+                -21,
+                -29,
+                -62
+            ],
+            [
+                -9,
+                -30,
+                -59
+            ],
+            [
+                4,
+                -36,
+                -55
+            ],
+            [
+                52,
+                -57,
+                -130
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl z"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621884190880,
+        "headPosition": [
+            -167,
+            -293,
+            -197
+        ],
+        "headRotation": [
+            -0.0014638600378968603,
+            -0.3289165354022858,
+            0.008914320518051796,
+            0.9443157865589369
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -22,
+                -24,
+                -38
+            ],
+            [
+                -28,
+                -45,
+                -62
+            ],
+            [
+                -12,
+                -59,
+                -88
+            ],
+            [
+                7,
+                -66,
+                -102
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -20,
+                -11,
+                -134
+            ],
+            [
+                -19,
+                -34,
+                -143
+            ],
+            [
+                -16,
+                -54,
+                -151
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                2,
+                -43,
+                -111
+            ],
+            [
+                -5,
+                -54,
+                -87
+            ],
+            [
+                -13,
+                -37,
+                -70
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                16,
+                -45,
+                -95
+            ],
+            [
+                6,
+                -54,
+                -72
+            ],
+            [
+                0,
+                -35,
+                -58
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                28,
+                -43,
+                -81
+            ],
+            [
+                18,
+                -51,
+                -65
+            ],
+            [
+                9,
+                -40,
+                -49
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                7,
+                -66,
+                -102
+            ],
+            [
+                -16,
+                -54,
+                -151
+            ],
+            [
+                -13,
+                -37,
+                -70
+            ],
+            [
+                0,
+                -35,
+                -58
+            ],
+            [
+                9,
+                -40,
+                -49
+            ]
+        ]
+    },
+    ///////////////////////
+    //                   //
+    //    ASL Numbers    //
+    //                   //
+    ///////////////////////
+    {
+        "names": [
+            "asl 1",
+            "point"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621882025090,
+        "headPosition": [
+            -118,
+            -288,
+            -85
+        ],
+        "headRotation": [
+            -0.04833077066753121,
+            -0.17988780704218232,
+            -0.02101940123998162,
+            0.9822742472459218
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -23,
+                -24,
+                -38
+            ],
+            [
+                -32,
+                -45,
+                -61
+            ],
+            [
+                -11,
+                -58,
+                -84
+            ],
+            [
+                12,
+                -61,
+                -93
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -25,
+                -12,
+                -134
+            ],
+            [
+                -25,
+                -21,
+                -156
+            ],
+            [
+                -24,
+                -25,
+                -178
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                0,
+                -44,
+                -108
+            ],
+            [
+                -5,
+                -44,
+                -81
+            ],
+            [
+                -10,
+                -22,
+                -71
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                15,
+                -45,
+                -92
+            ],
+            [
+                7,
+                -45,
+                -67
+            ],
+            [
+                4,
+                -23,
+                -56
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                27,
+                -43,
+                -80
+            ],
+            [
+                20,
+                -46,
+                -61
+            ],
+            [
+                16,
+                -28,
+                -48
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                12,
+                -61,
+                -93
+            ],
+            [
+                -24,
+                -25,
+                -178
+            ],
+            [
+                -10,
+                -22,
+                -71
+            ],
+            [
+                4,
+                -23,
+                -56
+            ],
+            [
+                16,
+                -28,
+                -48
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl 2",
+            "peace",
+            "✌️"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621882063463,
+        "headPosition": [
+            -78,
+            -333,
+            -64
+        ],
+        "headRotation": [
+            -0.012466682384500495,
+            -0.20815003942108648,
+            -0.007616852305390317,
+            0.97798779457112
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -23,
+                -24,
+                -38
+            ],
+            [
+                -31,
+                -46,
+                -61
+            ],
+            [
+                -7,
+                -58,
+                -82
+            ],
+            [
+                16,
+                -61,
+                -90
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -36,
+                -17,
+                -130
+            ],
+            [
+                -44,
+                -24,
+                -152
+            ],
+            [
+                -50,
+                -27,
+                -174
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                12,
+                -22,
+                -132
+            ],
+            [
+                21,
+                -34,
+                -155
+            ],
+            [
+                31,
+                -39,
+                -177
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                15,
+                -45,
+                -93
+            ],
+            [
+                6,
+                -52,
+                -69
+            ],
+            [
+                1,
+                -33,
+                -55
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                27,
+                -43,
+                -78
+            ],
+            [
+                16,
+                -50,
+                -62
+            ],
+            [
+                5,
+                -39,
+                -46
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                16,
+                -61,
+                -90
+            ],
+            [
+                -50,
+                -27,
+                -174
+            ],
+            [
+                31,
+                -39,
+                -177
+            ],
+            [
+                1,
+                -33,
+                -55
+            ],
+            [
+                5,
+                -39,
+                -46
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl 3"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621882096324,
+        "headPosition": [
+            -90,
+            -284,
+            -119
+        ],
+        "headRotation": [
+            -0.0259385870508839,
+            -0.2848118057916195,
+            0.0023300015486591072,
+            0.9582296150481066
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -32,
+                -12,
+                -32
+            ],
+            [
+                -57,
+                -17,
+                -53
+            ],
+            [
+                -81,
+                -18,
+                -77
+            ],
+            [
+                -103,
+                -17,
+                -88
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -34,
+                -8,
+                -133
+            ],
+            [
+                -40,
+                -15,
+                -155
+            ],
+            [
+                -44,
+                -18,
+                -177
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                6,
+                -28,
+                -129
+            ],
+            [
+                12,
+                -45,
+                -150
+            ],
+            [
+                18,
+                -58,
+                -171
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                15,
+                -45,
+                -95
+            ],
+            [
+                7,
+                -45,
+                -70
+            ],
+            [
+                2,
+                -28,
+                -54
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                27,
+                -43,
+                -79
+            ],
+            [
+                18,
+                -43,
+                -61
+            ],
+            [
+                11,
+                -29,
+                -46
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -103,
+                -17,
+                -88
+            ],
+            [
+                -44,
+                -18,
+                -177
+            ],
+            [
+                18,
+                -58,
+                -171
+            ],
+            [
+                2,
+                -28,
+                -54
+            ],
+            [
+                11,
+                -29,
+                -46
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl 4"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621882120663,
+        "headPosition": [
+            -10,
+            -289,
+            -146
+        ],
+        "headRotation": [
+            -0.0134235648291655,
+            -0.29478495379836034,
+            -0.005683892147365636,
+            0.9554524226671681
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -19,
+                -26,
+                -39
+            ],
+            [
+                -24,
+                -40,
+                -67
+            ],
+            [
+                2,
+                -44,
+                -87
+            ],
+            [
+                27,
+                -39,
+                -86
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -33,
+                -16,
+                -132
+            ],
+            [
+                -39,
+                -25,
+                -154
+            ],
+            [
+                -43,
+                -30,
+                -175
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                2,
+                -5,
+                -138
+            ],
+            [
+                4,
+                -9,
+                -166
+            ],
+            [
+                7,
+                -7,
+                -190
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                28,
+                -8,
+                -126
+            ],
+            [
+                36,
+                -10,
+                -152
+            ],
+            [
+                42,
+                -9,
+                -175
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                55,
+                -15,
+                -101
+            ],
+            [
+                69,
+                -16,
+                -116
+            ],
+            [
+                83,
+                -15,
+                -132
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                27,
+                -39,
+                -86
+            ],
+            [
+                -43,
+                -30,
+                -175
+            ],
+            [
+                7,
+                -7,
+                -190
+            ],
+            [
+                42,
+                -9,
+                -175
+            ],
+            [
+                83,
+                -15,
+                -132
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl 5"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621882144820,
+        "headPosition": [
+            -68,
+            -307,
+            -118
+        ],
+        "headRotation": [
+            -0.0006548264132407408,
+            -0.26763179031899964,
+            -0.027543871398438093,
+            0.9631272658719188
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -32,
+                -13,
+                -33
+            ],
+            [
+                -56,
+                -24,
+                -51
+            ],
+            [
+                -76,
+                -36,
+                -76
+            ],
+            [
+                -96,
+                -43,
+                -88
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -29,
+                -19,
+                -132
+            ],
+            [
+                -32,
+                -31,
+                -152
+            ],
+            [
+                -34,
+                -39,
+                -173
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                4,
+                -17,
+                -136
+            ],
+            [
+                7,
+                -28,
+                -161
+            ],
+            [
+                12,
+                -33,
+                -185
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                31,
+                -14,
+                -125
+            ],
+            [
+                40,
+                -22,
+                -148
+            ],
+            [
+                45,
+                -32,
+                -170
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                54,
+                -17,
+                -102
+            ],
+            [
+                68,
+                -21,
+                -116
+            ],
+            [
+                73,
+                -37,
+                -130
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -96,
+                -43,
+                -88
+            ],
+            [
+                -34,
+                -39,
+                -173
+            ],
+            [
+                12,
+                -33,
+                -185
+            ],
+            [
+                45,
+                -32,
+                -170
+            ],
+            [
+                73,
+                -37,
+                -130
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl 6"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621882165010,
+        "headPosition": [
+            -57,
+            -289,
+            -169
+        ],
+        "headRotation": [
+            -0.01464764983750695,
+            -0.21534395198621833,
+            0.0032979103239686703,
+            0.9764228347997765
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -20,
+                -25,
+                -38
+            ],
+            [
+                -25,
+                -47,
+                -62
+            ],
+            [
+                3,
+                -54,
+                -81
+            ],
+            [
+                26,
+                -55,
+                -88
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -32,
+                -6,
+                -133
+            ],
+            [
+                -36,
+                -12,
+                -156
+            ],
+            [
+                -39,
+                -15,
+                -178
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                1,
+                2,
+                -138
+            ],
+            [
+                2,
+                3,
+                -166
+            ],
+            [
+                5,
+                6,
+                -190
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                30,
+                -10,
+                -125
+            ],
+            [
+                39,
+                -15,
+                -150
+            ],
+            [
+                46,
+                -20,
+                -173
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                39,
+                -34,
+                -101
+            ],
+            [
+                32,
+                -53,
+                -98
+            ],
+            [
+                18,
+                -59,
+                -83
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                26,
+                -55,
+                -88
+            ],
+            [
+                -39,
+                -15,
+                -178
+            ],
+            [
+                5,
+                6,
+                -190
+            ],
+            [
+                46,
+                -20,
+                -173
+            ],
+            [
+                18,
+                -59,
+                -83
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl 7"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621882346213,
+        "headPosition": [
+            -27,
+            -334,
+            -145
+        ],
+        "headRotation": [
+            -0.015005493996917939,
+            -0.15341568022168556,
+            0.03297758828053621,
+            0.9874973125992063
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -25,
+                -22,
+                -37
+            ],
+            [
+                -37,
+                -42,
+                -60
+            ],
+            [
+                -16,
+                -55,
+                -83
+            ],
+            [
+                8,
+                -57,
+                -89
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -35,
+                -4,
+                -132
+            ],
+            [
+                -42,
+                -8,
+                -155
+            ],
+            [
+                -47,
+                -8,
+                -177
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                5,
+                -2,
+                -138
+            ],
+            [
+                9,
+                -4,
+                -165
+            ],
+            [
+                13,
+                -5,
+                -190
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                27,
+                -29,
+                -120
+            ],
+            [
+                17,
+                -48,
+                -105
+            ],
+            [
+                5,
+                -54,
+                -84
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                54,
+                -20,
+                -101
+            ],
+            [
+                68,
+                -23,
+                -115
+            ],
+            [
+                82,
+                -25,
+                -132
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                8,
+                -57,
+                -89
+            ],
+            [
+                -47,
+                -8,
+                -177
+            ],
+            [
+                13,
+                -5,
+                -190
+            ],
+            [
+                5,
+                -54,
+                -84
+            ],
+            [
+                82,
+                -25,
+                -132
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl 8"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621882371401,
+        "headPosition": [
+            -49,
+            -359,
+            -81
+        ],
+        "headRotation": [
+            -0.057632794428381325,
+            -0.24063075840535386,
+            0.010720279680260025,
+            0.9688448661910161
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -26,
+                -21,
+                -37
+            ],
+            [
+                -38,
+                -44,
+                -57
+            ],
+            [
+                -24,
+                -62,
+                -82
+            ],
+            [
+                -3,
+                -68,
+                -93
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -32,
+                -10,
+                -133
+            ],
+            [
+                -36,
+                -22,
+                -154
+            ],
+            [
+                -39,
+                -31,
+                -174
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                1,
+                -32,
+                -127
+            ],
+            [
+                -1,
+                -56,
+                -114
+            ],
+            [
+                -6,
+                -65,
+                -91
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                34,
+                -21,
+                -121
+            ],
+            [
+                44,
+                -33,
+                -143
+            ],
+            [
+                52,
+                -45,
+                -162
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                58,
+                -17,
+                -98
+            ],
+            [
+                74,
+                -19,
+                -110
+            ],
+            [
+                91,
+                -19,
+                -124
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -3,
+                -68,
+                -93
+            ],
+            [
+                -39,
+                -31,
+                -174
+            ],
+            [
+                -6,
+                -65,
+                -91
+            ],
+            [
+                52,
+                -45,
+                -162
+            ],
+            [
+                91,
+                -19,
+                -124
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl 9"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621882395447,
+        "headPosition": [
+            -59,
+            -356,
+            -39
+        ],
+        "headRotation": [
+            -0.04754158733028248,
+            -0.20973690866547548,
+            0.008011874154798836,
+            0.9765684998229093
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -30,
+                -17,
+                -35
+            ],
+            [
+                -47,
+                -41,
+                -47
+            ],
+            [
+                -34,
+                -64,
+                -69
+            ],
+            [
+                -12,
+                -67,
+                -78
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -23,
+                -43,
+                -110
+            ],
+            [
+                -20,
+                -56,
+                -90
+            ],
+            [
+                -16,
+                -58,
+                -68
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                -1,
+                -21,
+                -134
+            ],
+            [
+                0,
+                -34,
+                -159
+            ],
+            [
+                1,
+                -41,
+                -183
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                28,
+                -8,
+                -126
+            ],
+            [
+                34,
+                -15,
+                -151
+            ],
+            [
+                40,
+                -19,
+                -174
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                57,
+                -15,
+                -100
+            ],
+            [
+                72,
+                -17,
+                -113
+            ],
+            [
+                87,
+                -17,
+                -129
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -12,
+                -67,
+                -78
+            ],
+            [
+                -16,
+                -58,
+                -68
+            ],
+            [
+                1,
+                -41,
+                -183
+            ],
+            [
+                40,
+                -19,
+                -174
+            ],
+            [
+                87,
+                -17,
+                -129
+            ]
+        ]
+    },
+    {
+        "names": [
+            "asl 10"
+        ],
+        "handedness": "right",
+        "handyRevision": 5,
+        "time": 1621882417336,
+        "headPosition": [
+            -157,
+            -305,
+            -42
+        ],
+        "headRotation": [
+            -0.10482942509633282,
+            -0.16455429850635156,
+            -0.021289602152466634,
+            0.9805505709975685
+        ],
+        "jointPositions": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                -31,
+                -14,
+                -34
+            ],
+            [
+                -51,
+                -13,
+                -59
+            ],
+            [
+                -72,
+                -5,
+                -85
+            ],
+            [
+                -93,
+                2,
+                -95
+            ],
+            [
+                -16,
+                -9,
+                -41
+            ],
+            [
+                -24,
+                -7,
+                -96
+            ],
+            [
+                -21,
+                -45,
+                -102
+            ],
+            [
+                -21,
+                -43,
+                -77
+            ],
+            [
+                -21,
+                -25,
+                -63
+            ],
+            [
+                -3,
+                -9,
+                -41
+            ],
+            [
+                -2,
+                -3,
+                -96
+            ],
+            [
+                -2,
+                -45,
+                -97
+            ],
+            [
+                -5,
+                -46,
+                -70
+            ],
+            [
+                -9,
+                -28,
+                -53
+            ],
+            [
+                8,
+                -9,
+                -38
+            ],
+            [
+                17,
+                -7,
+                -89
+            ],
+            [
+                14,
+                -45,
+                -88
+            ],
+            [
+                8,
+                -45,
+                -62
+            ],
+            [
+                5,
+                -26,
+                -47
+            ],
+            [
+                23,
+                -9,
+                -34
+            ],
+            [
+                35,
+                -14,
+                -78
+            ],
+            [
+                26,
+                -43,
+                -80
+            ],
+            [
+                22,
+                -44,
+                -60
+            ],
+            [
+                20,
+                -27,
+                -46
+            ]
+        ],
+        "digitTipPositions": [
+            [
+                -93,
+                2,
+                -95
+            ],
+            [
+                -21,
+                -25,
+                -63
+            ],
+            [
+                -9,
+                -28,
+                -53
+            ],
+            [
+                5,
+                -26,
+                -47
+            ],
+            [
+                20,
+                -27,
+                -46
+            ]
+        ]
+    }
+];
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"JacNc"}]},["5MabY","g1M29"], "g1M29", "parcelRequirea5b0")
 
 //# sourceMappingURL=index.10fa75bc.js.map

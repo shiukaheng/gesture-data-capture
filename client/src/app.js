@@ -16,6 +16,8 @@ import * as PoseUtils from "./lib/PoseUtils"
 import * as ObjectUtils from "./lib/ObjectUtils"
 import * as InteractiveElements from "./lib/InteractiveElements"
 
+import {Handy} from "handy.js"
+
 import "axios"
 import axios from "axios"
 
@@ -48,6 +50,7 @@ class App {
         this.audioLoader = new THREE.AudioLoader();
         this.music_player = new THREE.Audio(this.listener)
         this.upload_endpoint = upload_endpoint
+        this.Handy = Handy
 
         // Setup viewport canvas and renderer
         document.getElementsByClassName("viewport-div")[0].appendChild(this.renderer.domElement)
@@ -68,6 +71,9 @@ class App {
                 })
                 // console.log("Modifier terminated.")
             })})
+            Handy.update((hand) => {
+                // console.log(hand.searchResults)
+            })
         })
 
         // Setup controllers and hand tracking
@@ -133,6 +139,7 @@ class App {
         this.scene.add( hand1 );
         preprocess_hand(hand1)
         hand1.add( handModelFactory.createHandModel( hand1, 'mesh' ) );
+        Handy.makeHandy(hand1)
         
         // Hand 2
         var controllerGrip2 = this.renderer.xr.getControllerGrip( 1 );
@@ -142,6 +149,7 @@ class App {
         this.scene.add( hand2 );
         preprocess_hand(hand2)
         hand2.add( handModelFactory.createHandModel( hand2, 'mesh' ) );
+        Handy.makeHandy(hand2)
     
         // Create dummy hands pre-requisites
         this.dummy_factory = new DummyXRHandModelFactory()
