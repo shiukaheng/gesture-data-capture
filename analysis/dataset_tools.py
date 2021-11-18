@@ -70,3 +70,28 @@ def list_datasets(path=DATASETS_FOLDER):
         list: List representing all available dataset files.
     """
     return glob.glob(path+"/*.json")
+
+# TODO: Create the functions below
+
+def imu_transform(data:dict):
+    """Differentiates position and rotation data into simulated IMU data
+    position + rotation -> linear acceleration + angular velocity
+
+    Args:
+        data (dict): Dataset dict
+
+    Raises:
+        NotImplementedError: [description]
+    """
+    raise NotImplementedError()
+
+def imu_ahrs_transform(data:dict):
+    """position + rotation -> linear acceleration + rotation
+
+    Args:
+        data (dict): Dataset dict
+
+    Raises:
+        NotImplementedError: [description]
+    """
+    raise NotImplementedError()
