@@ -6,7 +6,7 @@ Current production hand gesture recognition methods require high manufacturing c
 - [ ] Collecting data
 - [ ] Exploring machine learning models and data representation
 - [ ] Writing the paper
-## Data collection
+## Web data collection utility
 We've created a web utility for collecting labelled hand skeleton data using the WebXR hand tracking API, the code of which is supplied within this repository. The web server could be launched as below:
 ```
 > cd server
