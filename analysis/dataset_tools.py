@@ -58,7 +58,7 @@ def unflatten_data(data):
     Returns:
         dict: Unflattened data
     """
-    return _unflatten_stream(data["flattened_data"], data["protocol"])
+    return _unflatten_stream(np.array(data["flattened_data"]).transpose().tolist(), data["protocol"])
 
 def list_datasets(path=DATASETS_FOLDER):
     """Lists all available datasets (searches non-recursively)
